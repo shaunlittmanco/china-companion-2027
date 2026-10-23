@@ -13,3 +13,37 @@ test('blocked spoken output pauses voice turn instead of restarting microphone',
 test('offline map opens itinerary address without requesting street tiles; local checkmarks retained',()=>{const trip={schemaVersion:2,trip:{budgetPHP:150000},itinerary:[{id:'activity',date:'2027-01-11',city:'Shanghai',activity:'Synthetic hotel',addressCN:'测试地址',transport:'Walk 1 km'}],hotels:[],bookings:[]};const app=start({seed:{chinaCompanionPrivateV2:trip,chinaCompanionDoneV1:{activity:true}}});try{app.w.document.querySelector('[data-map-activity="activity"]').click();assert.match(app.el('mapMessage').textContent,/测试地址/);assert.match(app.el('mapMessage').textContent,/Walk 1 km/);assert.match(app.el('mapCanvas').textContent,/Offline/);assert.equal(app.el('mapCanvas').querySelectorAll('iframe').length,0);assert.equal(JSON.parse(app.w.localStorage.getItem('chinaCompanionDoneV1')).activity,true);}finally{app.close();}});
 test('complete backup round-trips pending receipt bytes and reserved ID without OAuth settings',async()=>{const app=start(),restored=start({seed:{chinaCompanionExpensesV1:[{id:'kept',date:'2027-01-10',desc:'Keep existing',amount:10}]}});try{fill(app);const file=new File(['private synthetic bytes'],'test.pdf',{type:'application/pdf'});Object.defineProperty(app.el('expenseReceiptFile'),'files',{value:[file],configurable:true});app.click('saveExpense');await flush();const [e]=app.expenses();await app.w.ChinaReceipts.store().reserve(e.id,'reserved_test_0001');app.w.localStorage.setItem('chinaCompanionPickerApiKeyV1','DO_NOT_EXPORT_TEST_CONFIG');let exported;app.w.URL.createObjectURL=blob=>{exported=blob;return 'blob:test';};app.w.URL.revokeObjectURL=()=>{};app.w.HTMLAnchorElement.prototype.click=()=>{};app.w.FileReader=class{readAsDataURL(blob){blob.arrayBuffer().then(buffer=>{this.result='data:'+blob.type+';base64,'+Buffer.from(buffer).toString('base64');this.onload();});}};app.click('exportBackup');await flush();assert.ok(exported);const raw=await exported.text();assert.ok(!raw.includes('DO_NOT_EXPORT'));const backup=JSON.parse(raw);assert.equal(backup.receipts.length,1);assert.equal(backup.receipts[0].driveFileId,'reserved_test_0001');const backupFile=new File([raw],'backup.json',{type:'application/json'});Object.defineProperty(restored.el('restoreBackup'),'files',{value:[backupFile],configurable:true});restored.el('restoreBackup').dispatchEvent(new restored.w.Event('change'));await flush();assert.equal(restored.expenses().length,2);assert.ok(restored.expenses().find(x=>x.id==='kept'));const queued=await restored.w.ChinaReceipts.store().get(e.id);assert.equal(await queued.blob.text(),'private synthetic bytes');assert.equal(queued.driveFileId,'reserved_test_0001');}finally{app.close();restored.close();}});
 test('delete removes only the synthetic local record and outbox file',async()=>{const app=start();try{fill(app);Object.defineProperty(app.el('expenseReceiptFile'),'files',{value:[new File(['test'],'test.pdf',{type:'application/pdf'})],configurable:true});app.click('saveExpense');await flush();const [e]=app.expenses();app.w.document.querySelector(`[data-remove-expense="${e.id}"]`).click();await flush();assert.equal(app.expenses().length,0);assert.equal(await app.w.ChinaReceipts.store().get(e.id),null);}finally{app.close();}});
+test('receipt OAuth keeps the public client ID and Picker uses the matching project and origin', async () => {
+ const app = start({offline:false});
+ try {
+  let authRequests=0, origin, project, callback;
+  const clientId='1234567-test-client.apps.googleusercontent.com';
+  app.set('googleClientId',clientId);
+  app.set('receiptApiKey','AIza'+'x'.repeat(32));
+  app.set('receiptProjectNumber','1234567');
+  class DocsView {
+   setIncludeFolders(){return this;} setSelectFolderEnabled(){return this;}
+   setMode(){return this;} setQuery(){return this;}
+  }
+  class PickerBuilder {
+   addView(){return this;} setOAuthToken(){return this;} setDeveloperKey(){return this;}
+   setAppId(n){project=n;return this;} setOrigin(o){origin=o;return this;}
+   setCallback(cb){callback=cb;return this;}
+   build(){return {setVisible(){queueMicrotask(()=>callback({action:'cancel'}));}};}
+  }
+  app.w.google={
+   accounts:{oauth2:{initTokenClient:opts=>({requestAccessToken(){
+    authRequests++;
+    queueMicrotask(()=>opts.callback({access_token:'TEST_ONLY_SESSION',expires_in:3600,scope:'https://www.googleapis.com/auth/drive.file'}));
+   }})}},
+   picker:{DocsView,ViewId:{FOLDERS:'folders'},DocsViewMode:{LIST:'list'},Response:{ACTION:'action'},Action:{CANCEL:'cancel'},PickerBuilder}
+  };
+  const first=app.w.ChinaReceipts.connect(),second=app.w.ChinaReceipts.connect();
+  assert.equal(first,second); await first; assert.equal(authRequests,1);
+  assert.equal(app.w.localStorage.getItem('chinaCompanionGoogleClientIdV1'),clientId);
+  await app.w.ChinaReceipts.chooseFolder();
+  assert.equal(project,'1234567'); assert.equal(origin,'https://example.test');
+  const stored=[...Array(app.w.localStorage.length)].map((_,i)=>app.w.localStorage.getItem(app.w.localStorage.key(i))).join('');
+  assert.ok(!stored.includes('TEST_ONLY_SESSION'));
+ } finally {app.close();}
+});
