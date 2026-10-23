@@ -1,0 +1,4 @@
+node_modules/
+*.local.json
+*private-backup*.json
+china-trip-private-data.json

@@ -1,5 +1,5 @@
-const CACHE='china-companion-v1-5';
-const CORE=['./','./index.html','./styles.css','./app.js','./sheet-sync.js','./receipts.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
+const CACHE='china-companion-v1-6';
+const CORE=['./','./index.html','./styles.css?v=1.6','./app.js?v=1.6','./sheet-sync.js?v=1.6','./receipts.js?v=1.6','./receipt-store.js?v=1.6','./travel-data.js?v=1.6','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('china-companion-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
