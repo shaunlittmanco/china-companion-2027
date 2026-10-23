@@ -8,7 +8,7 @@ const safeNum=x=>Number.isFinite(Number(x))?Number(x):0;
 const dateStr=d=>new Date(d+'T12:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'short',day:'numeric'});
 const dates=Array.from({length:11},(_,i)=>`2027-01-${String(11+i).padStart(2,'0')}`);
 let data={schemaVersion:2,trip:{title:'China Companion Demo',budgetPHP:150000,baselineSpentPHP:0,dailyAllowancePHP:8000},itinerary:[],bookings:[],hotels:[],transport:[],paymentGuide:[],food:[],attractions:[]};
-let expenses=[],done={},selectedDay=dates[0],view='home',translation={text:'',language:'zh-CN'},direction='en-zh',recognition=null,micRequested=false,recognitionBusy=false,toastTimer;
+let expenses=[],done={},selectedDay=dates[0],view='home',translation={text:'',language:'zh-CN'},direction='en-zh',recognition=null,micRequested=false,recognitionBusy=false,recognitionProcessing=false,voiceErrors=0,voiceEpoch=0,translationSeq=0,toastTimer;
 let mapCity='Shanghai',sheetSync=null,googleClient=null,syncState={message:'Connect Google to refresh your private tracker.'};
 const OAUTH_CONFIG='chinaCompanionGoogleClientIdV1';
 const mapData={
@@ -39,7 +39,7 @@ function notify(s){const t=$('#toast');t.textContent=s;t.classList.add('show');c
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(data));localStorage.setItem(EXP,JSON.stringify(expenses));localStorage.setItem(CHECK,JSON.stringify(done));}catch(e){notify('Storage unavailable. Download a backup of your files.')}}
 function boot(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d?.schemaVersion>=1&&d?.trip)data=d;}catch{}try{const x=JSON.parse(localStorage.getItem(EXP));if(Array.isArray(x))expenses=x;}catch{}try{const x=JSON.parse(localStorage.getItem(CHECK));if(x&&typeof x==='object')done=x;}catch{}const now=new Date();const t=now.toISOString().slice(0,10);selectedDay=dates.find(x=>x>=t)||dates.at(-1);if(t<dates[0])selectedDay=dates[0];initHandlers();initSheetSync();renderEverything();updateNetwork();window.addEventListener('online',updateNetwork);window.addEventListener('offline',updateNetwork);if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 function updateNetwork(){$('#networkIndicator').textContent=navigator.onLine?'● Online':'○ Offline';$('#networkIndicator').style.color=navigator.onLine?'#93d5b4':'#f4c89b'}
-function nav(name){view=name;$$('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${name}`));$$('[data-nav]').forEach(x=>x.classList.toggle('nav-active',x.dataset.nav===name));window.scrollTo({top:0,behavior:'auto'});if(name==='map')renderMap();if(name==='wallet')renderMoney();if(name==='bookings')renderBookings();if(name==='translate')renderPhrases();}
+function nav(name){if(view==='translate'&&name!=='translate'&&micRequested)stopMic('Conversation paused when leaving Talk.');view=name;$$('.page').forEach(x=>x.classList.toggle('active',x.id===`page-${name}`));$$('[data-nav]').forEach(x=>x.classList.toggle('nav-active',x.dataset.nav===name));window.scrollTo({top:0,behavior:'auto'});if(name==='map')renderMap();if(name==='wallet')renderMoney();if(name==='bookings')renderBookings();if(name==='translate')renderPhrases();}
 function isReal(){return Array.isArray(data.itinerary)&&data.itinerary.length>0}
 function records(day){return (data.itinerary||[]).filter(x=>x.date===day)}
 function cardActivity(x){const c=!!done[x.id],must=/must|p1/i.test(x.status+' '+x.activity);return `<div class="activity ${c?'done':''}"><span class="time-tick">${esc(x.time||'Anytime')}</span><div class="activity-main"><div class="activity-title">${esc(x.activity)}</div><div class="activity-meta">${esc(x.city)}${x.area?' · '+esc(x.area):''}${x.transport?' · '+esc(x.transport):''}</div>${x.notes?`<div class="activity-note">${esc(x.notes).slice(0,500)}</div>`:''}<span class="status ${must?'pending':''}">${must?'⭐ Priority':esc(x.status||'Planned')}</span></div><input type="checkbox" class="done-check" data-done="${esc(x.id)}" aria-label="Completed: ${esc(x.activity)}" ${c?'checked':''}></div>`}
@@ -56,17 +56,98 @@ function renderMap(){mapCity=$('#mapCity').value;const d=mapData[mapCity];showMa
 function locate(){if(!navigator.geolocation){notify('Location is not available in this browser.');return}navigator.geolocation.getCurrentPosition(pos=>showMapPosition(pos.coords.latitude,pos.coords.longitude,'Your current location',.007),err=>notify('GPS unavailable: '+err.message),{enableHighAccuracy:true,timeout:13000,maximumAge:60000})}
 function renderPhrases(){$('#phraseChips').innerHTML=phrases.map((p,i)=>`<button data-phrase="${i}">${esc(p[0])}</button>`).join('')}
 function normalize(s){return String(s||'').trim().replace(/[?？!！。.,]/g,'').toLowerCase()}
-async function translatePhrase(input){let s=input.trim();if(!s){notify('Type or dictate a phrase first.');return}let match=direction==='en-zh'?phrases.find(p=>normalize(p[0])===normalize(s)):phrases.find(p=>normalize(p[1])===normalize(s));
-if(match){setTranslation(direction==='en-zh'?match[1]:match[0],direction==='en-zh'?'zh-CN':'en-US',direction==='en-zh'?match[2]:'Saved phrase • offline');return}
-if(!$('#onlineTranslate').checked){setTranslation('Not in saved phrases',direction==='en-zh'?'zh-CN':'en-US','Enable the optional online service for unfamiliar phrases, or use a saved phrase.');return}
-if(!navigator.onLine){setTranslation('Offline: no matching saved phrase','','No online translation available without internet.');return}
-if(new TextEncoder().encode(s).length>500){notify('Online provider limit: 500 bytes per phrase.');return}
-setTranslation('Translating…','','Contacting third-party service');
-try{const params=new URLSearchParams({q:s,langpair:direction==='en-zh'?'en|zh-CN':'zh-CN|en'});const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),9500);let r=await fetch('https://api.mymemory.translated.net/get?'+params,{signal:controller.signal});clearTimeout(timer);let j=await r.json();if(!r.ok||j.responseStatus!==200||!j.responseData?.translatedText)throw Error('Translation not returned');setTranslation(j.responseData.translatedText,direction==='en-zh'?'zh-CN':'en-US','Online translation · check accuracy, service may be blocked in China');if(micRequested)speak();}
-catch(e){setTranslation('Online service unavailable','','Try a saved phrase or confirm internet access.');}}
-function setTranslation(text,lang,note){translation={text,language:lang};$('#translateResult').innerHTML=`<small>TRANSLATION</small><strong>${esc(text)}</strong><span>${esc(note||'')}</span>`}
-function speak(){if(!translation.text||!translation.language){notify('Translate a phrase first.');return}if(!('speechSynthesis'in window)){notify('Voice playback not supported.');return}speechSynthesis.cancel();const a=new SpeechSynthesisUtterance(translation.text);a.lang=translation.language;a.rate=.86;speechSynthesis.speak(a)}
-function startMic(){if(recognitionBusy){micRequested=false;try{recognition?.stop()}catch{}recognitionBusy=false;$('#voiceBtn').textContent='🎙 Start microphone';$('#voiceStatus').textContent='Microphone stopped.';return}let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){notify('Browser speech recognition unavailable. Try typing.');return}recognition=new SR();recognition.lang=direction==='en-zh'?'en-US':'zh-CN';recognition.interimResults=false;recognition.continuous=true;micRequested=true;recognition.onstart=()=>{recognitionBusy=true;$('#voiceBtn').textContent='■ Stop microphone';$('#voiceStatus').textContent='Listening in '+(direction==='en-zh'?'English':'Mandarin')+'. Auto restart may be blocked by Safari.'};recognition.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++)if(e.results[i].isFinal){const t=e.results[i][0].transcript;$('#translateInput').value=t;translatePhrase(t)}};recognition.onerror=e=>{$('#voiceStatus').textContent='Speech recognition: '+e.error+'. Manual typing remains available.';if(['not-allowed','service-not-allowed','language-not-supported'].includes(e.error)){micRequested=false;recognitionBusy=false;$('#voiceBtn').textContent='🎙 Start microphone'}};recognition.onend=()=>{recognitionBusy=false;$('#voiceBtn').textContent='🎙 Start microphone';if(micRequested&&view==='translate'&&document.visibilityState==='visible'){try{recognition.start()}catch{micRequested=false;$('#voiceStatus').textContent='Speech recognition stopped. Tap Start microphone again.'}}};try{recognition.start()}catch{micRequested=false;notify('Could not start microphone')}}
+async function translatePhrase(input,fromVoice=false){
+ const s=String(input||'').trim(),myTurn=++translationSeq,outputLang=direction==='en-zh'?'zh-CN':'en-US';
+ if(!s){if(!fromVoice)notify('Type or dictate a phrase first.');return false}
+ const finish=async(text,lang,note)=>{
+  if(myTurn!==translationSeq)return false;
+  setTranslation(text,lang,note);
+  if(fromVoice&&micRequested&&lang){await speak(true);if(myTurn!==translationSeq||!micRequested)return true;direction=direction==='en-zh'?'zh-en':'en-zh';syncDir();recognitionProcessing=false;listenNext();}
+  return true;
+ };
+ const match=direction==='en-zh'?phrases.find(p=>normalize(p[0])===normalize(s)):phrases.find(p=>normalize(p[1])===normalize(s));
+ if(match)return finish(direction==='en-zh'?match[1]:match[0],outputLang,direction==='en-zh'?match[2]:'Saved phrase · offline');
+ if(!$('#onlineTranslate').checked){
+  setTranslation('No matching saved phrase','','For open conversation, enable the optional online translation service. It sends your spoken words to a third party.');
+  if(fromVoice)stopMic('Conversation paused. Enable online translation to translate unfamiliar sentences.');
+  return false;
+ }
+ if(!navigator.onLine){setTranslation('Offline: phrase not found','','Live translation needs internet. Saved phrases work offline.');if(fromVoice)stopMic('Offline translation unavailable for this sentence.');return false;}
+ if(new TextEncoder().encode(s).length>500){setTranslation('Phrase too long','','Please speak in shorter sentences.');if(fromVoice)stopMic('Please use shorter sentences and restart.');return false;}
+ setTranslation('Translating…','','Online translation · third-party service');
+ try{
+  const params=new URLSearchParams({q:s,langpair:direction==='en-zh'?'en|zh-CN':'zh-CN|en'});
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9500);
+  let r;try{r=await fetch('https://api.mymemory.translated.net/get?'+params,{signal:controller.signal});}finally{clearTimeout(timer)}
+  const j=await r.json();
+  if(!r.ok||Number(j.responseStatus)!==200||!j.responseData?.translatedText)throw Error('Translation unavailable');
+  return finish(j.responseData.translatedText,outputLang,'Online translation · verify important details · provider may be blocked in China');
+ }catch(e){if(myTurn===translationSeq){setTranslation('Online service unavailable','','You can use the saved phrasebook or try again when connected.');if(fromVoice)stopMic('Online translation unavailable. Automatic conversation stopped.');}return false;}
+}
+function setTranslation(text,lang,note){translation={text,language:lang};$('#translateResult').innerHTML='<small>TRANSLATION</small><strong>'+esc(text)+'</strong><span>'+esc(note||'')+'</span>'}
+function speak(fromVoice=false){
+ return new Promise(resolve=>{
+  if(!translation.text||!translation.language){if(!fromVoice)notify('Translate a phrase first.');resolve(false);return;}
+  if(!('speechSynthesis'in window)){if(!fromVoice)notify('Voice playback not supported.');resolve(false);return;}
+  let settled=false,timer;
+  const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);resolve(ok)};
+  try{
+   speechSynthesis.cancel();
+   const a=new SpeechSynthesisUtterance(translation.text);a.lang=translation.language;a.rate=.86;
+   a.onend=()=>finish(true);a.onerror=()=>finish(false);
+   timer=setTimeout(()=>finish(false),Math.min(15000,3200+translation.text.length*140));
+   speechSynthesis.speak(a);
+  }catch{finish(false)}
+ });
+}
+function stopMic(message='Microphone stopped.'){
+ micRequested=false;recognitionProcessing=false;recognitionBusy=false;voiceEpoch++;translationSeq++;
+ try{recognition?.abort()}catch{}
+ try{speechSynthesis?.cancel()}catch{}
+ $('#voiceBtn').textContent='🎙 Start two-way conversation';
+ $('#voiceStatus').textContent=message;
+}
+function listenNext(){
+ if(!micRequested)return;
+ if(view!=='translate'||document.visibilityState!=='visible'){stopMic('Conversation paused. Return to Talk to restart.');return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){stopMic('Speech recognition is unavailable in this browser. Use text or saved phrases.');return;}
+ const thisEpoch=++voiceEpoch,instance=new SR();recognition=instance;
+ instance.lang=direction==='en-zh'?'en-US':'zh-CN';
+ instance.interimResults=false;instance.continuous=false;
+ instance.onstart=()=>{if(thisEpoch!==voiceEpoch)return;recognitionBusy=true;$('#voiceBtn').textContent='■ Stop conversation';$('#voiceStatus').textContent='Listening for '+(direction==='en-zh'?'English':'Mandarin')+' · speak one sentence, then let the app translate.';};
+ instance.onresult=e=>{
+  if(thisEpoch!==voiceEpoch||!micRequested||recognitionProcessing)return;
+  const segments=Array.from(e.results).filter(x=>x.isFinal).map(x=>x[0]?.transcript||'').filter(Boolean);
+  if(!segments.length)return;
+  voiceErrors=0;recognitionProcessing=true;
+  const heard=segments.join(' ').trim();$('#translateInput').value=heard;
+  $('#voiceStatus').textContent='Translating '+(direction==='en-zh'?'English to Mandarin':'Mandarin to English')+'…';
+  try{instance.stop()}catch{}
+  translatePhrase(heard,true).catch(()=>stopMic('Voice translation stopped unexpectedly. Please try again.'));
+ };
+ instance.onerror=e=>{
+  if(thisEpoch!==voiceEpoch||!micRequested)return;
+  if(['not-allowed','service-not-allowed','audio-capture','language-not-supported','network'].includes(e.error)){stopMic('Microphone/recognition issue ('+e.error+'). Allow permission or check connectivity, then restart.');return;}
+  $('#voiceStatus').textContent='Listening issue: '+e.error+'. Trying again if supported.';
+ };
+ instance.onend=()=>{
+  if(thisEpoch!==voiceEpoch)return;
+  recognitionBusy=false;
+  if(!micRequested||recognitionProcessing)return;
+  voiceErrors++;
+  if(voiceErrors>3){stopMic('Listening stopped after repeated silence or browser interruptions. Tap Start to retry.');return;}
+  setTimeout(()=>{if(thisEpoch===voiceEpoch&&micRequested&&!recognitionProcessing)listenNext()},350);
+ };
+ try{instance.start()}catch{stopMic('iPhone browser blocked microphone restart. Tap Start again to resume.');}
+}
+function startMic(){
+ if(micRequested){stopMic();return;}
+ if(!(window.SpeechRecognition||window.webkitSpeechRecognition)){notify('Speech recognition unavailable. You can type or use the phrasebook.');return;}
+ micRequested=true;recognitionBusy=false;recognitionProcessing=false;voiceErrors=0;
+ $('#voiceStatus').textContent='Starting two-way conversation. The app alternates English and Mandarin after each spoken translation; it cannot reliably identify both speakers.';
+ listenNext();
+}
 function paymentOptions(){const m=$('#paymentMethod').value;const c=Math.max(0,safeNum($('#cnyInput').value));let defaultFee=m==='visa'||m==='wechat'?1.70:0;let field=$('#extraFee');if(field.dataset.lastMethod!==m){field.value=defaultFee;field.dataset.lastMethod=m;}const r=Math.max(0,safeNum($('#fxRate').value));const extra=Math.max(0,safeNum(field.value));const platform=(m==='visa'||m==='wechat')&&c>200?c*.03:0;const base=c*r,other=platform*r,issuer=(base+other)*extra/100,total=base+other+issuer;$('#walletTotal').innerHTML=`<small>Estimated total in PHP</small><strong>${php(total)}</strong><span>Comparison only, actual card/QR quote can differ</span>`;$('#walletBreakdown').innerHTML=`<div class="line"><span>Base conversion</span><b>${php(base)}</b></div><div class="line"><span>Estimated platform fee</span><b>${php(other)}</b></div><div class="line"><span>Issuer fee (${extra.toFixed(2)}%)</span><b>${php(issuer)}</b></div>`;}
 function renderMoney(){paymentOptions()}
 function renderExpenses(){$('#expenseList').innerHTML=expenses.length?expenses.slice().reverse().map(e=>`<div class="expense-card"><div><b>${esc(e.desc)}</b><small>${esc(e.city)} · ${esc(e.method)} · ${esc(e.date)}</small></div><strong>${php(e.amount)}</strong><button data-remove-expense="${esc(e.id)}" aria-label="Remove expense">✕</button></div>`).join(''):'<div class="empty">No new expenses logged yet.</div>'}
@@ -115,6 +196,6 @@ function initSheetSync(){
  setInterval(auto,5*60*1000);window.addEventListener('online',auto);window.addEventListener('focus',auto);document.addEventListener('visibilitychange',auto);
  renderSyncState();
 }
-function syncDir(){$('#toChineseBtn').classList.toggle('active',direction==='en-zh');$('#toEnglishBtn').classList.toggle('active',direction==='zh-en');$('#translateInput').placeholder=direction==='en-zh'?'How much is this?':'这个多少钱？';if(recognitionBusy)startMic();}
+function syncDir(){$('#toChineseBtn').classList.toggle('active',direction==='en-zh');$('#toEnglishBtn').classList.toggle('active',direction==='zh-en');$('#translateInput').placeholder=direction==='en-zh'?'How much is this?':'这个多少钱？';if(micRequested&&!recognitionProcessing&&recognitionBusy){try{recognition?.abort()}catch{}}}
 boot();
 })();
