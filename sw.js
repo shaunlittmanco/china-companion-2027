@@ -1,4 +1,4 @@
-const CACHE='china-companion-v1-3';
+const CACHE='china-companion-v1-4';
 const CORE=['./','./index.html','./styles.css','./app.js','./sheet-sync.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('china-companion-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
