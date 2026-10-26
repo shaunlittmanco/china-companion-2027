@@ -18,7 +18,8 @@ jobs:
       - run: npm run check
       - run: npm test
   mobile:
-    runs-on: ubuntu-latest
+    # Keep the runner compatible with the pinned browser binaries.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
