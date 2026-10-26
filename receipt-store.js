@@ -12,8 +12,10 @@ function create(indexedDB=globalThis.indexedDB){
  const update=(id,patch)=>transaction('readwrite',(s,done)=>{const r=s.get(id);r.onsuccess=()=>{if(!r.result){done(null);return;}const row={...r.result,...patch,expenseId:id};s.put(row);done(row);};});
  const reserve=(id,fileId)=>transaction('readwrite',(s,done)=>{const r=s.get(id);r.onsuccess=()=>{if(!r.result){done(null);return;}const row={...r.result,driveFileId:r.result.driveFileId||fileId};s.put(row);done(row);};});
  const putAll=rows=>transaction('readwrite',s=>{for(const row of rows)s.put(row);});
+ // Once a Drive ID is reserved, retain its original name for uncertain-upload recovery.
+ const renameIfUnreserved=(id,filename)=>transaction('readwrite',(s,done)=>{const r=s.get(id);r.onsuccess=()=>{const row=r.result;if(!row){done(null);return;}if(!row.driveFileId){row.filename=filename;s.put(row);}done(row);};});
  const clear=()=>transaction('readwrite',s=>s.clear());
- return {get,all,put,remove,update,reserve,clear,putAll};
+ return {get,all,put,remove,update,reserve,clear,putAll,renameIfUnreserved};
 }
 return {create};
 });

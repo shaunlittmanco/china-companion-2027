@@ -17,3 +17,52 @@ test('offline and expired access preserve receipt without any fetch',async()=>{l
 test('shared/wrong folder and malformed remote metadata are rejected',async()=>{for(const changed of [{...folder,shared:true},{...folder,name:'Wrong folder'}]){const {client,queue}=await setup({fetcher:async()=>response(changed)});await assert.rejects(client.upload('expense-001'),e=>e.code==='folder');assert.ok(await queue.get('expense-001'));}const {client}=await setup({fetcher:async(u,o)=>u.includes(folder.id)?response(folder):u.includes('generateIds')?response({ids:['drive_test_0001']}):response({id:'drive_test_0001',parents:['wrong'],size:'1'})});await assert.rejects(client.upload('expense-001'),e=>e.code==='verify');});
 test('Drive permission denial and 401 expiration keep the outbox',async()=>{for(const status of [401,403,429,503]){const {client,queue}=await setup({fetcher:async()=>response({},status)});await assert.rejects(client.upload('expense-001'));assert.ok(await queue.get('expense-001'));if(status===401)assert.equal(client.authorized(),false);}});
 test('denied scope never stores a usable session',()=>{const client=create({getFolder:()=>folder});assert.throws(()=>client.authorize({...auth,scope:'https://www.googleapis.com/auth/drive.readonly'}));assert.equal(client.authorized(),false);});
+
+test('receipt filename includes date, city, merchant, CNY, payment method and the saved expense ID',()=>{
+ const {filenameForExpense,safeFilename}=require('../receipts');
+ const expense={id:'94a23b10-26df-4daa-9ba2-40fe8729e117',date:'2027-01-12',city:'Shanghai',desc:'Test Tea Shop',amountCNY:28.5,method:'GCash Global Pay via Alipay+'};
+ const name=filenameForExpense(expense,file);
+ assert.equal(name,'2027-01-12_Shanghai_Test-Tea-Shop_CNY28.50_GCash-AlipayPlus_94a23b10-26df-4daa-9ba2-40fe8729e117.pdf');
+ assert.equal(safeFilename(file,name),name,'upload must not append a second extension');
+ assert.equal(filenameForExpense(expense,file),name,'retry must generate the same name');
+ assert.notEqual(filenameForExpense({...expense,id:'different-expense-id'},file),name);
+});
+test('all supported methods and legacy payment labels get readable filename tags',()=>{
+ const {filenameForExpense}=require('../receipts');
+ for(const [method,tag] of [['GCash via Alipay+','GCash-AlipayPlus'],['Alipay using BDO Visa Signature virtual card','Alipay-BDO-Visa-Virtual'],['Alipay + BDO Visa Virtual','Alipay-BDO-Visa-Virtual'],['BDO UnionPay Diamond','BDO-UnionPay-Diamond'],['WeChat Pay using linked Visa','WeChat-Visa'],['Cash','Cash']]){
+  const name=filenameForExpense({id:'unique-expense',date:'2027-01-12',city:'Test city',desc:'Test shop',amountCNY:12,method},file);
+  assert.ok(name.includes('_'+tag+'_'),name);
+ }
+});
+test('long Chinese and unsafe merchant text stays byte-bounded without removing the unique suffix',()=>{
+ const {filenameForExpense}=require('../receipts'),id='c491535c-8b7a-4cdd-85b8-f36ccb8c00c1';
+ const name=filenameForExpense({id,date:'2027-01-12',city:'上海'.repeat(80),desc:'../\\'+('测试商店😀 / :\n'.repeat(60)),amountCNY:123.45,method:'Alipay using BDO Visa Signature virtual card'},file);
+ assert.ok(Buffer.byteLength(name,'utf8')<=224);
+ assert.ok(name.endsWith('_'+id+'.pdf'));
+ assert.ok(!/[\/\\:\n\r\u0000]/.test(name));
+ assert.ok(!name.includes('..'));
+ assert.ok(name.includes('测试商店'));
+});
+test('missing CNY remains explicitly unknown and existing image/PDF extensions are supported',()=>{
+ const {filenameForExpense}=require('../receipts');
+ for(const cny of [undefined,null,0,''])assert.ok(filenameForExpense({id:'stable-id',date:'2027-01-12',amountCNY:cny},file).includes('_CNY-NA_'));
+ for(const [name,type,extension] of [['x.png','image/png','png'],['x.jpg','image/jpeg','jpg'],['x.heic','image/heic','heic'],['x.pdf','application/pdf','pdf']])assert.ok(filenameForExpense({id:'stable-id',date:'2027-01-12'},new File(['x'],name,{type})).endsWith('.'+extension));
+ assert.throws(()=>filenameForExpense({date:'2027-01-12'},file));
+});
+test('queued names can change before reservation, but never after a Drive ID is reserved',async()=>{
+ const queue=storeFactory(new IDBFactory());await queue.put({expenseId:'saved',blob:file,filename:'old-name'});
+ assert.equal((await queue.renameIfUnreserved('saved','descriptive.pdf')).filename,'descriptive.pdf');
+ await queue.reserve('saved','reserved_drive_001');
+ const row=await queue.renameIfUnreserved('saved','changed-after-edit.pdf');
+ assert.equal(row.filename,'descriptive.pdf');assert.equal(row.driveFileId,'reserved_drive_001');assert.equal(await row.blob.text(),await file.text());
+});
+test('descriptive filenames are used in upload metadata with one POST across retries',async()=>{
+ const {filenameForExpense}=require('../receipts');
+ const {client,queue,calls}=await setup();
+ const expected=filenameForExpense({id:'expense-001',date:'2027-01-12',city:'Shanghai',desc:'Test merchant',amountCNY:50,method:'Cash'},file);
+ await queue.renameIfUnreserved('expense-001',expected);
+ await client.upload('expense-001');await client.upload('expense-001');
+ const posts=calls.filter(([,opts])=>opts.method==='POST');assert.equal(posts.length,1);
+ assert.ok((await posts[0][1].body.text()).includes('"name":"'+expected+'"'));
+ assert.equal((await queue.get('expense-001')).filename,expected);
+});

@@ -6,7 +6,37 @@ const text=v=>String(v??'').trim(),validId=id=>/^[\w-]{10,}$/.test(text(id));
 class ReceiptError extends Error{constructor(code,message){super(message);this.code=code;}}
 function mimeFor(file){if(['image/jpeg','image/png','image/webp','image/heic','image/heif','application/pdf'].includes(file.type))return file.type;return ({jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',heic:'image/heic',heif:'image/heif',pdf:'application/pdf'})[text(file.name).split('.').pop().toLowerCase()]||'';}
 function validate(file){if(!file||!mimeFor(file))throw new ReceiptError('file','Choose a JPG, PNG, WEBP, HEIC/HEIF image or PDF.');if(file.size<=0||file.size>5*1024*1024)throw new ReceiptError('file','Receipt must be between 1 byte and 5 MB. Compress large photos first.');}
-function safeFilename(file,prefix){const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/heic':'heic','image/heif':'heif','application/pdf':'pdf'})[mimeFor(file)];return text(prefix).replace(/[^\p{L}\p{N}_-]/gu,'_').slice(0,85)+'.'+ext;}
+function filenamePart(value,limit,fallback=''){
+ const clean=text(value).normalize('NFKC').replace(/[^\p{L}\p{N}._-]+/gu,'-').replace(/\.{2,}/g,'-').replace(/[-_]{2,}/g,'-').replace(/^[._-]+|[._-]+$/g,'');
+ let result='',bytes=0;
+ for(const character of clean){const size=new TextEncoder().encode(character).length;if(bytes+size>limit)break;result+=character;bytes+=size;}
+ return result.replace(/[._-]+$/g,'')||fallback;
+}
+function safeFilename(file,prefix){
+ validate(file);
+ const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/heic':'heic','image/heif':'heif','application/pdf':'pdf'})[mimeFor(file)];
+ const stem=text(prefix).replace(new RegExp('\\.'+ext+'$','i'),'');
+ return filenamePart(stem,220,'receipt')+'.'+ext;
+}
+function paymentFilenameTag(method){
+ const value=text(method);
+ if(/gcash/i.test(value))return 'GCash-AlipayPlus';
+ if(/wechat|weixin/i.test(value))return 'WeChat-Visa';
+ if(/unionpay/i.test(value))return 'BDO-UnionPay-Diamond';
+ if(/alipay/i.test(value))return 'Alipay-BDO-Visa-Virtual';
+ if(/cash/i.test(value))return 'Cash';
+ return filenamePart(value,28,'Other');
+}
+function filenameForExpense(expense,file){
+ const id=filenamePart(expense.id,48);
+ if(!id)throw new ReceiptError('file','Save the expense before naming its receipt.');
+ const candidate=text(expense.localDateTime||expense.date).slice(0,10);
+ const date=/^\d{4}-\d{2}-\d{2}$/.test(candidate)?candidate:'undated';
+ const cny=Number(expense.amountCNY);
+ const amount=Number.isFinite(cny)&&cny>0?'CNY'+cny.toFixed(2):'CNY-NA';
+ const parts=[date,filenamePart(expense.city,24,'City-NA'),filenamePart(expense.desc,64,'Merchant-NA'),filenamePart(amount,28),paymentFilenameTag(expense.method),id];
+ return safeFilename(file,parts.join('_'));
+}
 function settings(key,number,clientId){if(!/^AIza[A-Za-z0-9_-]{20,}$/.test(key))throw new ReceiptError('setup','Enter your restricted Google Picker API key in More.');if(!/^\d{5,25}$/.test(number))throw new ReceiptError('setup','Enter the numeric Cloud project number in More.');const prefix=clientId.match(/^(\d+)-[\w-]+\.apps\.googleusercontent\.com$/)?.[1];if(!prefix||prefix!==number)throw new ReceiptError('setup','Project number must match the project number at the start of your OAuth web client ID.');return {key,number};}
 function create({fetcher=fetch,now=()=>Date.now(),onState=()=>{},getFolder,queue,revoke,online=()=>navigator.onLine,locks=globalThis.navigator?.locks}={}){
  let token='',expires=0;const active=new Map();let epoch=0;
@@ -44,5 +74,5 @@ async function chooseFolder(){if(folderBusy)return false;folderBusy=true;try{con
 // Keep Picker token plumbing private to the module; not on any exported browser object.
 let pickerToken='';function withToken(callback){if(!client.authorized())throw new ReceiptError('auth','Reconnect receipt uploads before opening Picker.');callback(pickerToken);}
 function init(){queue=globalThis.ChinaReceiptStore.create();const core=create({queue,getFolder:folder,onState:state,revoke:t=>window.google?.accounts?.oauth2?.revoke(t,()=>{})});const grant=core.authorize;core.authorize=r=>{grant(r);pickerToken=r.access_token;};const off=core.disconnect;core.disconnect=()=>{pickerToken='';off();};client=core;try{byId('receiptApiKey').value=localStorage.getItem(API_KEY)||'';byId('receiptProjectNumber').value=localStorage.getItem(PROJECT_NUMBER)||'';state(folder()?'Existing receipts folder selected. Connect uploads when ready.':'Choose your existing private receipts folder to enable uploads.');}catch{state('Receipt settings are unavailable in this browser.');}byId('chooseReceiptFolder')?.addEventListener('click',chooseFolder);byId('connectReceiptDrive')?.addEventListener('click',()=>connect().catch(e=>state(e.message)));byId('disconnectReceiptDrive')?.addEventListener('click',()=>client.disconnect());}
-return {init,chooseFolder,connect,upload:id=>client.upload(id),authorized:()=>!!client?.authorized(),store:()=>queue,disconnect:()=>client?.disconnect(),folder,validate,mimeFor,safeFilename,settings,create,SCOPE,ReceiptError};
+return {init,chooseFolder,connect,upload:id=>client.upload(id),authorized:()=>!!client?.authorized(),store:()=>queue,disconnect:()=>client?.disconnect(),folder,validate,mimeFor,safeFilename,filenameForExpense,settings,create,SCOPE,ReceiptError};
 });

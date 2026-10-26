@@ -1,4 +1,4 @@
-# Receipt uploads in v1.6
+# Receipt uploads in v1.6.1
 
 The existing v1.5 integration has been hardened; the app and folder have not been rebuilt. App-side tests pass. **A genuine upload to the user's folder remains unverified** because this Cloud Browser has no saved OAuth/Picker configuration and Cloud Console returns “Site Unavailable”. Do not treat a local pending receipt as a Drive backup.
 
@@ -33,6 +33,23 @@ Google's Picker setup instructions: https://developers.google.com/workspace/driv
 - New expenses are never appended to the master Sheet. Sheets requests remain GET-only under the existing read-only token.
 
 Storage is not encrypted by the app. Device/browser storage can be evicted, including Safari website data. Keep original photos and a complete private backup in Files.
+
+## Optional receipts and automatic filenames
+
+You can save an expense without any attachment or Google setup, including offline. Receipt-free expense save/edit/delete and receipt-free backup restore do not depend on IndexedDB. **Remove selected file** clears the file chooser without clearing the transaction; a previously saved receipt stays linked.
+
+New upload names follow this pattern (synthetic example):
+
+`2027-01-12_Shanghai_Test-Tea-Shop_CNY28.50_GCash-AlipayPlus_94a23b10-26df-4daa-9ba2-40fe8729e117.pdf`
+
+- The date comes from the transaction's local date, not the date of a later retry.
+- City and merchant/description retain supported Chinese text; unsafe filename characters are replaced.
+- The CNY amount is shown to two decimal places. If it was not recorded, CNY-NA is used; no PHP-to-CNY amount is invented.
+- Tags distinguish GCash/Alipay+, Alipay/BDO Visa virtual, BDO UnionPay Diamond, WeChat/Visa, and Cash. Older payment labels remain supported.
+- The stable expense ID is the unique suffix. Components have byte limits so long names cannot remove it. Supported JPG/PNG/WEBP/HEIC/HEIF/PDF extensions are preserved without doubling the extension.
+- Existing queued filenames may be refreshed from edited expense details only before a Drive file ID has been reserved. A reserved ID and its original name are kept together for retry/recovery. Existing uploaded files are not renamed.
+
+If Drive has verified the receipt but the device cannot remove its queued copy, the app keeps the verified link and reports that the local copy remains. It does not tell you to upload a second copy.
 
 ## Safe upload and recovery
 

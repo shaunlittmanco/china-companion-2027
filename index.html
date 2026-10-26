@@ -4,7 +4,7 @@
 <meta name="theme-color" content="#101a2e"><meta name="description" content="Private offline-first China travel companion">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="icons/favicon.png">
-<link rel="stylesheet" href="styles.css?v=1.6"><link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="styles.css?v=1.6.1"><link rel="preconnect" href="https://unpkg.com">
 <title>China Companion 2027</title>
 </head><body>
 <div id="app" class="app">
@@ -58,7 +58,8 @@
  <label class="online-opt"><input id="expenseInTracker" type="checkbox"> Already included in the master's paid total — exclude from additional spending</label>
  <label class="field"><span>Match a paid tracker line (when available)</span><select id="expenseTrackerPaid"><option value="">No tracker line selected</option></select></label>
  <label class="field" for="expenseReceiptFile"><span>📎 Receipt photo, screenshot or PDF (optional, max 5 MB)</span><input id="expenseReceiptFile" type="file" accept=".jpg,.jpeg,.png,.webp,.heic,.heif,.pdf,image/*,application/pdf"></label>
- <div id="expenseReceiptStatus" class="notice" role="status">Expenses save locally first. Attachments are kept on this device until verified in Drive.</div>
+ <button id="removeExpenseReceipt" class="secondary-btn" type="button" hidden>Remove selected file</button>
+ <div id="expenseReceiptStatus" class="notice" role="status">Receipts are optional. Expenses save locally without Google access. Attachments stay on this device until verified in Drive.</div>
  <div class="button-row"><button id="saveExpense" class="primary-btn">Save expense</button><button id="cancelExpenseEdit" class="secondary-btn" hidden>Cancel edit</button></div>
  <div class="caption">Saving never writes to Google Sheets. Pending receipts need a Google connection and Retry. Delete removes only the local record and its local attachment; uploaded Drive files are kept.</div>
  </div>
@@ -80,9 +81,9 @@
  <div class="panel"><h3>Load your trip data</h3><p class="muted">Choose <b>china-trip-private-data.json</b> from Files. The app stores it only in this browser's local storage, without uploading it to our servers.</p><label class="file-import">📁 Choose private JSON <input id="dataFile" type="file" accept=".json,application/json"></label><div id="importStatus" class="notice">Demo mode is active until you import your private data.</div><button id="clearData" class="danger-btn">Clear imported trip and expenses</button></div>
  <div class="panel"><h3>Install on iPhone</h3><p>After this website is published over HTTPS, open it in Safari → Share → Add to Home Screen.</p><div class="notice">You can open the included local files on a computer for inspection, but offline install/service worker requires HTTPS or localhost. GitHub Pages hosting is free for public repositories; keep the private JSON out of your repository.</div></div>
  <div class="panel"><h3>Privacy & limitations</h3><p>Imported bookings are saved in <b>localStorage</b> on your device, not encrypted. Avoid shared devices. Safari clearing website data or switching browsers will remove saved data. Export or re-import a backup.</p><p>Maps need internet, and mainland China may block some third-party tiles. Saved itinerary, phrasebook, currency math and imported bookings can work offline after first successful install.</p><p>Tracker sync uses only the read-only Google Sheets permission. Google describes this scope as viewing all your spreadsheets; this app requests only the fixed tracker. Access tokens stay in memory and disappear on reload. No client secret or refresh token is used. Two-way voice mode is experimental and can stop on iPhone Safari. Full reliable always-listening translation and live metro routing are not implemented.</p></div>
- <div class="panel"><h3>Version</h3><p>App v1.6 · receipt outbox · travel expense tools</p></div><div class="panel"><h3>Tracker source</h3><a href="https://docs.google.com/spreadsheets/d/1Pvy6BIZJL_hLxP8td-HKdoEg2NuZ2b1LaWnz98GpFhs/edit" target="_blank" rel="noopener">China Trip Command Center 2027 ↗</a><p class="muted" id="syncStatus">Snapshot date: 23 Oct 2026. Updates require importing another snapshot.</p></div>
+ <div class="panel"><h3>Version</h3><p>App v1.6.1 · optional receipts · descriptive filenames</p></div><div class="panel"><h3>Tracker source</h3><a href="https://docs.google.com/spreadsheets/d/1Pvy6BIZJL_hLxP8td-HKdoEg2NuZ2b1LaWnz98GpFhs/edit" target="_blank" rel="noopener">China Trip Command Center 2027 ↗</a><p class="muted" id="syncStatus">Snapshot date: 23 Oct 2026. Updates require importing another snapshot.</p></div>
 </section>
 </main>
 <nav class="bottom-nav" aria-label="Main navigation"><button data-nav="home" class="nav-active"><span>⌂</span><small>Home</small></button><button data-nav="itinerary"><span>▤</span><small>Plan</small></button><button data-nav="map"><span>⌖</span><small>Map</small></button><button data-nav="translate"><span>文</span><small>Talk</small></button><button data-nav="wallet"><span>¥</span><small>Wallet</small></button><button data-nav="bookings"><span>▣</span><small>Tickets</small></button><button data-nav="settings"><span>⚙</span><small>More</small></button></nav>
 <div id="toast" class="toast" aria-live="polite"></div>
-</div><script async src="https://accounts.google.com/gsi/client"></script><script defer src="sheet-sync.js?v=1.6"></script><script defer src="receipt-store.js?v=1.6"></script><script defer src="travel-data.js?v=1.6"></script><script defer src="receipts.js?v=1.6"></script><script defer src="app.js?v=1.6"></script></body></html>
+</div><script async src="https://accounts.google.com/gsi/client"></script><script defer src="sheet-sync.js?v=1.6.1"></script><script defer src="receipt-store.js?v=1.6.1"></script><script defer src="travel-data.js?v=1.6.1"></script><script defer src="receipts.js?v=1.6.1"></script><script defer src="app.js?v=1.6.1"></script></body></html>
