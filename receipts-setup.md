@@ -1,6 +1,6 @@
 # Receipt uploads in v1.6.1
 
-The existing v1.5 integration has been hardened; the app and folder have not been rebuilt. App-side tests pass. **A genuine upload to the user's folder remains unverified** because this Cloud Browser has no saved OAuth/Picker configuration and Cloud Console returns “Site Unavailable”. Do not treat a local pending receipt as a Drive backup.
+The existing integration has been hardened; the app and folder have not been rebuilt. App-side tests pass. **A genuine PNG upload to the existing private folder was verified on 26 October 2026**, including independent Drive metadata readback and test cleanup. App-origin Google Sheets authorization and a subsequent manual read-only refresh also passed. See TRAVEL_READY_STATUS.md for exact coverage and remaining device checks. Do not treat a local pending receipt as a Drive backup.
 
 ## Keep the existing private destination
 

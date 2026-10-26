@@ -12,7 +12,16 @@ This is an incremental update to the existing public app. The private master She
 - A local queue-cleanup failure after verified upload retains the verified receipt link and reports the remaining local copy separately, instead of labeling the upload failed.
 - Additional coverage: receipt-free operations with unavailable IndexedDB, attachment removal, receipt-free backup restore/export, filename fields and payment aliases, Chinese/unsafe/long names, stable suffixes, upload metadata, reserved-name preservation and local-cleanup failure.
 - Updated asset versions/cache for the existing PWA. Storage keys, existing expenses, pending receipt blobs, saved filenames/IDs for reserved uploads, the private Sheet and the existing private folder are preserved.
-- Connected Drive metadata confirms the existing receipts folder is private. No actual app-created Drive receipt has been verified in this audit. This is not a successful live upload claim.
+- Connected Drive metadata confirms the existing receipts folder is private. The initial automated audit did not verify a real upload; subsequent live checks are recorded below.
+
+## Live Google integration verification — 26 October 2026
+
+- Completed app-origin Google Drive authorization and selected the existing private receipts folder through Google Picker. Its necessary-cookie prompt required owner interaction in Cloud Chrome; no global browser privacy settings were weakened.
+- Saved one clearly labeled synthetic TEST expense with a 12,578-byte PNG. The Expense Log automatically uploaded it and displayed **Uploaded · verified in Drive** with its private receipt link.
+- Independently fetched the actual uploaded file through the connected Drive service. Verified the exact generated filename, image/png MIME type, byte count, existing parent folder, private sharing state and owner-only permission. The filename included date, city, TEST merchant, CNY amount, payment method and the unique expense ID. This verifies one PNG upload; live PDF/HEIC uploads are not covered by this check.
+- Completed app-origin Sheets authorization and an initial real refresh, followed by **Refresh now**. The successful-refresh timestamp advanced and the imported record counts remained consistent. The local TEST expense, amount, verified upload state and receipt link survived the refresh. No source Sheet edits were used for this test; its modification timestamp was unchanged before and after.
+- Removed the synthetic Drive file using the connected Drive service and verified a subsequent direct file lookup returned NOT_FOUND. Removed the TEST expense through the app and confirmed the Expense Log was empty again. Existing folders and master Sheet were preserved.
+- No credentials, tokens, private tracker records, destination IDs or receipt links are included in this report or committed configuration. Runtime Google configuration remains local to the browser.
 
 ## Implemented
 
@@ -34,11 +43,11 @@ Tests use synthetic data and mocked Google responses, actual IndexedDB transacti
 ## Genuine checks still blocked or unavailable
 
 - Cloud project/key restriction inspection: Cloud Console displays Site Unavailable in this browser. No repeated attempts or replacement project/client/key were made.
-- The available Cloud Browser has no owner OAuth client ID, Picker key, project number, selected folder or Google session. App-origin consent, real receipt creation/readback, and genuine before/after Sheets refresh are not verified here. Connected-Drive folder metadata confirmed the existing destination is private, but that is not an app upload test.
+- Actual app-origin consent, PNG receipt creation/readback, manual Sheets refresh and test cleanup passed in Cloud Chrome as recorded above. The five-minute automatic timer, actual token expiration/recovery, live PDF/HEIC uploads and Google access during a real network outage were not exercised end-to-end in this live check; their synthetic coverage does not replace device testing.
 - Native iPhone Safari, installation on an actual iPhone, airplane-mode restart on the device, microphone capture and audible English/Mandarin output cannot be certified from desktop Chrome or simulated speech tests.
 - OSM tiles/geocoding, Google, online translation, voice recognition and transit information may be unavailable or incomplete in mainland China. Saved local records remain usable independently.
 
-Do not label the app fully travel-ready until the real receipt, Google consent/sync and iPhone offline/audio checks pass. The exact owner setup/check sequence is in receipts-setup.md.
+Do not label the app fully travel-ready until the remaining device, network and audio checks pass. The real PNG receipt and Google consent/manual sync checks passed in Cloud Chrome. The setup/check sequence is in receipts-setup.md.
 
 ## Reference sources
 
