@@ -32,6 +32,7 @@ jobs:
         env:
           TEST_WEBKIT: '1'
       - run: node scripts/review-check.cjs
+      - run: node scripts/design-review-check.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

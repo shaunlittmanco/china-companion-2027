@@ -1,0 +1,73 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "screen": "home",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "itinerary",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "map",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "translate",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "wallet",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "bookings",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "settings",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    }
+  ],
+  "extraStates": [
+    "large Chinese address",
+    "77-day departure countdown on 26 Oct 2026",
+    "simulated offline quick access"
+  ],
+  "wrapperWidths": [
+    320,
+    390,
+    768,
+    1040
+  ],
+  "externalRequestsAllowed": false
+}

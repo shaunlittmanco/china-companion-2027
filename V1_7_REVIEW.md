@@ -4,6 +4,42 @@
 
 Production remains v1.6.1 at the existing GitHub Pages URL. This is an incremental presentation update to the existing application, with no new backend, Cloud project, billing or paid API. Preview content is fictional; it is not a tracker export or a real hotel reservation.
 
+## Complete Light / Dark review — 26 October 2026
+
+Open [jade-night-review.html](docs/previews/jade-night-review.html) for simultaneous Light and Dark previews of all seven experiences. The file is self-contained: download it and open it in a browser. Scroll within the phones to inspect the complete screens. Extra controls show the departure countdown, simulated offline shortcuts and the large Chinese Address Card.
+
+| Screen | Light and Dark comparison |
+| --- | --- |
+| Home / Smart Today | [Preview](docs/previews/review-home-light-dark.png) |
+| Plan | [Preview](docs/previews/review-itinerary-light-dark.png) |
+| Map | [Preview](docs/previews/review-map-light-dark.png) |
+| Talk | [Preview](docs/previews/review-translate-light-dark.png) |
+| Wallet | [Preview](docs/previews/review-wallet-light-dark.png) |
+| Tickets | [Preview](docs/previews/review-bookings-light-dark.png) |
+| Settings | [Preview](docs/previews/review-settings-light-dark.png) |
+| Chinese Address Card | [Preview](docs/previews/review-chinese-address-light-dark.png) |
+| Countdown | [Preview](docs/previews/review-countdown-light-dark.png) |
+| Offline quick access | [Preview](docs/previews/review-offline-light-dark.png) |
+
+This follow-up changes review files, their automation and one asynchronous test wait only. **No runtime app file is changed in this pass.** The implementation already present on the unmerged draft branch remains pending design approval; main/production is still v1.6.1. Design approval authorizes the next implementation/refinement stage; merging and production deployment require separate approval.
+
+The two previews have isolated, memory-only fictional records. Network access is denied by their Content Security Policy. Google authorization, external navigation, location and microphone actions are disabled. The map area is explicitly labeled as a design preview; it is not a live map or a promise of offline routing. The review's offline control simulates the UI state; it does not install a service worker. The app's separate network-disabled reload test covers actual PWA caching.
+
+Fresh validation: 61 unit/integration tests pass; Chromium verifies all seven screens in both themes at 320, 375, 390, 430 and 820 px, existing stored data preservation, address dialog behavior, conversion/expense entry and a network-disabled PWA reload with hotel lookup. The new review check verifies both isolated themes on all seven screens, three extra states, disabled Google authorization, no script errors and wrapper widths 320–1040 px. Its JSON evidence is [design-review-results.json](docs/previews/design-review-results.json). One receipt test now waits for the completed local save rather than assuming a fixed 30 ms delay; its receipt durability assertions are unchanged.
+
+Real iPhone validation remains required for:
+
+- Safari and installed PWA safe areas, keyboard, text zoom, VoiceOver and clipboard behavior.
+- Actual English/Mandarin recognition and audible playback, speed selection, interrupted/background sessions and resume behavior.
+- Opening the native AMap app, choosing the correct destination/entrance and actual walking/transit routes.
+- Airplane-mode launch/relaunch and availability of cached plans, hotel addresses, saved bookings and phrases after Safari eviction/restart.
+- Actual photo/HEIC/PDF receipt selection and Drive upload, offline queue recovery, Google consent popups and expired-session reconnection without losing local data.
+- Connectivity from mainland China; Google sync/uploads, online translation and street tiles depend on reachable external services.
+
+After approval, continue on this existing branch: reconcile the approved presentation with the retained runtime, preserve storage keys/OAuth scopes/read-only Sheets/private Drive receipt logic, complete feasible free-service improvements, rerun regression checks and present the final PR for deployment approval. Reliable offline street routing, background turn-by-turn guidance and uninterrupted interpretation remain outside the current static web app's guarantees.
+
+Rebuild this review with `node scripts/build-design-review.cjs` (from the committed synthetic comparison), and validate with `node scripts/design-review-check.cjs`. Regenerate the underlying comparison first if runtime UI changes after approval.
+
 ## Review the design
 
 Download and open [the self-contained comparison](docs/previews/review.html) in a browser. It shows the original and proposed app at **390 × 844 CSS pixels**, with page and Light/Dark controls. Its storage is temporary memory and Google connection buttons are disabled. It cannot access the production site's local data. Do not use this fictional preview for actual travel directions.
