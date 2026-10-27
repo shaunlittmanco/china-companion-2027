@@ -3,7 +3,7 @@
 'use strict';
 const SCOPE='https://www.googleapis.com/auth/spreadsheets.readonly';
 const TABS=['Dashboard','Master Itinerary','Budget','Bookings','Hotels','Transportation','Attractions','Food','Packing & Requirements','China Payments'];
-const EXTRA_TABS=['Decision Options','Social Media','Wulong Day Trip','Shanghai','Chongqing','Chengdu','Beijing'];
+const EXTRA_TABS=['Decision Options','Social Media','Wulong Day Trip','Shanghai','Chongqing','Chengdu','Beijing','Packing & Bags'];
 const clean=x=>String(x??'').trim();
 const money=x=>{const s=clean(x).replace(/[₱¥,\s]/g,'');return s!==''&&Number.isFinite(Number(s))?Number(s):null;};
 function table(rows,required){const i=rows.findIndex(r=>required.every(h=>r.map(clean).includes(h)));if(i<0)throw new Error('Tracker headers changed. Your previous snapshot is safe.');const headers=rows[i].map(clean);return rows.slice(i+1).filter(r=>r.some(x=>clean(x))).map(r=>Object.fromEntries(headers.filter(Boolean).map(h=>[h,r[headers.indexOf(h)]??''])));}
@@ -38,12 +38,14 @@ function mapWorkbook(tabs,previous={},now=new Date().toISOString()){
  const estimated=summary?money(summary[summary.indexOf('Estimated Total')+1]):null;
  // Sum actual paid budget lines once; do not sum bookings again or round dashboard totals.
  const baseline=budget.filter(r=>clean(r.Item)&&/^paid(?:$|\s|[•✓])/i.test(clean(r['Paid?']))).reduce((n,r)=>n+(money(r['Actual PHP'])??0),0);
- return {...previous,...mapExtras(tabs,previous),schemaVersion:2,source:'China Trip Command Center 2027',sourceDate:now,sync:{lastSuccess:now},trip:{...previous.trip,title:'China 2027',budgetPHP:target??previous.trip?.budgetPHP??150000,baselineSpentPHP:Math.round(baseline*100)/100,estimatedTotalPHP:estimated??money(dashboard.find(r=>r[0]==='Estimated Total (PHP)')?.[1])??0},itinerary,bookings,hotels,paidBudgetItems:budget.filter(r=>clean(r.Item)&&/^paid(?:$|\s|[•✓])/i.test(clean(r['Paid?']))).map(r=>({id:'paid-'+hash([r.Category,r.Item,r.City].join('|')),item:clean(r.Item),city:clean(r.City),amountPHP:money(r['Actual PHP'])??0})),transport:table(tabs.Transportation||[],['Date','From','To','Mode']),attractions:table(tabs.Attractions||[],['City','Attraction / Activity']),food:table(tabs.Food||[],['City','Restaurant / Food']),checklist:table(tabs['Packing & Requirements']||[],['Category','Item','Status']),paymentGuide:table(tabs['China Payments']||[],['SITUATION','USE FIRST','BACKUP'])};
+ let packing={};if(tabs['Packing & Bags']){try{const codec=typeof module==='object'&&module.exports?require('./packing-sync.js'):globalThis.ChinaPackingSync;packing={packingLoaded:true,packingRecords:codec.parse(tabs['Packing & Bags']),packingImportWarning:''};}catch{packing={packingLoaded:previous.packingLoaded,packingRecords:previous.packingRecords,packingImportWarning:'Packing & Bags headers/records need review; previous copy kept.'};}}
+ return {...previous,...mapExtras(tabs,previous),...packing,schemaVersion:2,source:'China Trip Command Center 2027',sourceDate:now,sync:{lastSuccess:now},trip:{...previous.trip,title:'China 2027',budgetPHP:target??previous.trip?.budgetPHP??150000,baselineSpentPHP:Math.round(baseline*100)/100,estimatedTotalPHP:estimated??money(dashboard.find(r=>r[0]==='Estimated Total (PHP)')?.[1])??0},itinerary,bookings,hotels,paidBudgetItems:budget.filter(r=>clean(r.Item)&&/^paid(?:$|\s|[•✓])/i.test(clean(r['Paid?']))).map(r=>({id:'paid-'+hash([r.Category,r.Item,r.City].join('|')),item:clean(r.Item),city:clean(r.City),amountPHP:money(r['Actual PHP'])??0})),transport:table(tabs.Transportation||[],['Date','From','To','Mode']),attractions:table(tabs.Attractions||[],['City','Attraction / Activity']),food:table(tabs.Food||[],['City','Restaurant / Food']),checklist:table(tabs['Packing & Requirements']||[],['Category','Item','Status']),paymentGuide:table(tabs['China Payments']||[],['SITUATION','USE FIRST','BACKUP'])};
 }
 class SyncError extends Error{constructor(code,message){super(message);this.code=code;}}
 function errorMessage(e){return e instanceof SyncError||/previous snapshot|Previous snapshot|Tracker headers/.test(e?.message||'')?e.message:'Could not refresh the tracker. Your saved snapshot is still available. Retry when connected.';}
 function create(options){
  const {sheetId,fetcher=fetch,onData,onState=()=>{},now=()=>Date.now(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),random=Math.random}=options;
+ const getSheetId=typeof sheetId==='function'?sheetId:()=>sheetId;
  let token=null,expires=0,pending=null,generation=0,blockedUntil=0,lastAttempt=0;
  const state=(code,message)=>onState({code,message});
  function clear(){generation++;token=null;expires=0;state('disconnected','Disconnected. The offline snapshot stays on this device.');}
@@ -52,7 +54,7 @@ function create(options){
   for(let attempt=0;attempt<3;attempt++){
    if(session!==generation)throw new SyncError('cancelled','Sync cancelled.');
    const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),15000);let res;
-   try{res=await fetcher('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(sheetId)+path,{method:'GET',headers:{Authorization:'Bearer '+sessionToken},cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',signal:controller.signal});}catch{throw new SyncError('network','Google is unreachable. Your saved snapshot is available offline.');}finally{clearTimeout(timer);}
+   try{res=await fetcher('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(getSheetId())+path,{method:'GET',headers:{Authorization:'Bearer '+sessionToken},cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',signal:controller.signal});}catch{throw new SyncError('network','Google is unreachable. Your saved snapshot is available offline.');}finally{clearTimeout(timer);}
    if(res.status===401){if(session===generation){token=null;expires=0;}throw new SyncError('auth','Google authorization expired. Tap Connect Google to resume.');}
    if(res.status===403)throw new SyncError('permission','Google denied access. Check the account, Sheets API and read-only consent. Saved data kept.');
    if(res.status===404)throw new SyncError('missing','Tracker not found for this Google account. Saved data kept.');
@@ -75,7 +77,7 @@ function create(options){
    const batch=await get('/values:batchGet?'+params,session,sessionToken);
    if(batch.valueRanges?.length!==available.length)throw new SyncError('schema','Incomplete tracker response. Previous snapshot kept.');
    const tabs=Object.fromEntries(available.map((name,i)=>[name,batch.valueRanges[i].values||[]]));
-   const next=mapWorkbook(tabs,previous,new Date(now()).toISOString());
+   const next=mapWorkbook(tabs,options.getCurrent?.()||previous,new Date(now()).toISOString());
    if(session!==generation)return false;
    await onData(next);state('synced','Tracker refreshed. Automatic checks every 5 minutes while open and authorized.');return true;
   }catch(e){if(session!==generation)return false;state(e.code||'error',errorMessage(e));return false;}};

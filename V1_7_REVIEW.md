@@ -63,7 +63,7 @@ The Imperial Red, Antique Gold, Deep Red, Porcelain Ivory, Lacquer Black and res
 
 ## Preserved
 
-OAuth settings/scopes, read-only Sheets, private Drive receipt destination/selection/upload/retry, queued receipt bytes and reserved IDs, expense history/math/reconciliation, bookings, maps/GPS, translations, speech speed, backups, themes and completion records remain. `receipts.js`, `receipt-store.js` and `jade-ui.js` are unchanged in this upgrade. No public private-data export, new Google project, folder, paid API, subscription, billing or server was introduced. PWA assets/cache advance together to preview.3; private Google responses remain excluded.
+OAuth settings/scopes, read-only Sheets, private Drive receipt destination/selection/upload/retry, queued receipt bytes and reserved IDs, expense history/math/reconciliation, bookings, maps/GPS, translations, speech speed, backups, themes and completion records remain. `receipts.js`, `receipt-store.js` and `jade-ui.js` are unchanged in this upgrade. No public private-data export, new Google project, folder, paid API, subscription, billing or server was introduced. PWA assets/cache advance together to preview.4; private Google responses remain excluded.
 
 ## Actual integration versus simulation
 
@@ -83,10 +83,16 @@ See [implementation and schema details](docs/SMART_TRAVEL.md) for evidence rules
 
 88 automated tests pass, including the original regression coverage updated for the intended Menu and cache-version changes. Tests cover optional tab mapping/GET-only sync, six ticket states, evidence/payment separation, quote comparisons, route freshness and the strict 2km rule, snow uncertainty/no-snow/closure, protected bookings, adjacent-day avoidance, explicit plan confirmation, offline checklist persistence, backup merge and existing receipt behavior.
 
-Chromium checks cover 11 pages × 2 themes × 7 widths (320–1366 px), plus all five Activity Details sections at each width, unchanged existing local records, 44px visible navigation targets, reduced motion, theme persistence, contrast samples and actual network-disabled PWA reload. Complete review checks cover all core/new screens, both themes, sample contrasts, local interactions and independent isolated frames.
+Chromium checks cover 12 pages × 2 themes × 7 widths (320–1366 px), plus all five Activity Details sections at each width, unchanged existing local records, 44px visible navigation targets, reduced motion, theme persistence, contrast samples and actual network-disabled PWA reload. Complete review checks cover all core/new screens, both themes, sample contrasts, local interactions and independent isolated frames.
 
 WebKit runs in PR CI on Ubuntu 24.04. This workspace could download WebKit but could not install its native system libraries; do not call local Chromium testing a physical Safari test. Current-commit CI status is reported in the PR.
 
-No new account permissions are required. On the owner’s iPhone, verify the extended read-only import, actual Safari/PWA safe areas/keyboard/VoiceOver/clipboard, AMap/GPS handoffs, real English/Mandarin audio, airplane-mode cold launch/storage eviction, backup restore, real HEIC/PDF/photo uploads and Google session expiry. Also check iPad/Mac Safari and mainland-China service reachability.
+Packing writes now require separate opt-in file authorization/Picker selection with the existing drive.file scope; no automatic consent is assumed. On the owner’s iPhone, verify the extended read-only import, actual Safari/PWA safe areas/keyboard/VoiceOver/clipboard, AMap/GPS handoffs, real English/Mandarin audio, airplane-mode cold launch/storage eviction, backup restore, real HEIC/PDF/photo uploads and Google session expiry. Also check iPad/Mac Safari and mainland-China service reachability.
 
 **Recommendation: keep the PR in draft for design and real-device review. No merge or deployment has been performed.**
+
+## Packing and synchronization continuation
+
+The existing branch now includes permanent three-bag inventory plus Unassigned, independent hotel arrivals/checkouts/transfers and room sweeps, Manila baggage claim and manual Back Home verification. The existing dedicated tab is read-only imported; opt-in file-scoped writes use stable IDs, a durable pending queue, canonical upserts, shared recovery revisions, preflight/readback and explicit conflict resolution. Other tabs remain read-only; receipt code/schema stay unchanged. Public runtime/previews no longer embed the workbook ID; enter the existing private tracker URL/ID once in Settings, keeping existing OAuth/Picker configuration. This does not rewrite historical commits.
+
+See [implementation and owner tests](docs/PACKING_SYNC.md) and [release gates](docs/RELEASE_QA.md). Automated simulations are separate from actual-account Google consent, cross-device sync, real HEIC/PDF uploads and physical Safari/PWA checks. Production stays v1.6.1 until those gates pass.

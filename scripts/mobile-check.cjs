@@ -2,7 +2,7 @@
 const {chromium,webkit}=require('playwright'),http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const fixture=require('./preview-fixture.cjs'),root=path.resolve(__dirname,'..'),out=path.join(root,'docs/previews');
 const baseline=process.env.BASELINE_DIR&&path.resolve(process.env.BASELINE_DIR);
-const secondary=['settings','options','vlog','smart','resources'];
+const secondary=['settings','options','vlog','smart','resources','packing'];
 const navSelector=name=>name==='bookings'?'.header-actions [data-nav="bookings"]':'.bottom-nav [data-nav="'+name+'"]';
 async function navigate(p,name){if(secondary.includes(name)){const sidebar=p.locator('#sidebarContents [data-page="'+name+'"]').first();if(await sidebar.isVisible()){await sidebar.click();return;}await p.locator('#openMenu').click();await p.locator('#menuContents [data-page="'+name+'"]').first().click();return;}await p.locator(navSelector(name)).click();}
 const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png'};
@@ -24,7 +24,7 @@ async function main(){
    for(const width of [320,375,390,430,820,1024,1366]){
     const c=await context(browser,width);const p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(origin+'/');await p.locator('#page-home.active').waitFor();const storageBefore=await p.evaluate(()=>['chinaCompanionPrivateV2','chinaCompanionExpensesV1','chinaCompanionDoneV1','chinaCompanionSpeechRateV1'].map(k=>localStorage.getItem(k)));
     assert.equal(await p.locator('.bottom-nav button').count(),5);
-    for(const page of ['home','itinerary','map','translate','wallet','bookings','settings','options','vlog','smart','resources']){
+    for(const page of ['home','itinerary','map','translate','wallet','bookings','settings','options','vlog','smart','resources','packing']){
      await navigate(p,page);
      const overflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);assert.equal(overflow,false,`${name} ${width}px ${page} overflows`);
      assert.equal(await p.locator('#page-'+page+'.active').count(),1);
@@ -32,13 +32,13 @@ async function main(){
     await navigate(p,'settings');await p.locator('#themeSelect').selectOption('dark');assert.equal(await p.locator('html').getAttribute('data-theme'),'dark');
     await p.reload();assert.equal(await p.locator('html').getAttribute('data-theme'),'dark');assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionExpensesV1')).length),2);
     assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionDoneV1'))['preview-arrival']),true);
-    for(const page of ['home','itinerary','map','translate','wallet','bookings','settings','options','vlog','smart','resources']){await navigate(p,page);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${name} ${width}px dark ${page} overflows`);}
+    for(const page of ['home','itinerary','map','translate','wallet','bookings','settings','options','vlog','smart','resources','packing']){await navigate(p,page);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${name} ${width}px dark ${page} overflows`);}
     await navigate(p,'itinerary');await p.locator('#itineraryList [data-smart="open"][data-id="preview-garden"]').click();
     for(const tab of ['overview','go','do','nearby','vlog']){await p.locator('[data-smart="activity-tab"][data-value="'+tab+'"]').click();assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,`${name} ${width}px activity-${tab} overflows`);}
     const targets=await p.locator('.bottom-nav button,.header-actions button').evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>({width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height})));assert.ok(targets.every(x=>x.width>=44&&x.height>=44),'Navigation targets must be at least 44px');
     assert.deepEqual(await p.evaluate(()=>['chinaCompanionPrivateV2','chinaCompanionExpensesV1','chinaCompanionDoneV1','chinaCompanionSpeechRateV1'].map(k=>localStorage.getItem(k))),storageBefore,'Existing local records must remain byte-for-byte unchanged');
     for(const mode of ['light','dark']){await navigate(p,'settings');await p.locator('#themeSelect').selectOption(mode);const contrast=await p.evaluate(()=>{const lum=c=>{const v=c.match(/[0-9.]+/g).slice(0,3).map(Number).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4;});return v[0]*.2126+v[1]*.7152+v[2]*.0722;},ratio=(a,b)=>(Math.max(lum(a),lum(b))+.05)/(Math.min(lum(a),lum(b))+.05),button=getComputedStyle(document.querySelector('#googleConnect')),paragraph=getComputedStyle(document.querySelector('#page-settings .page-heading p')),bg=getComputedStyle(document.documentElement).backgroundColor;return {button:ratio(button.color,button.backgroundColor),muted:ratio(paragraph.color,bg),motion:getComputedStyle(document.querySelector('.page.active')).animationName};});assert.ok(contrast.button>=4.5&&contrast.muted>=4.5,`Insufficient ${mode} text contrast`);assert.equal(contrast.motion,'none','Reduced motion must disable page animation');}
-    assert.deepEqual(errors,[],`${name} ${width}px script errors`);report.push({engine:name,width,pages:11,themes:'light/dark',overflow:false,storagePreserved:true});
+    assert.deepEqual(errors,[],`${name} ${width}px script errors`);report.push({engine:name,width,pages:12,themes:'light/dark',overflow:false,storagePreserved:true});
     await c.close();
    }
    if(name==='chromium'){

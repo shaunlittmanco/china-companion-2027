@@ -11,13 +11,13 @@ let C,activityId='',extraActivity=null,tab='overview',origin='hotel',quick=true,
 const data=()=>C.getData(),state=()=>data().smartState||{},all=()=>S.effectiveItinerary(data()),selected=()=>all().find(a=>a.id===activityId)||extraActivity;
 function save(patch,message){try{C.saveSmart({...state(),...patch});if(message)C.notify(message);return true;}catch{C.notify('Could not save. Existing local records were kept. Export a backup or free device storage.');return false;}}
 function menuMarkup(){return `<div class="menu-brand"><span class="eyebrow dark">YOUR CHINA COMPANION</span><h2>The whole journey.</h2></div>${[
- ['My Trip',[['Bookings','bookings'],['Hotels','bookings','hotels'],['Tickets and Reservations','bookings','tickets'],['Smart Plan A/B/C','smart']]],
+ ['My Trip',[['Packing & Bags','packing'],['Bookings','bookings'],['Hotels','bookings','hotels'],['Tickets and Reservations','bookings','tickets'],['Smart Plan A/B/C','smart']]],
  ['Travel Tools',[['Saved Options','options'],['Offline Resources','resources'],['Useful Chinese Addresses','map'],['Travel Utilities','wallet']]],
  ['Create & Capture',[['Vlog Hub','vlog'],['YouTube Shot Lists','vlog','youtube'],['Instagram Stories Planner','vlog','instagram']]],
  ['App & Data',[['Settings','settings'],['Google Sheets Sync','settings','sheet'],['Google Drive Receipts','settings','receipts'],['Backup and Restore','wallet','backup']]]
  ].map(([title,items])=>`<section class="menu-group"><h3>${title}</h3>${items.map(([label,page,sub])=>`<button data-smart="menu-nav" data-page="${page}" data-sub="${sub||''}">${label}<span aria-hidden="true">↗</span></button>`).join('')}</section>`).join('')}`;}
 function closeMenu(){if($('#menuDialog').open)$('#menuDialog').close();$('#openMenu').setAttribute('aria-expanded','false');}
-function init(context){C=context;
+function init(context){C=context;root.ChinaPackingUI?.init(context);
  $('#menuContents').innerHTML=menuMarkup();$('#sidebarContents').innerHTML=menuMarkup();
  $('#openMenu').addEventListener('click',()=>{lastOpener=$('#openMenu');$('#menuDialog').showModal();$('#openMenu').setAttribute('aria-expanded','true');});
  $('#closeMenu').addEventListener('click',closeMenu);$('#menuDialog').addEventListener('click',e=>{if(e.target===$('#menuDialog'))closeMenu();});
@@ -26,9 +26,9 @@ function init(context){C=context;
  document.addEventListener('click',click);document.addEventListener('change',change);
  window.addEventListener('offline',render);window.addEventListener('online',render);
 }
-function onNav(name){closeMenu();if(name==='activity')renderActivity();if(name==='options')renderOptions();if(name==='vlog')renderVlog();if(name==='smart')renderPlans();if(name==='resources')renderResources();}
+function onNav(name){closeMenu();if(name==='packing')root.ChinaPackingUI?.render();if(name==='activity')renderActivity();if(name==='options')renderOptions();if(name==='vlog')renderVlog();if(name==='smart')renderPlans();if(name==='resources')renderResources();}
 function open(id,section='overview',a=null){activityId=id;extraActivity=a;tab=section;origin='hotel';C.nav('activity');}
-function render(){if(!C)return;renderToday();const p=document.querySelector('.page.active')?.id;if(p==='page-activity')renderActivity();if(p==='page-options')renderOptions();if(p==='page-vlog')renderVlog();if(p==='page-smart')renderPlans();if(p==='page-resources')renderResources();}
+function render(){if(!C)return;root.ChinaPackingUI?.render();root.ChinaPackingUI?.today();renderToday();const p=document.querySelector('.page.active')?.id;if(p==='page-activity')renderActivity();if(p==='page-options')renderOptions();if(p==='page-vlog')renderVlog();if(p==='page-smart')renderPlans();if(p==='page-resources')renderResources();}
 function pill(t){return `<span class="status pending">${esc(t)}</span>`;}
 function renderToday(){
  const mode=state().mode||'planning',clock=root.ChinaJade.clock(),date=mode==='travel'&&clock.date>='2027-01-11'&&clock.date<='2027-01-21'?clock.date:C.getDay(),a=all().filter(a=>a.date===date),remaining=a.reduce((n,a)=>n+S.shots(a,true).filter(s=>!state().shots?.[s.id]).length,0),budget=data().trip?.dailyAllowancePHP||8000;

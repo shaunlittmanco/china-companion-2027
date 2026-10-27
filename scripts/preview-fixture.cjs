@@ -33,3 +33,18 @@ d.smartState={routes:{'preview-garden|hotel':[
 {mode:'Walking',km:1.4,minutes:22,fareCNY:0,transfers:0,walkKm:1.4,distanceType:'walking-route',safe:true,scenic:true,weatherOK:true,practical:true,source:'SIMULATED walking route · not an AMap result',updatedAt:'2027-01-12T00:00:00Z',sample:true},
 {mode:'Metro',km:2.2,minutes:18,fareCNY:3,transfers:0,walkKm:.6,source:'SIMULATED transport estimate',updatedAt:'2027-01-12T00:00:00Z',sample:true},
 {mode:'DiDi',km:2.5,minutes:12,fareCNY:null,source:'SAMPLE drive time; actual fare must be checked in DiDi',updatedAt:'2027-01-12T00:00:00Z',sample:true}]}};
+// Packing fixtures are deliberately fictional, with demo-only IDs and source references.
+const Packing=require('../packing'),PackingSync=require('../packing-sync');
+d.hotels[0]['Check-out']='2027-01-13';d.hotels[0].Area='Central Shanghai · fictional';
+d.hotels.push(...[
+ ['Shanghai','Toy Story-area · fictional demo stay','2027-01-13','2027-01-14'],
+ ['Shanghai','Wildlife-area · fictional demo stay','2027-01-14','2027-01-15'],
+ ['Chongqing','River Lantern · fictional demo stay','2027-01-15','2027-01-17'],
+ ['Chengdu','Bamboo Court · fictional demo stay','2027-01-17','2027-01-18'],
+ ['Beijing','Capital Courtyard · fictional demo stay','2027-01-18','2027-01-21']
+].map(([City,Hotel,checkIn,checkOut])=>({City,Hotel,'Check-in':checkIn,'Check-out':checkOut,'Paid?':'TBD / demo only',Notes:'Fictional sample, not a reservation.'})));
+d.checklist=[{Category:'Visa preparation',Item:'Submit fictional application',Status:'Example only'},{Category:'Insurance',Item:'Review fictional insurance checklist',Status:'Example only'}];
+const sampleItems=[['demo-document','Demo passport wallet','personal','Documents',1,null],['demo-jacket','Demo winter coat','checked','Clothing',1,.8],['demo-scarf','Demo wool scarves','checked','Clothing',2,.15],['demo-camera','Demo compact camera','cabin','Cameras',1,.25],['demo-power','Demo power bank','cabin','Chargers & Power',1,null],['demo-toiletries','Demo toiletries','checked','Toiletries',1,.2],['demo-gift','Demo souvenir tea','unassigned','Souvenirs',2,null]];
+const packingRecords=sampleItems.map(([id,name,bag,category,quantity,weight])=>({'Record Type':'ITEM','Item / Task':name,Bag:Packing.BAGS.find(b=>b.id===bag).name,Category:category,Quantity:quantity,'Unit Weight (kg)':weight??'',Status:'Active',Notes:'FICTIONAL DEMO ITEM · not assumed owned or packed','Item ID':id,'Record ID':'ITEM-'+id,Source:'Synthetic preview fixture'}));
+const sample=PackingSync.ingest(d,packingRecords);
+Object.assign(d,sample);

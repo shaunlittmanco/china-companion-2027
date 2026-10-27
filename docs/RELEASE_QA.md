@@ -2,7 +2,7 @@
 
 Design approval is complete. Production deployment is conditionally authorized by [the owner’s PR #1 authorization](https://github.com/shaunlittmanco/china-companion-2027/pull/1#issuecomment-6433127953), **only after all critical checks truly pass**. Do not merge based on CI alone. This report does not mark physical devices or live account flows passed.
 
-Approved application source: `90308dc1b10dd3dd2a9fc15436ce595617ae536f`. The QA follow-up changes tests, CI, documentation and rollback tooling only; production application assets remain unchanged from that approved application. Recheck the latest PR head and its CI before any release.
+The previously approved Imperial design and original v1.7 features are preserved. Subsequent owner instructions add Packing & Bags, hotel-to-hotel/return-home checks and opt-in bidirectional packing sync as mandatory release gates. Runtime assets now include those additions. Recheck the latest PR head and CI before release. See [Packing implementation and account checklist](PACKING_SYNC.md).
 
 ## Current production and evidence — 27 October 2026
 
@@ -15,25 +15,26 @@ Approved application source: `90308dc1b10dd3dd2a9fc15436ce595617ae536f`. The QA 
 
 | Release gate | Evidence available | Status |
 | --- | --- | --- |
-| Latest source / CI | Approved head’s 88 tests and Chromium/WebKit CI passed; follow-up QA CI is linked in PR body | Automated checks passed; use latest-head CI |
+| Latest source / CI | Prior 88-test CI passed; packing continuation adds model, queue/concurrency and actual UI integration tests | Use the latest-head CI linked in PR body |
 | Extended Sheets from actual app origin, owner account | Full bounded connected-workbook rows mapped successfully, all seven added tabs present, no import warnings; GET-only tests pass | **BLOCKED: owner app-origin OAuth/refresh not performed** |
 | Real photo/HEIC/PDF + Drive destination/retries/expiry | Existing uploader/outbox and mocked integration suite pass; prior v1.6.1 PNG test is historical only | **BLOCKED: v1.7 owner-device/live-account cases not performed** |
 | Physical iPhone Safari/PWA, navigation, audio, GPS, offline and restore | Chromium/WebKit emulation passes; no physical iPhone was available to Work | **BLOCKED: physical device cases below** |
+| Packing inventory / journey / two-way sync | Implemented with synthetic queue, independent-stage and competing-app revision tests; existing seven starter IDs verified read-only | **BLOCKED: actual owner file consent/read-write, two-device and physical workflow tests** |
 | PWA / schema / preservation | Real Chromium baseline → candidate → rollback → candidate cycle passes, including offline reloads and stored receipt bytes/IDs | Automated migration passed; physical cold launch still required |
 | Rollback / limitations | Pinned rollback patch prepared and apply-check passes; provider/mainland limits below | Prepared, not executed on production |
 
-No new Google scope, project, folder, billing or paid service is required or authorized. No private snapshot, token, key, account cookie, receipt link or receipt file is part of the repo/test artifacts.
+Packing writes require separate explicit file authorization/Picker selection using `drive.file`; this is the existing receipt scope but expands the selected files the app can edit. Google cannot restrict this grant to a tab. App writes are allowlisted to Packing & Bags. No new project, folder, backend, billing or paid service is introduced. No private snapshot, token, key, account cookie, receipt link or receipt file is part of the repo/test artifacts.
 
 ## What was actually rechecked
 
-`npm run check` and all 88 unit/integration tests pass. Local Chromium mobile checks pass again. Existing current-application CI also passed WebKit; the follow-up workflow reruns both engines and adds the two QA scripts below.
+`npm run check` and the original 88 regression tests plus new packing/sync/UI tests are run against this candidate; consult the latest-head results for the final count. Local Chromium mobile checks pass again. Existing current-application CI also passed WebKit; the follow-up workflow reruns both engines and adds the two QA scripts below.
 
 `node scripts/release-check.cjs` runs a real Chromium service-worker transition using an isolated synthetic profile. It extracts the pinned baseline from git, serves both versions at the same loopback origin and verifies:
 
 1. v1.6.1 → v1.7 activation retains legacy trip/expenses/checkmarks, existing configuration, saved address and uploaded-receipt reference.
 2. A pending PDF’s exact bytes, original filename and pre-reserved Drive ID survive.
 3. Paid tracker spending is not counted twice.
-4. New notes/shot progress survive actual offline reload.
+4. New notes/shot progress, permanent packing inventory, independent checkpoint verification and pending packing writes survive actual offline reload.
 5. Restoring v1.6.1, then offline reloading it, does not delete legacy records or the new v1.7 progress.
 6. Forward recovery to v1.7 restores usable notes/shot checklists with the same pending receipt.
 
@@ -53,7 +54,7 @@ npx playwright install chromium
 node scripts/account-qa.cjs
 ```
 
-The helper opens a **fresh isolated browser** at the existing HTTPS app URL but supplies committed candidate static files only to that browser. It rejects locally modified runtime files. The public server and normal Safari/Chrome/PWA storage remain untouched. Existing Sheets GET responses and live Google OAuth/Drive responses are not mocked or logged. Non-GET Sheets requests are blocked. It starts with no production cookies, tokens or private data; enter existing public app configuration locally and sign in yourself.
+The helper opens a **fresh isolated browser** at the existing HTTPS app URL but supplies committed candidate static files only to that browser. It rejects locally modified runtime files. The public server and normal Safari/Chrome/PWA storage remain untouched. Existing Sheets GET responses and live Google OAuth/Drive responses are not mocked or logged. Non-GET Sheets requests are blocked by default. The explicit `--packing-write` launch option permits only the configured workbook’s Packing & Bags RAW upserts and recovery-row append requests; in-app file consent and Picker selection are still required. Use it only for owner-authorized records/test writes; see PACKING_SYNC.md. It starts with no production cookies, tokens or private data; enter existing public app configuration locally and sign in yourself.
 
 This is an account-flow staging method, not a public QA deployment. **Service workers are disabled in this helper. It does not satisfy iPhone, installed-PWA, offline cold-launch or migration sign-off.** Its temporary local data is discarded when the browser closes; export a QA backup first if you need to retain results. Actual TEST files uploaded to Drive remain in the existing private folder. Do not upload real sensitive documents as test material.
 
@@ -63,7 +64,7 @@ This is an account-flow staging method, not a public QA deployment. **Service wo
 
 Record the candidate commit, device/browser version, date and pass/fail for each case. Keep private proof and configuration on your device/existing private Drive; do not put tokens, network HAR files, receipts or private tracker rows in the public PR.
 
-- [ ] Menu → Settings: use the existing public OAuth client ID, restricted Picker key and project number. Confirm consent only requests the existing Sheets read-only / `drive.file` permissions.
+- [ ] Menu → Settings: save the existing private tracker URL/ID locally, then use the existing public OAuth client ID, restricted Picker key and project number. Confirm consent only requests the existing Sheets read-only / `drive.file` permissions.
 - [ ] Connect Google → Refresh now. Verify successful timestamp plus Master Itinerary, Decision Options, Social Media, Wulong and all four city plans. Confirm known Working/Booked/Backup labels and historical prices remain intact; saved budget choices are unchanged.
 - [ ] Refresh again. Confirm existing local notes/checkmarks/expenses persist and the app sends only GET requests to Sheets. Do not edit the master to manufacture a test.
 - [ ] Select the existing private receipts folder. Save clearly labeled TEST expenses using non-sensitive photo, HEIC and PDF files. Verify exact uploaded files, private destination, unique IDs, byte counts and filenames in Drive. A local Pending label is not a verified upload.
@@ -80,8 +81,8 @@ For pre-merge testing without changing the public server, an owner with a Mac ca
 1. Save a complete private backup from the existing production app in Files. Keep original receipt media. Do not uninstall the existing PWA or clear website data.
 2. Connect the iPhone to the Mac. Enable Safari Web Inspector on the iPhone and developer features in Mac Safari. Select the actual iPhone Safari page or Home Screen web app in Safari’s Develop menu.
 3. Map Response Local Overrides to the committed candidate’s runtime files at the **same existing app URL**, preserving correct MIME types. Override the root document and `index.html`, plus styles, all JS files, manifest, service worker and icons listed in the candidate `sw.js` CORE array. Match version query strings too. Keep all security/cross-origin protections enabled; do not override Google requests.
-4. Reload while inspecting and verify the actual candidate Menu/Activity/Vlog screens and versioned preview.3 assets. A v1.6.1 UI means the override did not take; stop rather than marking a result passed.
-5. For the PWA/cold-launch case, independently verify that the active worker and **complete** cached shell are the v1.7 candidate (`china-companion-v1-7-preview-3`). Merely seeing overrides while Inspector is open is insufficient. Service-worker interception/cache priming through remote overrides is **not certified by Work**. If the device cannot actually cache/run the candidate, the cold-launch gate remains blocked and a separately verified staging environment is needed before merge.
+4. Reload while inspecting and verify the actual candidate Menu/Activity/Vlog screens and versioned preview.4 assets. A v1.6.1 UI means the override did not take; stop rather than marking a result passed.
+5. For the PWA/cold-launch case, independently verify that the active worker and **complete** cached shell are the v1.7 candidate (`china-companion-v1-7-preview-4`). Merely seeing overrides while Inspector is open is insufficient. Service-worker interception/cache priming through remote overrides is **not certified by Work**. If the device cannot actually cache/run the candidate, the cold-launch gate remains blocked and a separately verified staging environment is needed before merge.
 6. Perform the checks below while the confirmed candidate is active. For offline cold launch, close Inspector and all app views, enable airplane mode with Wi-Fi off, then open the Home Screen app. Verify v1.7 screens/progress actually load. Reopening the online page without overrides may load production again; confirm the version for every result.
 7. Remove local overrides after the session and return to the normal public version. Do not clear storage to remove the override. Check the private backup and pending receipt references remain available.
 
@@ -124,3 +125,14 @@ Recheck the exact production head and patch before applying; it must fail safely
 ## Final release decision
 
 **HOLD. No merge/deployment.** Owner-account results and physical iPhone results are not present. Once those exact-candidate results are supplied, resolve any failures, rerun full latest-head CI, re-read this authorization and current PR head, then release only if every mandatory gate is satisfied. Keep a record of the merged/deployed SHA, Pages status/URL and post-deploy smoke checks. Approval of the design alone is not release sign-off.
+
+## Additional physical Packing acceptance
+
+- [ ] My Bags shows the three distinct luggage groups plus Unassigned in both themes; add/archive/restore/move preserves identity and contents. Confirm actual per-leg airline limits independently.
+- [ ] Home → Central Shanghai arrival → Toy Story checkout and full room sweep → next hotel: same inventory, fresh checks every time, useful item locations, collapsed bags retain progress. Missing/critical items never show verified-ready.
+- [ ] New souvenir appears in future stages, not completed history. Changed hotel/date/room preserves history.
+- [ ] Beijing → MNL baggage claim → manually started Back Home: fresh per-bag checks, gifts distinct from missing, unpacking tasks and dump-location/backup gate. No media is modified.
+- [ ] On physical iPhone, airplane-mode cold launch after edits restores pending sync and unfinished room sweep. Restore the private full backup and verify existing expenses/receipts remain intact.
+- [ ] With owner-authorized file access, second-device convergence/conflict resolution and exact Sheet readback pass. Until then, bidirectional sync remains unverified for release.
+
+The prepared rollback restores v1.6.1 behavior with one privacy compatibility change: its Sheets client reads the existing `chinaCompanionSheetIdV1` device setting rather than embedding a private workbook identifier. The old static tracker link becomes the generic Google Sheets entrypoint. Reproduce the patch with `node scripts/prepare-rollback.cjs` after committing runtime/test changes. Historical commits are not rewritten.
