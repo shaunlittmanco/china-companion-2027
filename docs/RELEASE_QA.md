@@ -27,7 +27,7 @@ Packing writes require separate explicit file authorization/Picker selection usi
 
 ## Preview.5 resume result
 
-Recovered GitHub head and prior successful CI; fixed late-disconnect response handling, duplicate checkpoint identities and manual CHECK/SWEEP ID reuse. Current syntax and **127/127** automated tests pass locally. Asset/cache versions advance together to preview.5. The continuation report records the feature audit and remaining owner steps. Re-run/check latest-head CI after this commit; no live Google or physical-device gate is waived.
+Recovered GitHub head and prior successful CI; fixed late-disconnect response handling, duplicate checkpoint identities and manual CHECK/SWEEP ID reuse. Current syntax and **127/127** automated tests pass locally. Asset/cache versions advance together to preview.5. The continuation report records the feature audit and remaining owner steps. Exact committed preview.5 account smoke and regenerated-patch upgrade/offline/rollback/forward checks passed locally on `c50964e3ae9aa7a635dc9bfc7e5e17f579cd2fa1`. The follow-up commit includes that regenerated rollback patch. Fresh connected read-only packing schema/starter-ID inspection also passes; no write was made. Re-run/check latest-head CI after this checkpoint; no live Google or physical-device gate is waived.
 
 ## What was actually rechecked
 

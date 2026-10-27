@@ -13,7 +13,11 @@ Recovered the actual GitHub head `8d3dfc4bb0c95e8c168ad988c52407fd1e30f6e5`, its
 - Editing a manually created CHECK/SWEEP could generate a second app-shaped Record ID. Encoding now reuses the existing checkpoint/item or checkpoint/task Record ID. A full synthetic add/edit/upsert/readback case confirms one record under each original ID.
 - Candidate version, asset URLs and service-worker cache advanced together to **1.7.0-preview.5**, so an earlier candidate cache cannot retain the old packing client. Public interactive bundles were regenerated with synthetic data only. Visual layout is unchanged; existing screenshot gallery is retained.
 
-Three new regression tests cover these failures. Current local result: **127/127**, syntax checks pass. Chromium rechecks cover 168 layout combinations, actual offline reload, full Light/Dark journey/demo interactions, expense and backup regressions. The committed candidate is then checked by the exact-origin smoke and isolated baseline upgrade/offline/rollback/forward procedure; consult the latest PR CI for final-commit Chromium/WebKit results. None is a live Google or physical-device pass.
+The fix commit is `c50964e3ae9aa7a635dc9bfc7e5e17f579cd2fa1`. A follow-up checkpoint refreshes the rollback patch against that exact committed source and records verification.
+
+Three new regression tests cover these failures. Current local result: **127/127**, syntax checks pass. Chromium rechecks cover 168 layout combinations, actual offline reload, full Light/Dark journey/demo interactions, expense and backup regressions. The committed candidate is then checked by the exact-origin smoke and isolated baseline upgrade/offline/rollback/forward procedure; consult the latest PR CI for final-commit Chromium/WebKit results. The exact committed preview.5 also passed `scripts/account-qa.cjs --smoke` and `scripts/release-check.cjs` locally, including the regenerated rollback patch. None is a live Google or physical-device pass.
+
+A fresh connected-account read-only metadata/range check confirms the existing Packing & Bags tab remains present/visible at its existing gid, with its original A3:N3 schema. The first populated records retain seven unique starter IDs; the current parser imports them as seven unique items with zero pending writes. No Sheet data was saved, edited, hidden or deleted. This connected-source check does not prove app-origin Google authorization or live bidirectional writes.
 
 ### Feature audit
 
