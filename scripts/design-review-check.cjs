@@ -10,7 +10,7 @@ const {chromium}=require('playwright'),path=require('node:path'),fs=require('nod
   await page.goto('file://'+path.join(out,'imperial-china-review.html'));
   const frames=['light','dark'].map(id=>({id,frame:page.frameLocator('#'+id)}));
   for(const {id,frame} of frames){await frame.locator('html[data-theme="'+id+'"]').waitFor();assert.equal(await frame.locator('#googleConnect').isEnabled(),false);}
-  for(const name of ['home','itinerary','map','translate','wallet','bookings','settings']){
+  for(const name of ['home','itinerary','map','translate','wallet','bookings','settings','options','smart','vlog','resources']){
    await page.locator('[data-page="'+name+'"]').click();
    for(const {id,frame} of frames){
     await frame.locator('#page-'+name+'.active').waitFor();
@@ -32,6 +32,33 @@ const {chromium}=require('playwright'),path=require('node:path'),fs=require('nod
    for(const {id} of frames)await page.locator('#'+id).evaluate(e=>e.style.height='844px');
    report.push({screen:name,themes:['light','dark'],overflow:false,contrast:'at least 4.5:1 for checked text',fullContentCaptured:true});
   }
+  // Exercise all new local workflows in both independent themes.
+  await page.locator('#activity').click();
+  for(const {frame} of frames)await frame.locator('#page-activity.active').waitFor();
+  for(const tab of ['overview','go','do','nearby','vlog']){
+   for(const {frame} of frames){await frame.locator('[data-smart="activity-tab"][data-value="'+tab+'"]').click();assert.equal(await frame.locator('html').evaluate(e=>e.scrollWidth>e.clientWidth+1),false,'Activity '+tab+' overflow');}
+   if(tab==='go')for(const {frame} of frames){assert.match(await frame.locator('.recommended').innerText(),/Walk this one/);assert.match(await frame.locator('#activityContent').innerText(),/SIMULATED/);}
+   if(tab==='vlog')for(const {frame} of frames){await frame.locator('[data-smart-check="shot"]').first().check();assert.equal(await frame.locator('[data-smart-check="shot"]').first().isChecked(),true);}
+   await page.locator('.pair').screenshot({path:path.join(out,'review-activity-'+tab+'-light-dark.png'),animations:'disabled'});
+   for(const {id,frame} of frames){const height=await frame.locator('html').evaluate(e=>e.scrollHeight);await page.locator('#'+id).evaluate((e,h)=>e.style.height=h+'px',height);}
+   await page.locator('.pair').screenshot({path:path.join(out,'full-activity-'+tab+'-light-dark.png'),animations:'disabled'});
+   for(const {id} of frames)await page.locator('#'+id).evaluate(e=>e.style.height='844px');
+   report.push({screen:'activity-'+tab,themes:['light','dark'],overflow:false});
+  }
+  await page.locator('#activity').click();
+  for(const {frame} of frames){await frame.locator('#ticketState').selectOption('Paid');await frame.locator('#ticketEvidence').fill('Synthetic receipt reference');await frame.locator('[data-smart="save-ticket"]').click();assert.match(await frame.locator('.ticket-detail').innerText(),/Local declaration/);assert.equal(await frame.locator('#ticketState').inputValue(),'Paid');await frame.locator('[data-smart="refresh-price"]').click();assert.match(await frame.locator('#priceRefreshStatus').innerText(),/No reliable free live provider/);}
+  await page.locator('#snowDay').click();
+  for(const {frame} of frames){await frame.locator('#page-smart.active').waitFor();await frame.locator('[data-smart="simulate"][data-value="snow"]').click();assert.match(await frame.locator('#smartPlanContent').innerText(),/Plan A · Fairy Mountain/);}
+  await page.locator('.pair').screenshot({path:path.join(out,'review-snow-plan-a-light-dark.png'),animations:'disabled'});
+  for(const {frame} of frames){await frame.locator('[data-smart="simulate"][data-value="none"]').click();assert.match(await frame.locator('#smartPlanContent').innerText(),/Plan B · Chongqing city/);await frame.locator('[data-smart="prepare-plan"][data-value="B"]').click();await frame.locator('#planConfirm[open]').waitFor();}
+  await page.locator('.pair').screenshot({path:path.join(out,'review-plan-confirm-light-dark.png'),animations:'disabled'});
+  for(const {frame} of frames){await frame.locator('[data-smart="cancel-plan"]').click();assert.match(await frame.locator('#smartPlanContent').innerText(),/None; master itinerary unchanged/);await frame.locator('[data-smart="prepare-plan"][data-value="B"]').click();await frame.locator('[data-smart="confirm-plan"]').click();assert.match(await frame.locator('#smartPlanContent').innerText(),/Current local selection: B/);await frame.locator('[data-smart="simulate"][data-value="unknown"]').click();assert.match(await frame.locator('#smartPlanContent').innerText(),/Plan C · Conditions uncertain/);}
+  await page.locator('[data-page="itinerary"]').click();for(const {frame} of frames){assert.match(await frame.locator('#itineraryList').innerText(),/Shibati/);assert.ok(!(await frame.locator('#itineraryList').innerText()).includes('Fairy Mountain'));}
+  await page.locator('.pair').screenshot({path:path.join(out,'review-applied-city-plan-light-dark.png'),animations:'disabled'});
+  await page.locator('[data-page="home"]').click();
+  for(const {frame} of frames){await frame.locator('#openMenu').click();await frame.locator('#menuDialog[open]').waitFor();}
+  await page.locator('.pair').screenshot({path:path.join(out,'review-menu-light-dark.png'),animations:'disabled'});
+  for(const {frame} of frames){await frame.locator('#closeMenu').click();assert.equal(await frame.locator('#openMenu').evaluate(e=>document.activeElement===e),true);}
   await page.locator('#address').click();
   for(const {frame} of frames){await frame.locator('#addressDialog[open]').waitFor();assert.match(await frame.locator('#addressChinese').innerText(),/云舍/);}
   await page.locator('.pair').screenshot({path:path.join(out,'review-chinese-address-light-dark.png'),animations:'disabled'});

@@ -70,6 +70,86 @@
       "overflow": false,
       "contrast": "at least 4.5:1 for checked text",
       "fullContentCaptured": true
+    },
+    {
+      "screen": "options",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "smart",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "vlog",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "resources",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "activity-overview",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "activity-go",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "activity-do",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "activity-nearby",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
+    },
+    {
+      "screen": "activity-vlog",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false
     }
   ],
   "extraStates": [

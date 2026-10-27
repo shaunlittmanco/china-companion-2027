@@ -57,3 +57,11 @@ Do not label the app fully travel-ready until the remaining device, network and 
 - Diamond UnionPay fee: https://www.bdo.com.ph/personal/cards/credit-cards/fees-and-charges-update
 - Wallet platform estimate: https://www.bdo.com.ph/personal/cards/credit-cards/cashless-payments-in-china
 - GCash Global Pay: https://gcash.com/services/global-pay
+
+## v1.7 Smart Travel draft — 27 October 2026
+
+The existing design branch now extends Modern Imperial China with Menu/sidebar, Activity Details/tickets, optional read-only tracker datasets, saved-option comparisons, conditional Plan A/B/C, local route/price references, Vlog Kit/Hub, daily Stories, Travel Mode and offline progress/backup support. See V1_7_REVIEW.md and docs/SMART_TRAVEL.md for screenshots, data boundaries and partial/live-provider limitations.
+
+88 automated tests pass with synthetic data. Local Chromium covers 11 screens in two themes at seven widths, plus activity sections and actual offline PWA reload. PR CI additionally runs WebKit; the current result belongs in the PR. These checks do not certify a physical iPhone or the new batch under real app-origin OAuth.
+
+The earlier v1.6.1 app-origin Sheets refresh and one PNG Drive upload verification above are historical verified checks, not a new live certification of every v1.7 feature. This upgrade retains receipt and authorization implementations and adds no permissions. No merge or production deployment is authorized or performed. Venue pricing, snow conditions and DiDi quotes are not live integrations; dates/sources and unknowns remain explicit. Other-day disruption planning is advice, not a full automatic schedule generator.
