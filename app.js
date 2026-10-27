@@ -309,7 +309,7 @@ function initSheetSync(){
   getCurrent:()=>data,
   onState:s=>{syncState=s;renderSyncState();},
   onData:next=>{
-   if(next.packingLoaded)next=globalThis.ChinaPackingSync?.ingest({...next,smartState:data.smartState},next.packingRecords)||next;
+   if(next.packingLoaded)next=globalThis.ChinaPackingSync?.ingest({...next,packingLoaded:data.packingLoaded,packingRecords:data.packingRecords,smartState:data.smartState},next.packingRecords)||next;
    // Commit the full validated snapshot atomically before switching the visible app.
    try{localStorage.setItem(KEY,JSON.stringify(next));}catch{throw new ChinaSheetSync.SyncError('storage','Device storage is full or unavailable. Previous offline snapshot kept.');}
    data=next;renderEverything();
