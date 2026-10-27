@@ -1,3 +1,38 @@
+diff --git a/.github/workflows/test.yml b/.github/workflows/test.yml
+index 6a3ae3f..a2b63b5 100644
+--- a/.github/workflows/test.yml
++++ b/.github/workflows/test.yml
+@@ -17,30 +17,3 @@ jobs:
+       - run: npm ci --ignore-scripts --no-audit --no-fund
+       - run: npm run check
+       - run: npm test
+-  mobile:
+-    # Keep the runner compatible with the pinned browser binaries.
+-    runs-on: ubuntu-24.04
+-    steps:
+-      - uses: actions/checkout@v4
+-        with:
+-          fetch-depth: 0
+-      - uses: actions/setup-node@v4
+-        with:
+-          node-version: '24'
+-          cache: npm
+-      - run: npm ci --ignore-scripts --no-audit --no-fund
+-      - run: npx playwright install --with-deps chromium webkit
+-      - run: npm run test:mobile
+-        env:
+-          TEST_WEBKIT: '1'
+-      - run: node scripts/release-check.cjs
+-      - run: node scripts/account-qa.cjs --smoke
+-      - run: node scripts/review-check.cjs
+-      - run: node scripts/design-review-check.cjs
+-      - uses: actions/upload-artifact@v4
+-        if: always()
+-        with:
+-          name: imperial-china-fictional-mobile-previews
+-          path: |
+-            docs/previews/*.png
+-            docs/previews/*results.json
 diff --git a/app.js b/app.js
 index 561da19..194a3c3 100644
 --- a/app.js
@@ -939,6 +974,117 @@ index 1f57f91..58a961f 100644
 @@ -1 +1 @@
 -{"id":"./","name":"China Companion 2027","short_name":"China 2027","start_url":"./index.html","scope":"./","display":"standalone","background_color":"#FAF7F1","theme_color":"#FAF7F1","orientation":"portrait-primary","icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
 +{"id":"./","name":"China Companion 2027","short_name":"China 2027","start_url":"./index.html","scope":"./","display":"standalone","background_color":"#f4f6fb","theme_color":"#14223c","orientation":"portrait-primary","icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
+diff --git a/package-lock.json b/package-lock.json
+index 9c963d0..9c6298d 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,16 +1,15 @@
+ {
+   "name": "china-companion-2027",
+-  "version": "1.7.0-preview.3",
++  "version": "1.6.1",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "china-companion-2027",
+-      "version": "1.7.0-preview.3",
++      "version": "1.6.1",
+       "devDependencies": {
+         "fake-indexeddb": "6.2.6",
+-        "jsdom": "^26.1.0",
+-        "playwright": "1.56.1"
++        "jsdom": "^26.1.0"
+       },
+       "engines": {
+         "node": ">=20"
+@@ -231,21 +230,6 @@
+         "node": ">=18"
+       }
+     },
+-    "node_modules/fsevents": {
+-      "version": "2.3.2",
+-      "resolved": "https://registry.npmjs.org/fsevents/-/fsevents-2.3.2.tgz",
+-      "integrity": "sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==",
+-      "dev": true,
+-      "hasInstallScript": true,
+-      "license": "MIT",
+-      "optional": true,
+-      "os": [
+-        "darwin"
+-      ],
+-      "engines": {
+-        "node": "^8.16.0 || ^10.6.0 || >=11.0.0"
+-      }
+-    },
+     "node_modules/html-encoding-sniffer": {
+       "version": "4.0.0",
+       "resolved": "https://registry.npmjs.org/html-encoding-sniffer/-/html-encoding-sniffer-4.0.0.tgz",
+@@ -381,38 +365,6 @@
+         "url": "https://github.com/inikulin/parse5?sponsor=1"
+       }
+     },
+-    "node_modules/playwright": {
+-      "version": "1.56.1",
+-      "resolved": "https://registry.npmjs.org/playwright/-/playwright-1.56.1.tgz",
+-      "integrity": "sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==",
+-      "dev": true,
+-      "license": "Apache-2.0",
+-      "dependencies": {
+-        "playwright-core": "1.56.1"
+-      },
+-      "bin": {
+-        "playwright": "cli.js"
+-      },
+-      "engines": {
+-        "node": ">=18"
+-      },
+-      "optionalDependencies": {
+-        "fsevents": "2.3.2"
+-      }
+-    },
+-    "node_modules/playwright-core": {
+-      "version": "1.56.1",
+-      "resolved": "https://registry.npmjs.org/playwright-core/-/playwright-core-1.56.1.tgz",
+-      "integrity": "sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==",
+-      "dev": true,
+-      "license": "Apache-2.0",
+-      "bin": {
+-        "playwright-core": "cli.js"
+-      },
+-      "engines": {
+-        "node": ">=18"
+-      }
+-    },
+     "node_modules/punycode": {
+       "version": "2.3.1",
+       "resolved": "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz",
+diff --git a/package.json b/package.json
+index bc71734..68fd055 100644
+--- a/package.json
++++ b/package.json
+@@ -1,19 +1 @@
+-{
+-  "name": "china-companion-2027",
+-  "version": "1.7.0-preview.3",
+-  "private": true,
+-  "engines": {
+-    "node": ">=20"
+-  },
+-  "scripts": {
+-    "test": "node --test tests/*.test.cjs",
+-    "check": "node --check app.js && node --check receipts.js && node --check receipt-store.js && node --check travel-data.js && node --check sheet-sync.js && node --check sw.js && node --check jade-ui.js && node --check smart-travel.js && node --check companion-ui.js && node --check scripts/release-check.cjs && node --check scripts/account-qa.cjs",
+-    "test:mobile": "node scripts/mobile-check.cjs",
+-    "preview:build": "node scripts/build-review.cjs"
+-  },
+-  "devDependencies": {
+-    "fake-indexeddb": "6.2.6",
+-    "jsdom": "^26.1.0",
+-    "playwright": "1.56.1"
+-  }
+-}
++{"name":"china-companion-2027","version":"1.6.1","private":true,"engines":{"node":">=20"},"scripts":{"test":"node --test tests/*.test.cjs","check":"node --check app.js && node --check receipts.js && node --check receipt-store.js && node --check travel-data.js && node --check sheet-sync.js && node --check sw.js"},"devDependencies":{"fake-indexeddb":"6.2.6","jsdom":"^26.1.0"}}
+\ No newline at end of file
 diff --git a/receipts.js b/receipts.js
 index 4e5a283..ab7b870 100644
 --- a/receipts.js
@@ -2448,6 +2594,107 @@ index 2db342d..fff49d1 100644
  self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting()));});
  self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('china-companion-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
  self.addEventListener('fetch',event=>{
+diff --git a/tests/app.test.cjs b/tests/app.test.cjs
+index ffc0c1b..c90cc96 100644
+--- a/tests/app.test.cjs
++++ b/tests/app.test.cjs
+@@ -1,11 +1,10 @@
+ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+ const {JSDOM}=require('jsdom'),{IDBFactory}=require('fake-indexeddb');
+ const flush=()=>new Promise(r=>setTimeout(r,30));
+-async function waitFor(predicate){const until=Date.now()+3000;do{if(await predicate())return;await new Promise(r=>setTimeout(r,10));}while(Date.now()<until);assert.fail('Expected asynchronous operation to complete within 3 seconds');}
+-function start({offline=true,seed={},speechFails=false,noReceiptStorage=false}={}){const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://example.test/china/',runScripts:'outside-only'}),w=dom.window;w.scrollTo=()=>{};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};w.HTMLElement.prototype.scrollIntoView=()=>{};w.fetch=async()=>{throw Error('network inaccessible')};w.indexedDB=noReceiptStorage?undefined:new IDBFactory();w.Blob=Blob;w.File=File;w.AbortController=AbortController;w.TextEncoder=TextEncoder;w.confirm=()=>true;Object.defineProperty(w.navigator,'onLine',{value:!offline,configurable:true});Object.defineProperty(w.document,'visibilityState',{value:'visible',configurable:true});for(const [k,v]of Object.entries(seed))w.localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));const audio=[];w.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};w.speechSynthesis={getVoices:()=>[],cancel(){},speak(a){audio.push(a);queueMicrotask(()=>speechFails?a.onerror?.():a.onend?.());}};for(const f of ['jade-ui.js','receipt-store.js','travel-data.js','sheet-sync.js','receipts.js','smart-travel.js','companion-ui.js','app.js'])w.eval(fs.readFileSync(f,'utf8'));return {w,dom,audio,close:()=>w.close(),el:id=>w.document.getElementById(id),set:(id,val)=>{w.document.getElementById(id).value=val;},click:id=>w.document.getElementById(id).click(),expenses:()=>JSON.parse(w.localStorage.getItem('chinaCompanionExpensesV1')||'[]')};}
++function start({offline=true,seed={},speechFails=false,noReceiptStorage=false}={}){const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://example.test/china/',runScripts:'outside-only'}),w=dom.window;w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};w.fetch=async()=>{throw Error('network inaccessible')};w.indexedDB=noReceiptStorage?undefined:new IDBFactory();w.Blob=Blob;w.File=File;w.AbortController=AbortController;w.TextEncoder=TextEncoder;w.confirm=()=>true;Object.defineProperty(w.navigator,'onLine',{value:!offline,configurable:true});Object.defineProperty(w.document,'visibilityState',{value:'visible',configurable:true});for(const [k,v]of Object.entries(seed))w.localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));const audio=[];w.SpeechSynthesisUtterance=class{constructor(text){this.text=text;}};w.speechSynthesis={getVoices:()=>[],cancel(){},speak(a){audio.push(a);queueMicrotask(()=>speechFails?a.onerror?.():a.onend?.());}};for(const f of ['receipt-store.js','travel-data.js','sheet-sync.js','receipts.js','app.js'])w.eval(fs.readFileSync(f,'utf8'));return {w,dom,audio,close:()=>w.close(),el:id=>w.document.getElementById(id),set:(id,val)=>{w.document.getElementById(id).value=val;},click:id=>w.document.getElementById(id).click(),expenses:()=>JSON.parse(w.localStorage.getItem('chinaCompanionExpensesV1')||'[]')};}
+ function fill(app){app.set('expenseDateTime','2027-01-12T19:30');app.set('expenseDesc','Synthetic test meal');app.set('expenseAmount','120');}
+ test('offline app starts, saves and edits local expenses, no Sheet writes, old entries preserved',async()=>{const old={id:'legacy',date:'2027-01-11',desc:'Existing charge',amount:50,method:'Cash',city:'Shanghai'};const app=start({seed:{chinaCompanionExpensesV1:[old]}});try{assert.match(app.el('networkIndicator').textContent,/Offline/);fill(app);app.click('saveExpense');await flush();assert.equal(app.expenses().length,2);assert.deepEqual(app.expenses()[0],old);const id=app.expenses()[1].id;app.w.document.querySelector(`[data-edit-expense="${id}"]`).click();app.set('expenseAmount','130');app.click('saveExpense');await flush();assert.equal(app.expenses().length,2);assert.equal(app.expenses().find(e=>e.id===id).amount,130);assert.match(app.el('totalSpent').textContent,/180.00/);}finally{app.close();}});
+-test('offline receipt is durable and expense remains saved after upload failure',async()=>{const app=start();try{fill(app);const file=new File(['synthetic pdf'],'test.pdf',{type:'application/pdf'});Object.defineProperty(app.el('expenseReceiptFile'),'files',{value:[file],configurable:true});app.click('saveExpense');await waitFor(async()=>{const e=app.expenses()[0];return e&&!app.el('saveExpense').disabled&&await app.w.ChinaReceipts.store().get(e.id);});const [e]=app.expenses();assert.ok(e);assert.equal(e.receiptStatus,'pending');const queued=await app.w.ChinaReceipts.store().get(e.id);assert.equal(await queued.blob.text(),'synthetic pdf');app.w.document.querySelector(`[data-retry-receipt="${e.id}"]`).click();await flush();assert.equal(app.expenses().length,1);assert.equal(app.expenses()[0].receiptStatus,'pending');assert.ok(await app.w.ChinaReceipts.store().get(e.id));}finally{app.close();}});
++test('offline receipt is durable and expense remains saved after upload failure',async()=>{const app=start();try{fill(app);const file=new File(['synthetic pdf'],'test.pdf',{type:'application/pdf'});Object.defineProperty(app.el('expenseReceiptFile'),'files',{value:[file],configurable:true});app.click('saveExpense');await flush();const [e]=app.expenses();assert.ok(e);assert.equal(e.receiptStatus,'pending');const queued=await app.w.ChinaReceipts.store().get(e.id);assert.equal(await queued.blob.text(),'synthetic pdf');app.w.document.querySelector(`[data-retry-receipt="${e.id}"]`).click();await flush();assert.equal(app.expenses().length,1);assert.equal(app.expenses()[0].receiptStatus,'pending');assert.ok(await app.w.ChinaReceipts.store().get(e.id));}finally{app.close();}});
+ test('storage quota failure does not falsely claim expense save',async()=>{const app=start();try{fill(app);const prototype=Object.getPrototypeOf(app.w.localStorage),original=prototype.setItem;prototype.setItem=function(k,v){if(k==='chinaCompanionExpensesV1')throw Error('quota');return original.call(this,k,v);};app.click('saveExpense');await flush();assert.equal(app.expenses().length,0);assert.match(app.el('expenseReceiptStatus').textContent,/not saved/);prototype.setItem=original;}finally{app.close();}});
+ test('unknown receipt status recovers interrupted uploads on boot',()=>{const app=start({seed:{chinaCompanionExpensesV1:[{id:'x',desc:'Saved charge',date:'2027-01-12',amount:99,receiptStatus:'uploading'}]}});try{assert.equal(app.expenses()[0].receiptStatus,'pending');assert.match(app.el('expenseList').textContent,/Pending/);}finally{app.close();}});
+ test('same converter and expense form distinguish issuer fees, platform fees and actual amount',()=>{const app=start();try{app.set('paymentMethod','union');app.el('paymentMethod').dispatchEvent(new app.w.Event('input'));assert.equal(app.el('extraFee').value,'1.65');app.set('walletActual','999');app.el('walletActual').dispatchEvent(new app.w.Event('input'));assert.match(app.el('walletTotal').textContent,/Actual total charged.*999.00/);app.set('paymentMethod','visa');app.set('cnyInput','201');app.el('paymentMethod').dispatchEvent(new app.w.Event('input'));assert.equal(app.el('platformFee').value,'3');}finally{app.close();}});
+@@ -91,8 +90,3 @@ test('local cleanup failure does not turn a verified Drive receipt into a failed
+  app.w.document.querySelector(`[data-retry-receipt="${expense.id}"]`).click();await flush();const saved=app.expenses()[0];assert.equal(saved.receiptStatus,'uploaded');assert.equal(saved.receipt.verified,true);assert.match(saved.receiptError,/Local queued copy/);assert.match(app.el('expenseReceiptStatus').textContent,/Receipt verified in Drive/);assert.ok(await store.get(expense.id));assert.equal(app.w.document.querySelectorAll('[data-retry-receipt]').length,0);
+  }finally{app.close();}
+ });
+-
+-test('smart screens save ticket evidence, notes and shot progress without changing master itinerary or expenses',()=>{const f=structuredClone(require('../scripts/preview-fixture.cjs')),app=start({seed:f});try{const before=JSON.stringify(f.chinaCompanionPrivateV2.itinerary),expenses=JSON.stringify(app.expenses());app.w.ChinaCompanionUI.open('preview-garden');assert.match(app.el('activityHeading').textContent,/Yu Garden/);app.set('ticketState','Paid');app.set('ticketEvidence','TEST receipt ref');app.click('ticketExpense');app.w.document.querySelector('[data-smart="save-ticket"]').click();let d=JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2'));assert.equal(d.smartState.tickets['preview-garden'].status,'Paid');assert.equal(JSON.stringify(d.itinerary),before);assert.equal(JSON.stringify(app.expenses()),expenses);app.set('activityNote','Private test note');app.w.document.querySelector('[data-smart="save-note"]').click();app.w.document.querySelector('[data-smart="activity-tab"][data-value="vlog"]').click();const check=app.w.document.querySelector('[data-smart-check="shot"]');check.checked=true;check.dispatchEvent(new app.w.Event('change',{bubbles:true}));d=JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2'));assert.equal(d.smartState.notes['preview-garden'],'Private test note');assert.equal(d.smartState.shots[check.dataset.id],true);assert.equal(JSON.parse(app.w.localStorage.getItem('chinaCompanionDoneV1'))['preview-garden'],undefined);const reopened=start({seed:{chinaCompanionPrivateV2:d}});try{reopened.w.ChinaCompanionUI.open('preview-garden','vlog');assert.equal(reopened.w.document.querySelector('[data-smart-check="shot"]').checked,true);}finally{reopened.close();}}finally{app.close();}});
+-test('plan confirmation cancellation preserves schedule; confirm applies local fallback without source writes',()=>{const app=start({seed:structuredClone(require('../scripts/preview-fixture.cjs'))});try{app.w.document.querySelector('#menuContents [data-page="smart"]').click();app.w.document.querySelector('[data-smart="prepare-plan"][data-value="B"]').click();assert.equal(app.el('planConfirm').open,true);app.w.document.querySelector('[data-smart="cancel-plan"]').click();assert.equal(JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2')).smartState.plans,undefined);app.w.document.querySelector('[data-smart="prepare-plan"][data-value="B"]').click();app.w.document.querySelector('[data-smart="confirm-plan"]').click();const d=JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2'));assert.equal(d.smartState.plans['2027-01-16'].plan,'B');assert.ok(d.itinerary.some(a=>a.id==='preview-fairy'));assert.equal(app.el('planConfirm').open,false);}finally{app.close();}});
+-test('price refresh never fabricates live quotes or changes verification date, and source content is escaped',()=>{const f=structuredClone(require('../scripts/preview-fixture.cjs'));f.chinaCompanionPrivateV2.itinerary[1].activity='Yu Garden <img src=x onerror=alert(1)>';const app=start({seed:f});try{app.w.ChinaCompanionUI.open('preview-garden');const before=app.w.localStorage.getItem('chinaCompanionPrivateV2');app.w.document.querySelector('[data-smart="refresh-price"]').click();assert.match(app.el('priceRefreshStatus').textContent,/Offline/);assert.equal(app.w.localStorage.getItem('chinaCompanionPrivateV2'),before);assert.equal(app.el('activityHeading').querySelector('img'),null);assert.equal(app.el('activityContent').querySelector('img'),null);}finally{app.close();}});
+-test('complete backup merges vlog and notes into an existing trip while preserving current local choices',async()=>{const f=structuredClone(require('../scripts/preview-fixture.cjs'));f.chinaCompanionPrivateV2.smartState.shots={existing:true};const app=start({seed:f,noReceiptStorage:true});try{const backup={backupVersion:1,data:{schemaVersion:2,trip:{budgetPHP:5},itinerary:[],bookings:[],smartState:{shots:{restored:true,existing:false},notes:{restored:'Backup note'}}},expenses:[],receipts:[],done:{}};Object.defineProperty(app.el('restoreBackup'),'files',{value:[new File([JSON.stringify(backup)],'backup.json',{type:'application/json'})],configurable:true});app.el('restoreBackup').dispatchEvent(new app.w.Event('change'));await flush();const d=JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2'));assert.equal(d.trip.budgetPHP,150000);assert.equal(d.smartState.shots.existing,true);assert.equal(d.smartState.shots.restored,true);assert.equal(d.smartState.notes.restored,'Backup note');assert.equal(d.itinerary.length,f.chinaCompanionPrivateV2.itinerary.length);}finally{app.close();}});
+diff --git a/tests/jade-ui.test.cjs b/tests/jade-ui.test.cjs
+deleted file mode 100644
+index f771509..0000000
+--- a/tests/jade-ui.test.cjs
++++ /dev/null
+@@ -1,12 +0,0 @@
+-const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+-const UI=require('../jade-ui.js'),{JSDOM}=require('jsdom');
+-const fixture=require('../scripts/preview-fixture.cjs');
+-function app(){const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'https://example.test/china/',runScripts:'outside-only'}),w=dom.window;w.scrollTo=()=>{};w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new w.Event('close'));};w.HTMLElement.prototype.scrollIntoView=()=>{};w.Blob=Blob;w.File=File;w.TextEncoder=TextEncoder;w.confirm=()=>true;w.fetch=async()=>{throw Error('offline test')};for(const[k,v]of Object.entries(fixture))w.localStorage.setItem(k,typeof v==='string'?v:JSON.stringify(v));w.localStorage.setItem('chinaCompanionGoogleClientIdV1','PUBLIC_TEST_CLIENT');Object.defineProperty(w.navigator,'onLine',{value:false});for(const name of ['jade-ui.js','receipt-store.js','travel-data.js','sheet-sync.js','receipts.js','smart-travel.js','companion-ui.js','app.js'])w.eval(fs.readFileSync(name,'utf8'));return {w,dom,el:id=>w.document.getElementById(id),close:()=>w.close()};}
+-test('Today uses China local date across UTC midnight and counts down to departure',()=>{assert.equal(UI.clock(new Date('2027-01-10T16:01:00Z')).date,'2027-01-11');assert.equal(UI.today([],{},new Date('2027-01-10T15:59:00Z')).countdown,'1 day to go');assert.equal(UI.today([],{},new Date('2027-01-10T16:01:00Z')).countdown,'Day 1 of 11');assert.equal(UI.today([],{},new Date('2027-01-22T00:00:00Z')).countdown,'Journey complete');});
+-test('next activity is time ordered, skips completed/past rows, and leaves source records intact',()=>{const rows=[{id:'later',date:'2027-01-12',time:'14:00',city:'Shanghai'},{id:'done',date:'2027-01-12',time:'09:00',city:'Shanghai'},{id:'past',date:'2027-01-12',time:'07:00',city:'Shanghai'},{id:'next',date:'2027-01-12',time:'10:00',city:'Shanghai'}],original=JSON.stringify(rows);assert.equal(UI.today(rows,{done:true},new Date('2027-01-12T00:15:00Z')).next.id,'next');assert.equal(JSON.stringify(rows),original);assert.equal(UI.timeMinutes('9:15 PM'),1275);assert.equal(UI.timeMinutes('25:90'),null);});
+-test('AMap uses HTTPS, encoded Chinese text, no API key, and an explicit external-app handoff',()=>{const link=new URL(UI.amapUrl({Hotel:'<test & preview>','Chinese Address':'测试地址 & #1',City:'Shanghai'}));assert.equal(link.origin,'https://uri.amap.com');assert.equal(link.pathname,'/search');assert.equal(link.searchParams.get('keyword'),'<test & preview> 测试地址 & #1');assert.equal(link.searchParams.get('callnative'),'1');assert.equal(link.searchParams.has('key'),false);});
+-test('five-tab navigation retains Tickets and Settings entry points',()=>{const a=app();try{const nav=a.w.document.querySelectorAll('.bottom-nav button');assert.equal(nav.length,5);for(const page of ['bookings','settings']){if(page==='settings'){a.el('openMenu').click();a.w.document.querySelector('#menuContents [data-page="settings"]').click();}else a.w.document.querySelector(`.header-actions [data-nav="${page}"]`).click();assert.ok(a.el('page-'+page).classList.contains('active'));}}finally{a.close();}});
+-test('manual theme selection defaults to Light and changes only its new preference key',()=>{const a=app();try{assert.equal(a.w.document.documentElement.dataset.theme,'light');const before=Object.fromEntries(['chinaCompanionPrivateV2','chinaCompanionExpensesV1','chinaCompanionDoneV1','chinaCompanionGoogleClientIdV1','chinaCompanionSpeechRateV1'].map(k=>[k,a.w.localStorage.getItem(k)]));a.el('themeSelect').value='dark';a.el('themeSelect').dispatchEvent(new a.w.Event('change'));assert.equal(a.w.document.documentElement.dataset.theme,'dark');assert.equal(a.w.localStorage.getItem(UI.THEME_KEY),'dark');for(const[k,v]of Object.entries(before))assert.equal(a.w.localStorage.getItem(k),v);assert.equal(a.el('speechSpeed').value,'0.55');assert.equal(UI.theme('unknown'),'light');}finally{a.close();}});
+-test('Chinese hotel address can be copied and shown large without source mutation',async()=>{const a=app();try{let copied;a.w.navigator.clipboard={writeText:async t=>{copied=t;}};const before=a.w.localStorage.getItem('chinaCompanionPrivateV2');a.w.document.querySelector('[data-copy-hotel]').click();await new Promise(r=>setImmediate(r));assert.equal(copied,'云舍 · 演示酒店\n示例路88号（演示地址，请勿导航）');const opener=a.w.document.querySelector('[data-large-hotel]');opener.click();assert.equal(a.el('addressDialog').hasAttribute('open'),true);assert.match(a.el('addressLarge').textContent,/示例路88号/);a.el('closeAddress').click();assert.equal(a.el('addressDialog').hasAttribute('open'),false);assert.equal(a.w.localStorage.getItem('chinaCompanionPrivateV2'),before);}finally{a.close();}});
+-test('quick conversion prepares an optional expense without saving or replacing an active draft',()=>{const a=app();try{a.el('cnyInput').value='99';a.el('expenseFixed').value='25';a.el('logConversion').click();assert.equal(a.el('expenseFixed').value,'0');assert.equal(a.el('expenseCNY').value,'99');assert.equal(a.el('expenseEditor').open,true);assert.equal(JSON.parse(a.w.localStorage.getItem('chinaCompanionExpensesV1')).length,2);a.el('expenseDesc').value='Keep this draft';a.el('expenseCNY').value='20';a.el('cnyInput').value='88';a.el('logConversion').click();assert.equal(a.el('expenseCNY').value,'20');assert.equal(a.el('expenseDesc').value,'Keep this draft');}finally{a.close();}});
+-test('saved emergency phrases work without online translation or microphone access',()=>{const a=app();try{assert.match(a.el('phraseChips').textContent,/Please call an ambulance/);assert.match(a.el('phraseChips').textContent,/请帮我报警/);assert.equal(a.el('onlineTranslate').checked,false);assert.equal(a.el('speechSpeed').value,'0.55');}finally{a.close();}});
+diff --git a/tests/pwa.test.cjs b/tests/pwa.test.cjs
+index 0c596de..17f5686 100644
+--- a/tests/pwa.test.cjs
++++ b/tests/pwa.test.cjs
+@@ -1,5 +1,5 @@
+ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+ function runtime(overrides={}){const handlers={};const ctx={URL,Request,Response,AbortController,setTimeout,clearTimeout,self:{addEventListener:(n,f)=>handlers[n]=f,location:{origin:'https://example.test'},registration:{scope:'https://example.test/china/'},skipWaiting:async()=>{},clients:{claim:async()=>{}}},...overrides};vm.runInNewContext(fs.readFileSync('sw.js','utf8'),ctx);return {handlers,ctx};}
+-test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.7.0-preview.3')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
+-test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{match:async request=>new Response('cached:'+new URL(request.url).pathname)}});for(const path of ['index.html','app.js?v=1.7.0-preview.3','receipts.js?v=1.7.0-preview.3','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
+-test('cache activation preserves unrelated app caches',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','china-companion-v1-7-preview-1','china-companion-v1-7-preview-2','china-companion-v1-7-preview-3','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','china-companion-v1-7-preview-1','china-companion-v1-7-preview-2']);});
++test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.6.1')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
++test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{match:async request=>new Response('cached:'+new URL(request.url).pathname)}});for(const path of ['index.html','app.js?v=1.6.1','receipts.js?v=1.6.1','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
++test('cache activation preserves unrelated app caches',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,['china-companion-v1-5','china-companion-v1-6']);});
+diff --git a/tests/sheet-sync.test.cjs b/tests/sheet-sync.test.cjs
+index 6c269f5..403b588 100644
+--- a/tests/sheet-sync.test.cjs
++++ b/tests/sheet-sync.test.cjs
+@@ -61,5 +61,3 @@ test('service worker ignores Google API and authorization requests, caches app s
+  const handlers={};vm.runInNewContext(readFileSync(require.resolve('../sw.js'),'utf8'),{URL,self:{addEventListener:(n,f)=>handlers[n]=f,location:{origin:'https://example.test'},registration:{scope:'https://example.test/china/'}}});
+  for(const [url,method] of [['https://sheets.googleapis.com/v4/spreadsheets/id','GET'],['https://accounts.google.com/gsi/client','GET'],['https://example.test/china/private.json','GET'],['https://example.test/china/app.js','POST']])handlers.fetch({request:{url,method},respondWith:()=>assert.fail('Private or non-shell request intercepted')});
+ });
+-
+-test('optional advanced tabs are read with GET only and mapped alongside unchanged core records',async()=>{const tabs=fixture(),extra={'Decision Options':[['Decision','Option','Price Status'],['Synthetic choice','Synthetic option','Historical quote']],'Social Media':[['Platform','Shot / Content'],['Instagram','Synthetic idea']],'Wulong Day Trip':[['Step','From','To'],[1,'Hotel','Station']],Shanghai:[['Date / Day','Activity','Travel Time']],Chongqing:[['Date / Day','Activity','Travel Time']],Chengdu:[['Date / Day','Activity','Travel Time']],Beijing:[['Date / Day','Activity','Travel Time']]};Object.assign(tabs,extra);const names=[...TABS,...Object.keys(extra)],m={...meta,sheets:names.map(title=>({properties:{title,gridProperties:{rowCount:50,columnCount:15}}}))};let mapped;const calls=[];const sync=create({sheetId:'test-only-id',fetcher:async(u,o)=>{calls.push([u,o]);return response(u.includes('batchGet')?{valueRanges:names.map(t=>({values:tabs[t]}))}:m);},onData:d=>mapped=d});sync.authorize(auth);assert.equal(await sync.sync(),true);assert.equal(mapped.savedOptions[0].Option,'Synthetic option');assert.equal(mapped.socialMedia[0].Platform,'Instagram');assert.equal(mapped.importWarnings.length,0);assert.equal(mapped.trip.baselineSpentPHP,1234.56);assert.ok(calls.every(([u,o])=>o.method==='GET'&&!u.includes(auth.access_token)));assert.ok(new URL(calls[1][0]).searchParams.getAll('ranges').some(r=>r.includes('Decision Options')));});
+diff --git a/tests/smart-travel.test.cjs b/tests/smart-travel.test.cjs
+deleted file mode 100644
+index 36c2f0d..0000000
+--- a/tests/smart-travel.test.cjs
++++ /dev/null
+@@ -1,27 +0,0 @@
+-const {test}=require('node:test'),assert=require('node:assert/strict');
+-const S=require('../smart-travel'),D=require('../travel-data'),Sync=require('../sheet-sync');
+-const fixture=()=>structuredClone(require('../scripts/preview-fixture.cjs').chinaCompanionPrivateV2);
+-const jan16=Date.parse('2027-01-16T00:15:00Z');
+-const good=()=>({area:'Fairy Mountain',source:'https://example.com/snow-observation',observedAt:'2027-01-15T23:00:00Z',coverage:'scenic',park:'open',roads:'safe',transport:'available',practical:'yes',visibility:'good',falling:'no'});
+-test('Booked, planned and priority never become paid; a published zero does not infer free',()=>{const d=fixture(),a=d.itinerary.find(a=>a.id==='preview-garden');d.bookings=[{Booking:a.activity,'Payment Status':'Booked'}];assert.equal(S.ticket(a,d).status,'Needs Verification');assert.equal(S.ticket({...a,ticketStatus:'Paid'},d).status,'Needs Verification');assert.equal(S.ticket(a,d).publishedCNY,30);assert.equal(S.ticket(a,d).paidPHP,null);assert.equal(S.ticket(a,d).stale,true);});
+-test('all six ticket statuses save locally, independently of completion and expense totals',()=>{for(const status of S.TICKET_STATES){const d=fixture(),a=d.itinerary[1],before=JSON.stringify(d.itinerary);d.smartState=S.updateTicket(a,d,status,'synthetic receipt reference');assert.equal(S.ticket(a,d).status,status);assert.equal(S.ticket(a,d).local,true);assert.equal(JSON.stringify(d.itinerary),before);assert.equal(d.trip.baselineSpentPHP,4200);assert.equal(S.ticket(a,d).paidPHP,null);}});
+-test('paid requires evidence and can link existing expense without creating another charge',()=>{const d=fixture(),a=d.itinerary[1],expenses=[{id:'existing',desc:'ticket',amount:240,actualPHP:240,amountCNY:30}];assert.throws(()=>S.updateTicket(a,d,'Paid'),/reference/);d.smartState=S.updateTicket(a,d,'Paid','','existing',expenses);const t=S.ticket(a,d,expenses);assert.equal(t.paidCNY,30);assert.equal(t.paidPHP,240);assert.equal(expenses.length,1);assert.equal(D.localTotal(expenses),240);assert.throws(()=>S.updateTicket(a,d,'invented'))});
+-test('explicit paid tracker evidence and exact paid budget association are protected',()=>{const d=fixture(),a={...d.itinerary[1],ticketStatus:'Paid',ticketEvidence:'record-reference',paidPHP:200};assert.equal(S.ticket(a,d).paidPHP,200);assert.throws(()=>S.updateTicket(a,d,'To Buy'),/preserved/);const b=d.itinerary[1];d.paidBudgetItems=[{id:'paid-example',item:b.activity,city:b.city,amountPHP:180}];assert.equal(S.ticket(b,d).status,'Paid');assert.equal(S.ticket(b,d).paidPHP,180);assert.throws(()=>S.updateTicket(b,d,'To Buy'),/preserved/);});
+-test('saved comparisons retain historical status, paid-later labels and original budget choices',()=>{const d=fixture(),source=JSON.stringify(d.savedOptions),rows=S.optionComparison(d.savedOptions);assert.equal(rows[1].deltaPHP,-800);assert.equal(rows[0].budgetSelected,true);assert.match(rows[1].confidence,/Historical/);assert.equal(JSON.stringify(d.savedOptions),source);});
+-test('walking needs actual route under 2km AND all practical conditions; no coordinate-distance inference',()=>{const d=fixture(),a=d.itinerary[1],key=S.routeKey(a,'hotel');assert.equal(S.routes(a,'hotel',d,Date.parse('2027-01-12T00:15:00Z'))[0].recommended,true);for(const patch of [{km:2},{km:2.1},{safe:false},{weatherOK:false},{practical:false},{scenic:false},{steep:true},{luggage:true},{distanceType:'straight-line'}]){const e=fixture();Object.assign(e.smartState.routes[key][0],patch);assert.equal(S.routes(a,'hotel',e,Date.parse('2027-01-12T00:15:00Z'))[0].recommended,false);}assert.equal(S.routes(a,'hotel',d,jan16)[0].recommended,false);assert.equal(S.routes(a,'manual',d,jan16)[0].km,null);assert.equal(S.routes(a,'hotel',d)[5].fareCNY,null);});
+-test('AMap uses documented mode only with GCJ-02 endpoints; GPS falls back to destination search',()=>{const a={activity:'Test & place',city:'Shanghai',latitude:31.2,longitude:121.4,coordinateSystem:'GCJ-02'},o={name:'Hotel',latitude:31.1,longitude:121.3,coordinateSystem:'GCJ-02'};const u=new URL(S.amapRoute(a,o,'Walking'));assert.equal(u.pathname,'/navigation');assert.equal(u.searchParams.get('mode'),'walk');assert.match(u.searchParams.get('to'),/^121.4,31.2/);assert.equal(new URL(S.amapRoute(a,{...o,coordinateSystem:'WGS-84'},'Walking')).pathname,'/search');});
+-test('snow decision defaults uncertain months ahead, missing or stale evidence and wrong mountain scope',()=>{for(const evidence of [{},{...good(),observedAt:'2027-01-10T00:00:00Z'},{...good(),area:'Chongqing city'},{...good(),source:'javascript:alert(1)'},{...good(),coverage:'unknown'},{...good(),visibility:'unknown'}])assert.equal(S.snowDecision(evidence,jan16).plan,'C');assert.equal(S.snowDecision(good(),Date.parse('2026-10-27')).plan,'C');assert.equal(S.snowDecision(good(),Date.parse('2027-01-18')).plan,'C');});
+-test('scenic accumulated ground snow can recommend A without active snowfall; mere snowfall cannot',()=>{assert.equal(S.snowDecision(good(),jan16).plan,'A');assert.equal(S.snowDecision({...good(),coverage:'unknown',falling:'yes'},jan16).plan,'C');for(const patch of [{coverage:'none'},{coverage:'patchy'},{park:'closed'},{roads:'unsafe'},{transport:'unavailable'},{visibility:'poor'},{practical:'no'}])assert.equal(S.snowDecision({...good(),...patch},jan16).plan,'B');});
+-test('city fallback uses saved options, preserves evening, excludes Jan17 and does not invent Three Bridges',()=>{const d=fixture(),p=S.plans(d,jan16);assert.ok(p.B.some(a=>/Shibati/.test(a.activity)));assert.ok(p.B.some(a=>/Mountain City Trail/.test(a.activity)));for(const name of ['Mixue','Danzishi','Hongyadong','Drone show'])assert.ok(p.B.some(a=>a.activity.includes(name)));assert.ok(!p.B.some(a=>/Liziba|Three Natural Bridges|Fairy Mountain/.test(a.activity)));assert.equal(p.adjacent.length,1);assert.equal(p.conflicts.length,0);});
+-test('applying plan requires confirmation and only affects local effective schedule; source refresh invalidates it',()=>{const d=fixture(),before=JSON.stringify(d.itinerary);assert.throws(()=>S.applyPlan(d,'B',false,jan16),/Confirm/);d.smartState=S.applyPlan(d,'B',true,jan16);assert.equal(JSON.stringify(d.itinerary),before);assert.ok(S.effectiveItinerary(d).some(a=>/Shibati/.test(a.activity)));assert.ok(!S.effectiveItinerary(d).some(a=>a.id==='preview-fairy'));assert.ok(S.effectiveItinerary(d).some(a=>a.id==='preview-liziba'));d.itinerary[0].notes='new master record';assert.ok(S.effectiveItinerary(d).some(a=>/Shibati/.test(a.activity)),'unrelated day edit can preserve plan');d.itinerary.find(a=>a.id==='preview-fairy').time='10:00';assert.ok(S.effectiveItinerary(d).some(a=>a.id==='preview-fairy'));});
+-test('paid or confirmed ticket conflict blocks fallback rather than hiding purchased reservation',()=>{const d=fixture();d.itinerary.find(a=>a.id==='preview-fairy').ticketStatus='Paid';d.itinerary.find(a=>a.id==='preview-fairy').ticketEvidence='synthetic receipt';assert.throws(()=>S.applyPlan(d,'B',true,jan16),/protected/);});
+-test('fallback distinguishes new discoveries when saved choices are exhausted and never duplicates any day',()=>{const d=fixture();d.attractions=[];d.savedOptions=[];let p=S.plans(d,jan16);assert.ok(p.B.some(a=>a.source?.startsWith('Discover More')));d.itinerary.push(...S.DISCOVERIES.map((a,i)=>({...a,id:'planned-'+i,date:'2027-01-17'})));p=S.plans(d,jan16);assert.match(p.missing,/No unscheduled/);assert.throws(()=>S.applyPlan(d,'B',true,jan16),/No unscheduled/);});
+-test('generic disruptions keep uncertainty without recent sourced evidence',()=>{for(const k of ['rain','wall','drone','delay','closed','overrun','missed']){assert.match(S.scenarioAdvice(k),/^Uncertain/);assert.ok(!S.scenarioAdvice(k,{confirmed:true,at:new Date().toISOString(),source:'https://example.com/official'}).startsWith('Uncertain'));}});
+-test('vlog quick shoot has four essentials; full mode labels platform, framing and durations',()=>{const a=fixture().itinerary[1],short=S.shots(a,true),full=S.shots(a);assert.equal(short.length,4);assert.equal(full.length,8);assert.ok(short.every(s=>s.must));assert.ok(full.every(s=>s.framing&&s.seconds&&s.platform));assert.match(S.scripts(a).history,/1559/);assert.equal(S.safeUrl(S.scripts(a).source).startsWith('https:'),true);assert.match(S.scripts({activity:'Unknown',city:'X'}).history,/No researched history/);const stories=S.storyPrompts(a.date,[a]);assert.equal(stories.length,5);assert.equal(stories.filter(s=>s.must).length,2);});
+-test('extended tabs map their different actual header structures without leaking data into fixtures',()=>{const tabs={'Decision Options':[['Title'],[],['Decision','City','Category','Option','Est. PHP','Use in Budget?','Status','Δ vs Working','Pros','Cons','Price Status','Notes'],['Test','Test City','Hotel','Synthetic option','₱2,500','Yes','Booked','0','View','Cost','Historical quote','Private synthetic note']], 'Social Media':[['Platform','Shot / Content','Location / Moment'],['Instagram','Synthetic portrait','Test landmark']], 'Wulong Day Trip':[['Step','From','To'],[1,'Hotel','Station']],Shanghai:[['Date / Day','Activity','Travel Time'],['Jan 12, 2027 / Day 1','Synthetic place','1 hr']]};const mapped=Sync.mapExtras(tabs,{});assert.equal(mapped.savedOptions[0]['Price Status'],'Historical quote');assert.equal(mapped.savedOptions[0]['Use in Budget?'],'Yes');assert.equal(mapped.socialMedia[0]['Shot / Content'],'Synthetic portrait');assert.equal(mapped.cityPlans.Shanghai[0]['Travel Time'],'1 hr');assert.equal(S.extractDate(mapped.cityPlans.Shanghai[0]['Date / Day']),'2027-01-12');assert.equal(mapped.wulong[0].To,'Station');});
+-test('missing/malformed optional tab retains previous copy and reports issue',()=>{const previous={savedOptions:[{Option:'Keep'}],socialMedia:[{Platform:'Keep'}],cityPlans:{Shanghai:[{Activity:'Keep'}]}};const next=Sync.mapExtras({'Decision Options':[['broken']]},previous);assert.deepEqual(next.savedOptions,previous.savedOptions);assert.deepEqual(next.socialMedia,previous.socialMedia);assert.deepEqual(next.cityPlans,previous.cityPlans);assert.ok(next.importWarnings.length>=3);});
+-test('backup whitelist includes offline smart records, excludes credentials and merges progress without overwriting current',()=>{const d=fixture();d.secret='NEVER_EXPORT';d.smartState.shots={'a:wide':true};const b=D.backupData(d);assert.equal(b.secret,undefined);assert.deepEqual(b.smartState.shots,{'a:wide':true});assert.ok(b.savedOptions&&b.socialMedia&&b.wulong);const m=S.mergeState({shots:{a:true,b:true},tickets:{x:{status:'To Buy'}}},{shots:{a:false},tickets:{x:{status:'Paid'}}});assert.deepEqual(m.shots,{a:false,b:true});assert.equal(m.tickets.x.status,'Paid');});
+-test('source links reject script/data/credential URLs',()=>{for(const x of ['javascript:alert(1)','data:text/html,test','http://insecure.test','https://name:secret@example.com/'])assert.equal(S.safeUrl(x),'');assert.equal(S.safeUrl('https://example.com/'),'https://example.com/');});
+-test('fresh manual price reference stays separate from original quote and actual payment',()=>{const d=fixture(),a=d.itinerary[1];d.smartState.priceUpdates={[a.id]:{cny:40,source:'https://example.com/official-price',verifiedAt:'2027-01-12T00:00:00Z',applicability:'Example dated admission',status:'User-verified published reference'}};const t=S.ticket(a,d,[],Date.parse('2027-01-12T01:00:00Z'));assert.equal(t.publishedCNY,40);assert.equal(t.stale,false);assert.equal(t.paidPHP,null);assert.equal(d.attractions[0]['Entrance Fee CNY'],30);assert.match(t.priceStatus,/User-verified/);});
+-test('changing a manual origin invalidates its old route reference',()=>{const d=fixture(),a=d.itinerary[1];d.smartState.routes['preview-garden|manual']=[{mode:'Walking',originSignature:'old-origin',km:1,updatedAt:'2027-01-12T00:00:00Z'}];assert.equal(S.routes(a,'manual',d,jan16,'new-origin')[0].km,null);assert.equal(S.routes(a,'manual',d,jan16,'old-origin')[0].km,1);});
+-test('a differently named booked Wulong package blocks fallback even without an exact activity match',()=>{const d=fixture();d.bookings.push({Booking:'Wulong day package · synthetic',Date:'Jan 16, 2027','Payment Status':'Booked / Pay later'});assert.ok(S.plans(d,jan16).conflicts.some(a=>a.activity.includes('Wulong day package')));assert.throws(()=>S.applyPlan(d,'B',true,jan16),/protected/);});
 diff --git a/travel-data.js b/travel-data.js
 index e34f381..fc3145a 100644
 --- a/travel-data.js

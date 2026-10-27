@@ -107,15 +107,15 @@ Live venue ticket prices, DiDi quotations, in-app routing/ETA and mountain snow/
 
 ## Prepared rollback — not executed on production
 
-[rollback-v1.6.1.patch](qa/rollback-v1.6.1.patch) restores the pinned baseline’s runtime files/manifest/icons and service worker. It contains only public source/assets, not user data. Its `git apply --check` passes on the candidate. The actual browser rollback/forward cycle above also passes. New v1.7 JS files may remain unused; no localStorage, IndexedDB, Google data or uploaded Drive files are deleted by the patch.
+[rollback-v1.6.1.patch](qa/rollback-v1.6.1.patch) restores the pinned baseline’s runtime files/manifest/icons and service worker. It contains only public source/assets, not user data. The patch also restores the baseline package/lockfile, regression tests and CI, removing v1.7-only test cases so the rollback can pass the appropriate baseline suite. Its `git apply --check` passes on the candidate; application plus baseline syntax/regression validation in an isolated copy also passes. The actual browser rollback/forward cycle above also passes. New v1.7 JS files may remain unused; no localStorage, IndexedDB, Google data or uploaded Drive files are deleted by the patch.
 
-If a later authorized production release needs rollback, prepare a separate rollback branch/worktree and a new normal commit, preserving history:
+If a later authorized production release needs rollback, start from a clean checkout, prepare a separate rollback branch/worktree and a new normal commit, preserving history:
 
 ```sh
 git switch -c rollback/v1.7-to-v1.6.1 main
 git apply --check docs/qa/rollback-v1.6.1.patch
 git apply docs/qa/rollback-v1.6.1.patch
-git add index.html styles.css app.js sheet-sync.js receipts.js receipt-store.js travel-data.js sw.js manifest.webmanifest icons
+git add index.html styles.css app.js sheet-sync.js receipts.js receipt-store.js travel-data.js sw.js manifest.webmanifest icons package.json package-lock.json .github/workflows/test.yml tests
 git commit -m "Restore v1.6.1 runtime while preserving private device data"
 ```
 
