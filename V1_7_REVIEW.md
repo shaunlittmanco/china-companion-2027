@@ -63,7 +63,7 @@ The Imperial Red, Antique Gold, Deep Red, Porcelain Ivory, Lacquer Black and res
 
 ## Preserved
 
-OAuth settings/scopes, read-only Sheets, private Drive receipt destination/selection/upload/retry, queued receipt bytes and reserved IDs, expense history/math/reconciliation, bookings, maps/GPS, translations, speech speed, backups, themes and completion records remain. `receipts.js`, `receipt-store.js` and `jade-ui.js` are unchanged in this upgrade. No public private-data export, new Google project, folder, paid API, subscription, billing or server was introduced. PWA assets/cache advance together to preview.4; private Google responses remain excluded.
+OAuth settings/scopes, read-only Sheets, private Drive receipt destination/selection/upload/retry, queued receipt bytes and reserved IDs, expense history/math/reconciliation, bookings, maps/GPS, translations, speech speed, backups, themes and completion records remain. `receipts.js`, `receipt-store.js` and `jade-ui.js` are unchanged in this upgrade. No public private-data export, new Google project, folder, paid API, subscription, billing or server was introduced. PWA assets/cache advance together to preview.5; private Google responses remain excluded.
 
 ## Actual integration versus simulation
 

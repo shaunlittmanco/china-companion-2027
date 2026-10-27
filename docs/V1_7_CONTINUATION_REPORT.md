@@ -2,6 +2,46 @@
 
 **Release decision: HOLD. v1.7 has not been merged or deployed.** The owner's approved design and conditional release authorization remain in effect, with the new packing/sync requirements as additional gates. No real-account or physical-device check has been marked passed.
 
+## Resume audit — 27 October 2026, preview.5
+
+Recovered the actual GitHub head `8d3dfc4bb0c95e8c168ad988c52407fd1e30f6e5`, its draft PR conversation and CI run `40464942295` (both jobs successful, logs reviewed). Existing implementation and private sources were retained. This resume does not redo prior development.
+
+### Defects fixed in this resume
+
+- Disconnect during response-body decoding could still import packing data and publish Synced. Reproduced with a blocked JSON response; the packing client now checks session generation again after decoding. Cancelled responses cannot save or report success.
+- Duplicate CHECK rows for the same checkpoint/item and duplicate SWEEP rows for the same checkpoint/task passed parsing when their Record IDs differed, risking duplicate counts or silent replacement. Parsing now rejects these before imports/writes, preserving the previous snapshot and pending drafts. Different checkpoints remain independent; recovery proposals are separate.
+- Editing a manually created CHECK/SWEEP could generate a second app-shaped Record ID. Encoding now reuses the existing checkpoint/item or checkpoint/task Record ID. A full synthetic add/edit/upsert/readback case confirms one record under each original ID.
+- Candidate version, asset URLs and service-worker cache advanced together to **1.7.0-preview.5**, so an earlier candidate cache cannot retain the old packing client. Public interactive bundles were regenerated with synthetic data only. Visual layout is unchanged; existing screenshot gallery is retained.
+
+Three new regression tests cover these failures. Current local result: **127/127**, syntax checks pass. Chromium rechecks cover 168 layout combinations, actual offline reload, full Light/Dark journey/demo interactions, expense and backup regressions. The committed candidate is then checked by the exact-origin smoke and isolated baseline upgrade/offline/rollback/forward procedure; consult the latest PR CI for final-commit Chromium/WebKit results. None is a live Google or physical-device pass.
+
+### Feature audit
+
+| Feature | Implementation / automated evidence | Unverified acceptance |
+| --- | --- | --- |
+| Imperial Light/Dark; Today, Plan, Map, Talk, Wallet; expandable Menu | Existing UI retained; responsive, theme, navigation and storage checks | Physical iPhone/iPad/Mac keyboard, safe areas, VoiceOver |
+| Activity/tickets/prices/status; Saved Options | Existing detail/evidence logic and no duplicate spending tests | Owner-source/account refresh; current venue data |
+| AMap and transport comparisons | Existing handoffs and sourced-reference comparisons retained | Physical native-app/GPS; no integrated live routing/DiDi fares |
+| January 16 Fairy Mountain/Wulong A/B/C | Existing evidence uncertainty, protected bookings, compare/cancel/apply tests | Actual conditions near travel; no live snow feed |
+| YouTube Vlog Kit / IG Stories | Existing shot/script planning and offline progress tests | Physical device use |
+| Read-only Sheets | Existing optional/core import mapper and GET-only regression tests | Actual candidate-origin owner OAuth/refresh |
+| Expenses / Drive receipts | Existing uploader, outbox, expense math and backup tests retained | Real photo/HEIC/PDF, folder, expiry/retry/readback |
+| Offline / backup / migration / rollback | Synthetic browser offline and data/receipt preservation procedure | Candidate physical PWA cold launch/storage recovery |
+| My Bags / hotel check-in/out / room sweeps / Manila / Back Home | Existing permanent inventory and independent immutable history retained; three fixes above | Physical journey; live CHECK/SWEEP/back-home writes |
+| Automatic packing synchronization | Separate opt-in file grant, durable queue, preflight/recovery/readback/conflict tests | Actual authorized Sheet ↔ app and second-device convergence |
+
+### Current release decision and next action
+
+**HOLD.** No live account write, temporary QA Sheet record, receipt upload, new permission, merge or production deployment was performed in this resume. `main` remains `89ab875d8d4f51286b1fd024cb2293c02f40c536`; eight live production runtime files were re-fetched and matched that baseline. The existing production URL remains v1.6.1. Production authorization is still conditional on the owner's unchanged gates.
+
+Start the owner procedure in RELEASE_QA on this committed branch. First export a private production backup. On the Mac, use the isolated account helper for read-only Google refresh; only use `--packing-write` after explicitly authorizing uniquely tagged temporary QA records. The app explains that `drive.file` can edit the selected workbook, while application writes are restricted to Packing & Bags. Sign in and select the existing workbook yourself. Verify app→Sheet→readback, manual Sheet→app, stable IDs, independent CHECK/SWEEP/home records, offline/expiry/retries, conflicts and a second device. Do not clean up real records or publish private evidence.
+
+Physical iPhone Safari/Home Screen checks and real photo/HEIC/PDF receipts still require owner participation. Mac helper service workers are blocked; it cannot pass physical PWA acceptance. The documented Safari override procedure remains conditional on proving the actual candidate worker/cache; if that cannot be proven, stop and retain the device gate. Do not test public v1.6.1 and label it preview.5.
+
+Review: `docs/previews/imperial-china-review.html` is the actual self-contained interactive synthetic review. Download/open it in Safari/Chrome; Google access is disabled. It is not live sync or the private itinerary.
+
+The exact durable commit is the latest branch/PR head; the PR update records it after committing. Keep PR #1 open/draft until all owner gates pass, then recheck that exact candidate's CI and authorization before merge/deploy.
+
 ## Existing work retained
 
 The prior branch already contained Modern Imperial China Light/Dark, five primary tabs and Menu/sidebar, Smart Today, activity/ticket details, address cards/AMap handoff, saved options, January 16 A/B/C, vlog/Stories tools, offline references/backup, payment/expense tracking and the existing Drive receipt workflow. The previous 88-test CI and QA-tooling head were successful. This continuation extends that implementation rather than rebuilding it.

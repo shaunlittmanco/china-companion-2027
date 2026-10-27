@@ -25,6 +25,10 @@ The previously approved Imperial design and original v1.7 features are preserved
 
 Packing writes require separate explicit file authorization/Picker selection using `drive.file`; this is the existing receipt scope but expands the selected files the app can edit. Google cannot restrict this grant to a tab. App writes are allowlisted to Packing & Bags. No new project, folder, backend, billing or paid service is introduced. No private snapshot, token, key, account cookie, receipt link or receipt file is part of the repo/test artifacts.
 
+## Preview.5 resume result
+
+Recovered GitHub head and prior successful CI; fixed late-disconnect response handling, duplicate checkpoint identities and manual CHECK/SWEEP ID reuse. Current syntax and **127/127** automated tests pass locally. Asset/cache versions advance together to preview.5. The continuation report records the feature audit and remaining owner steps. Re-run/check latest-head CI after this commit; no live Google or physical-device gate is waived.
+
 ## What was actually rechecked
 
 `npm run check` and the original 88 regression tests plus new packing/sync/UI tests are run against this candidate; **124/124 tests pass locally**; consult the latest-head workflow for CI. Local Chromium mobile checks pass again. Existing current-application CI also passed WebKit; the follow-up workflow reruns both engines and adds the two QA scripts below.
@@ -81,8 +85,8 @@ For pre-merge testing without changing the public server, an owner with a Mac ca
 1. Save a complete private backup from the existing production app in Files. Keep original receipt media. Do not uninstall the existing PWA or clear website data.
 2. Connect the iPhone to the Mac. Enable Safari Web Inspector on the iPhone and developer features in Mac Safari. Select the actual iPhone Safari page or Home Screen web app in Safari’s Develop menu.
 3. Map Response Local Overrides to the committed candidate’s runtime files at the **same existing app URL**, preserving correct MIME types. Override the root document and `index.html`, plus styles, all JS files, manifest, service worker and icons listed in the candidate `sw.js` CORE array. Match version query strings too. Keep all security/cross-origin protections enabled; do not override Google requests.
-4. Reload while inspecting and verify the actual candidate Menu/Activity/Vlog screens and versioned preview.4 assets. A v1.6.1 UI means the override did not take; stop rather than marking a result passed.
-5. For the PWA/cold-launch case, independently verify that the active worker and **complete** cached shell are the v1.7 candidate (`china-companion-v1-7-preview-4`). Merely seeing overrides while Inspector is open is insufficient. Service-worker interception/cache priming through remote overrides is **not certified by Work**. If the device cannot actually cache/run the candidate, the cold-launch gate remains blocked and a separately verified staging environment is needed before merge.
+4. Reload while inspecting and verify the actual candidate Menu/Activity/Vlog screens and versioned preview.5 assets. A v1.6.1 UI means the override did not take; stop rather than marking a result passed.
+5. For the PWA/cold-launch case, independently verify that the active worker and **complete** cached shell are the v1.7 candidate (`china-companion-v1-7-preview-5`). Merely seeing overrides while Inspector is open is insufficient. Service-worker interception/cache priming through remote overrides is **not certified by Work**. If the device cannot actually cache/run the candidate, the cold-launch gate remains blocked and a separately verified staging environment is needed before merge.
 6. Perform the checks below while the confirmed candidate is active. For offline cold launch, close Inspector and all app views, enable airplane mode with Wi-Fi off, then open the Home Screen app. Verify v1.7 screens/progress actually load. Reopening the online page without overrides may load production again; confirm the version for every result.
 7. Remove local overrides after the session and return to the normal public version. Do not clear storage to remove the override. Check the private backup and pending receipt references remain available.
 

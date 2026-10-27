@@ -20,6 +20,10 @@ This extends the existing app/PR, without changing production. The authoritative
 - Reads before writing, a second preflight, confirmed recovery proposals and final readback. Expiry, rate/server/network failures retain pending changes. Ambiguous retries read stable IDs before sending another write. Both local and remote conflict records are retained; resolved versions remain in backup.
 - Backups include dedicated records, sessions, outbox, recovery rows and alternatives; merge keeps completed history and exposes divergent pending drafts.
 
+## Preview.5 follow-up
+
+Disconnect is rechecked after response decoding, preventing a cancelled session from saving late data or reporting Synced. Duplicate checkpoint/item CHECK and checkpoint/task SWEEP identities fail closed even with different Record IDs. App edits reuse manually created CHECK/SWEEP IDs. Three regression cases cover cancellation, duplicate detection and full original-ID upsert/readback. Current suite: 127/127; live-account gates remain open.
+
 ## Remaining release gates
 
 **No actual app-origin Google account read/write, physical iPhone, iPad or Mac acceptance is marked passed.** Connected-source inspection verified the existing tab and its seven starter identities without writing. That is not browser OAuth or two-way sync proof.

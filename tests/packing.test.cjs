@@ -39,3 +39,41 @@ test('a stale in-flight response cannot replace a confirmed local packing edit',
 test('missing confirmed canonical record becomes explicit conflict; recovery journal preserves its draft',async()=>{const a=setup();a.edit({notes:'Confirmed then externally removed'});a.sync.authorize(auth,'fictional-private-id');assert.equal(await a.sync.sync(true),true);a.server.sheet.splice(3,1);const next=S.ingest(a.d,S.parse(a.server.sheet));assert.ok(P.state(next).sync.conflicts['ITEM-sheet-a']);assert.equal(P.state(next).sync.pending['ITEM-sheet-a'].draft.Notes,'Confirmed then externally removed');assert.equal(P.state(next).sync.status,'Conflict');});
 test('blank Sheet gaps import safely but block writes before any row insertion/upsert',async()=>{const a=setup();a.server.sheet.push([],S.HEADERS.map(h=>sheetItem('gap-item','After blank gap')[h]??''));a.edit({notes:'Keep pending'});a.sync.authorize(auth,'fictional-private-id');assert.equal(await a.sync.sync(true),false);assert.equal(a.server.calls.filter(([,o])=>o.method==='POST').length,0);assert.equal(Object.keys(P.state(a.d).sync.pending).length,1);assert.ok(P.inventory(a.d).some(i=>i.id==='gap-item'));});
 test('explicit recovery restores a missing confirmed ITEM under the same ID; accepting removal archives locally without erasing history',async()=>{const a=setup();a.edit({notes:'Restore after external removal'});a.sync.authorize(auth,'fictional-private-id');await a.sync.sync(true);a.server.sheet.splice(3,1);a.set(S.ingest(a.d,S.parse(a.server.sheet)));put(a.d,S.resolve(a.d,'ITEM-sheet-a','local'));assert.equal(await a.sync.sync(true),true);assert.equal(S.parse(a.server.sheet).filter(r=>r['Record Type']==='ITEM'&&r['Item ID']==='sheet-a').length,1);const n=a.server.sheet.findIndex(r=>r[0]==='ITEM');a.server.sheet.splice(n,1);a.set(S.ingest(a.d,S.parse(a.server.sheet)));put(a.d,S.resolve(a.d,'ITEM-sheet-a','remote'));assert.equal(P.inventory(a.d).some(i=>i.id==='sheet-a'),false);assert.ok(P.inventory(a.d,{archived:true}).find(i=>i.id==='sheet-a').archived);assert.equal(await a.sync.sync(true),true);assert.equal(S.parse(a.server.sheet).some(r=>r['Record Type']==='ITEM'),false);});
+
+test('disconnect during packing response decoding cannot import data or report Synced',async()=>{
+ const server=fakeServer([sheetItem()]);let d=S.ingest(fixture(),S.parse(rows([sheetItem()]))),decoding,release,saves=0,status;
+ const entered=new Promise(r=>decoding=r),blocked=new Promise(r=>release=r);
+ const sync=S.create({sheetId:'fictional-private-id',getData:()=>d,saveData:n=>{saves++;d=n;},onState:s=>status=s,fetcher:async(u,o)=>{
+  const response=await server.fetcher(u,o);
+  if(!u.includes('/values/'))return response;
+  return {...response,json:async()=>{decoding();await blocked;return response.json();}};
+ }});
+ sync.authorize(auth,'fictional-private-id');const pending=sync.sync(true);await entered;sync.disconnect();release();
+ assert.equal(await pending,false);assert.equal(saves,0);assert.equal(status.status,'Needs Sign-in');assert.equal(server.calls.filter(([,o])=>o.method==='POST').length,0);
+});
+
+test('duplicate item checks or sweep tasks at one checkpoint fail closed even with distinct record IDs',()=>{
+ const d=fixture(),stage=P.definitions(d).find(x=>x.type==='checkout').id;
+ put(d,P.start(d,stage));const records=Object.values(S.encode(d));
+ const check=records.find(r=>r['Record Type']==='CHECK'&&r['Item ID']);
+ assert.throws(()=>S.parse(rows([...records,{...check,'Record ID':'duplicate-check'}])),/Duplicate packing checkpoint/);
+ const sweep=records.find(r=>r['Record Type']==='SWEEP');
+ assert.throws(()=>S.parse(rows([...records,{...sweep,'Record ID':'duplicate-sweep'}])),/Duplicate packing checkpoint/);
+ const independent={...check,'Record ID':'independent-check','Checkpoint ID':'home-return'};
+ assert.doesNotThrow(()=>S.parse(rows([...records,independent])));
+});
+
+test('app edits reuse manual Sheet CHECK and SWEEP record IDs without appending duplicate checkpoint records',async()=>{
+ const d=fixture(),stage=P.definitions(d).find(x=>x.type==='checkout').id,item=sheetItem();
+ const check={'Record Type':'CHECK','Item / Task':item['Item / Task'],Bag:item.Bag,Quantity:0,Status:'Not Checked','Item ID':'sheet-a','Record ID':'manual-check-a','Checkpoint ID':stage};
+ const sweep={'Record Type':'SWEEP','Item / Task':P.SWEEP[0],Status:'Not Checked','Record ID':'manual-sweep-a','Checkpoint ID':stage};
+ const server=fakeServer([item,check,sweep]);let data=S.ingest(d,S.parse(server.sheet));
+ data.smartState=S.queued(data,{...data.smartState,packing:P.verify(data,stage,'sheet-a',{state:'packed',quantity:2})});
+ data.smartState=S.queued(data,{...data.smartState,packing:P.setTask(data,stage,P.SWEEP[0],'checked')});
+ assert.ok(P.state(data).sync.pending['manual-check-a']);assert.ok(P.state(data).sync.pending['manual-sweep-a']);
+ const sync=S.create({sheetId:'fictional-private-id',getData:()=>data,saveData:n=>data=n,fetcher:server.fetcher});
+ sync.authorize(auth,'fictional-private-id');assert.equal(await sync.sync(true),true);
+ const saved=S.parse(server.sheet),checks=saved.filter(r=>r['Record Type']==='CHECK'&&r['Checkpoint ID']===stage&&r['Item ID']==='sheet-a'),sweeps=saved.filter(r=>r['Record Type']==='SWEEP'&&r['Checkpoint ID']===stage&&r['Item / Task']===P.SWEEP[0]);
+ assert.equal(checks.length,1);assert.equal(checks[0]['Record ID'],'manual-check-a');assert.equal(checks[0].Status,'packed');
+ assert.equal(sweeps.length,1);assert.equal(sweeps[0]['Record ID'],'manual-sweep-a');assert.equal(sweeps[0].Status,'Checked');
+});
