@@ -112,6 +112,96 @@
       "fullContentCaptured": true
     },
     {
+      "screen": "packing",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-bags",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-home",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-arrival",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-storybook",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-next",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-beijing",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-airport",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
+      "screen": "packing-return",
+      "groups": 4,
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "freshVerification": true,
+      "fullContentCaptured": true
+    },
+    {
       "screen": "activity-overview",
       "themes": [
         "light",

@@ -81,7 +81,7 @@ See [implementation and schema details](docs/SMART_TRAVEL.md) for evidence rules
 
 ## Validation and release gate
 
-88 automated tests pass, including the original regression coverage updated for the intended Menu and cache-version changes. Tests cover optional tab mapping/GET-only sync, six ticket states, evidence/payment separation, quote comparisons, route freshness and the strict 2km rule, snow uncertainty/no-snow/closure, protected bookings, adjacent-day avoidance, explicit plan confirmation, offline checklist persistence, backup merge and existing receipt behavior.
+124 automated tests pass, including the original regression coverage updated for the intended Menu and cache-version changes. Tests cover optional tab mapping/GET-only sync, six ticket states, evidence/payment separation, quote comparisons, route freshness and the strict 2km rule, snow uncertainty/no-snow/closure, protected bookings, adjacent-day avoidance, explicit plan confirmation, offline checklist persistence, backup merge and existing receipt behavior.
 
 Chromium checks cover 12 pages × 2 themes × 7 widths (320–1366 px), plus all five Activity Details sections at each width, unchanged existing local records, 44px visible navigation targets, reduced motion, theme persistence, contrast samples and actual network-disabled PWA reload. Complete review checks cover all core/new screens, both themes, sample contrasts, local interactions and independent isolated frames.
 
@@ -96,3 +96,16 @@ Packing writes now require separate opt-in file authorization/Picker selection w
 The existing branch now includes permanent three-bag inventory plus Unassigned, independent hotel arrivals/checkouts/transfers and room sweeps, Manila baggage claim and manual Back Home verification. The existing dedicated tab is read-only imported; opt-in file-scoped writes use stable IDs, a durable pending queue, canonical upserts, shared recovery revisions, preflight/readback and explicit conflict resolution. Other tabs remain read-only; receipt code/schema stay unchanged. Public runtime/previews no longer embed the workbook ID; enter the existing private tracker URL/ID once in Settings, keeping existing OAuth/Picker configuration. This does not rewrite historical commits.
 
 See [implementation and owner tests](docs/PACKING_SYNC.md) and [release gates](docs/RELEASE_QA.md). Automated simulations are separate from actual-account Google consent, cross-device sync, real HEIC/PDF uploads and physical Safari/PWA checks. Production stays v1.6.1 until those gates pass.
+
+### Packing review screens
+
+| Screen | Complete Light/Dark content |
+| --- | --- |
+| My Bags | [Permanent inventories](docs/previews/full-packing-bags-light-dark.png) |
+| Home departure | [Initial per-bag pack](docs/previews/full-packing-home-light-dark.png) |
+| Hotel arrival | [Positions and independent checks](docs/previews/full-packing-arrival-light-dark.png) |
+| Hotel checkout | [Separate bags and room sweep](docs/previews/full-packing-storybook-light-dark.png) |
+| Next hotel | [Fresh verification](docs/previews/full-packing-next-light-dark.png) |
+| Beijing checkout | [Final hotel](docs/previews/full-packing-beijing-light-dark.png) |
+| Manila | [Baggage collection](docs/previews/full-packing-airport-light-dark.png) |
+| Back Home | [Reconciliation and media backup](docs/previews/full-packing-return-light-dark.png) |

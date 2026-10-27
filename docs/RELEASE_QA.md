@@ -27,7 +27,7 @@ Packing writes require separate explicit file authorization/Picker selection usi
 
 ## What was actually rechecked
 
-`npm run check` and the original 88 regression tests plus new packing/sync/UI tests are run against this candidate; consult the latest-head results for the final count. Local Chromium mobile checks pass again. Existing current-application CI also passed WebKit; the follow-up workflow reruns both engines and adds the two QA scripts below.
+`npm run check` and the original 88 regression tests plus new packing/sync/UI tests are run against this candidate; **124/124 tests pass locally**; consult the latest-head workflow for CI. Local Chromium mobile checks pass again. Existing current-application CI also passed WebKit; the follow-up workflow reruns both engines and adds the two QA scripts below.
 
 `node scripts/release-check.cjs` runs a real Chromium service-worker transition using an isolated synthetic profile. It extracts the pinned baseline from git, serves both versions at the same loopback origin and verifies:
 
@@ -136,3 +136,5 @@ Recheck the exact production head and patch before applying; it must fail safely
 - [ ] With owner-authorized file access, second-device convergence/conflict resolution and exact Sheet readback pass. Until then, bidirectional sync remains unverified for release.
 
 The prepared rollback restores v1.6.1 behavior with one privacy compatibility change: its Sheets client reads the existing `chinaCompanionSheetIdV1` device setting rather than embedding a private workbook identifier. The old static tracker link becomes the generic Google Sheets entrypoint. Reproduce the patch with `node scripts/prepare-rollback.cjs` after committing runtime/test changes. Historical commits are not rewritten.
+
+The continuation report and exact source commits are in [V1_7_CONTINUATION_REPORT.md](V1_7_CONTINUATION_REPORT.md). Current Chromium matrix is 12 screens × 2 themes × 7 widths. CI additionally exercises WebKit. Real account/write/physical-device gates remain open.
