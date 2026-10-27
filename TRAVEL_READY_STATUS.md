@@ -65,3 +65,12 @@ The existing design branch now extends Modern Imperial China with Menu/sidebar, 
 88 automated tests pass with synthetic data. Local Chromium covers 11 screens in two themes at seven widths, plus activity sections and actual offline PWA reload. PR CI additionally runs WebKit; the current result belongs in the PR. These checks do not certify a physical iPhone or the new batch under real app-origin OAuth.
 
 The earlier v1.6.1 app-origin Sheets refresh and one PNG Drive upload verification above are historical verified checks, not a new live certification of every v1.7 feature. This upgrade retains receipt and authorization implementations and adds no permissions. No merge or production deployment is authorized or performed. Venue pricing, snow conditions and DiDi quotes are not live integrations; dates/sources and unknowns remain explicit. Other-day disruption planning is advice, not a full automatic schedule generator.
+
+
+## Conditional release QA — 27 October 2026
+
+Design is approved, but the owner’s PR conversation explicitly blocks merge/deployment until real app-origin Google account checks and physical iPhone checks pass. Those checks were not performed or marked passed. See docs/RELEASE_QA.md for exact acceptance cases and safe staging instructions.
+
+Rechecked: 88 tests and syntax pass; local Chromium mobile checks pass; full bounded private workbook rows map through the extended mapper without warnings, including all seven added tabs (connector/component verification, not app-origin OAuth). Real Chromium service-worker upgrade, offline reload, pinned v1.6.1 rollback and forward recovery preserve synthetic legacy records, pending receipt bytes/reserved ID, notes and vlog progress. An isolated exact-origin account-QA launcher is provided; its network-blocked smoke test passes, but no live owner login has been performed. A source-only rollback patch has been prepared and apply-checked. Production application assets are unchanged by this QA follow-up.
+
+Public Pages deployment metadata identifies successful production commit 89ab875d8d4f51286b1fd024cb2293c02f40c536. Eight live runtime files match that baseline byte-for-byte. Production remains v1.6.1; no new deployment or merge was performed. Public main metadata reports protection disabled and visible rulesets empty; detailed protection settings are unavailable to the integration (403). No permissions/protections changed. Main must not be merged merely because CI is green while owner/device gates remain open.

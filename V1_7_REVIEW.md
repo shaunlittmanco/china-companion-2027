@@ -1,6 +1,6 @@
 # v1.7 Modern Imperial China — Smart Travel review
 
-**Existing draft PR #1. Do not merge or deploy without Shaun’s approval.** Production stays at the existing URL on v1.6.1. This extends the existing branch; it does not rebuild the app.
+**Design approved; production approval is conditional on all critical release gates. Existing PR #1 remains draft/unmerged. See [release QA and owner handoff](docs/RELEASE_QA.md).** Production stays at the existing URL on v1.6.1. This extends the existing branch; it does not rebuild the app.
 
 ## Open the interactive review
 

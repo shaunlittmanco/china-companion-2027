@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -31,6 +33,8 @@ jobs:
       - run: npm run test:mobile
         env:
           TEST_WEBKIT: '1'
+      - run: node scripts/release-check.cjs
+      - run: node scripts/account-qa.cjs --smoke
       - run: node scripts/review-check.cjs
       - run: node scripts/design-review-check.cjs
       - uses: actions/upload-artifact@v4
