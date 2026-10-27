@@ -1,83 +1,77 @@
-# v1.7 Jade Night — design review
+# v1.7 Modern Imperial China — design review
 
-**Preview branch only. Do not merge or deploy until the owner approves the preview.**
+**Draft review only. Do not merge or deploy until Shaun approves the new design.**
 
-Production remains v1.6.1 at the existing GitHub Pages URL. This is an incremental presentation update to the existing application, with no new backend, Cloud project, billing or paid API. Preview content is fictional; it is not a tracker export or a real hotel reservation.
+The existing v1.7 branch and pull request are retained. Production remains v1.6.1 at the existing GitHub Pages URL. All preview records are fictional and never represent real bookings, addresses, expenses or private tracker data.
 
-## Complete Light / Dark review — 26 October 2026
+## Review the complete design
 
-Open [jade-night-review.html](docs/previews/jade-night-review.html) for simultaneous Light and Dark previews of all seven experiences. The file is self-contained: download it and open it in a browser. Scroll within the phones to inspect the complete screens. Extra controls show the departure countdown, simulated offline shortcuts and the large Chinese Address Card.
+Download [imperial-china-review.html](docs/previews/imperial-china-review.html) and open it in a browser. It shows all seven screens simultaneously in Light and Dark Mode. Each phone scrolls independently. Additional controls show the Chinese Address Card, the pre-departure countdown and simulated offline quick access. The older `jade-night-review.html` filename remains a compatibility copy of this current review.
 
-| Screen | Light and Dark comparison |
-| --- | --- |
-| Home / Smart Today | [Preview](docs/previews/review-home-light-dark.png) |
-| Plan | [Preview](docs/previews/review-itinerary-light-dark.png) |
-| Map | [Preview](docs/previews/review-map-light-dark.png) |
-| Talk | [Preview](docs/previews/review-translate-light-dark.png) |
-| Wallet | [Preview](docs/previews/review-wallet-light-dark.png) |
-| Tickets | [Preview](docs/previews/review-bookings-light-dark.png) |
-| Settings | [Preview](docs/previews/review-settings-light-dark.png) |
-| Chinese Address Card | [Preview](docs/previews/review-chinese-address-light-dark.png) |
-| Countdown | [Preview](docs/previews/review-countdown-light-dark.png) |
-| Offline quick access | [Preview](docs/previews/review-offline-light-dark.png) |
+| Screen | First iPhone screen | Full content |
+| --- | --- | --- |
+| Home / Smart Today | [Light and Dark](docs/previews/review-home-light-dark.png) | [Full Home](docs/previews/full-home-light-dark.png) |
+| Plan | [Light and Dark](docs/previews/review-itinerary-light-dark.png) | [Full Plan](docs/previews/full-itinerary-light-dark.png) |
+| Map | [Light and Dark](docs/previews/review-map-light-dark.png) | [Full Map](docs/previews/full-map-light-dark.png) |
+| Talk | [Light and Dark](docs/previews/review-translate-light-dark.png) | [Full Talk](docs/previews/full-translate-light-dark.png) |
+| Wallet | [Light and Dark](docs/previews/review-wallet-light-dark.png) | [Full Wallet](docs/previews/full-wallet-light-dark.png) |
+| Tickets | [Light and Dark](docs/previews/review-bookings-light-dark.png) | [Full Tickets](docs/previews/full-bookings-light-dark.png) |
+| Settings | [Light and Dark](docs/previews/review-settings-light-dark.png) | [Full Settings](docs/previews/full-settings-light-dark.png) |
 
-This follow-up changes review files, their automation and one asynchronous test wait only. **No runtime app file is changed in this pass.** The implementation already present on the unmerged draft branch remains pending design approval; main/production is still v1.6.1. Design approval authorizes the next implementation/refinement stage; merging and production deployment require separate approval.
+Additional states: [Chinese address](docs/previews/review-chinese-address-light-dark.png), [countdown](docs/previews/review-countdown-light-dark.png), [offline shortcuts](docs/previews/review-offline-light-dark.png). The original v1.6.1 [before/after comparison](docs/previews/review.html) is regenerated with the new theme.
 
-The two previews have isolated, memory-only fictional records. Network access is denied by their Content Security Policy. Google authorization, external navigation, location and microphone actions are disabled. The map area is explicitly labeled as a design preview; it is not a live map or a promise of offline routing. The review's offline control simulates the UI state; it does not install a service worker. The app's separate network-disabled reload test covers actual PWA caching.
+## Design system
 
-Fresh validation: 61 unit/integration tests pass; Chromium verifies all seven screens in both themes at 320, 375, 390, 430 and 820 px, existing stored data preservation, address dialog behavior, conversion/expense entry and a network-disabled PWA reload with hotel lookup. The new review check verifies both isolated themes on all seven screens, three extra states, disabled Google authorization, no script errors and wrapper widths 320–1040 px. Its JSON evidence is [design-review-results.json](docs/previews/design-review-results.json). One receipt test now waits for the completed local save rather than assuming a fixed 30 ms delay; its receipt durability assertions are unchanged.
+| Role | Color | Use |
+| --- | --- | --- |
+| Primary brand | Imperial Red `#B3262D` | Primary actions, selected dates, navigation accents, app icon |
+| Decorative accent | Antique Gold `#C89A43` | Moon Gate frame, hairlines, lantern and lattice details |
+| Strong accent | Deep Red `#7E1D25` | Home architectural welcome card, hover emphasis |
+| Light background | Porcelain Ivory `#FAF7F1` | Light Mode page background with white cards |
+| Dark background | Lacquer Black `#1B1D21` | Dark Mode page background with raised charcoal cards |
+| Secondary accent | Jade Green `#087F70` | Restrained confirmation/connectivity cues and small logo detail |
 
-Real iPhone validation remains required for:
+The selected Moon Gate direction is implemented as a lightweight editable SVG emblem and matching PNG app icons, simplified for small screens. A lantern and architectural line drawing appear on Home. Quiet Chinese window-lattice ornaments, gold rules and restrained card details repeat across all seven experiences. Editorial serif headings pair with device-native sans-serif controls; Chinese text uses installed device font fallbacks. The app adds no network font service, paid API, subscription or backend.
 
-- Safari and installed PWA safe areas, keyboard, text zoom, VoiceOver and clipboard behavior.
-- Actual English/Mandarin recognition and audible playback, speed selection, interrupted/background sessions and resume behavior.
-- Opening the native AMap app, choosing the correct destination/entrance and actual walking/transit routes.
-- Airplane-mode launch/relaunch and availability of cached plans, hotel addresses, saved bookings and phrases after Safari eviction/restart.
-- Actual photo/HEIC/PDF receipt selection and Drive upload, offline queue recovery, Google consent popups and expired-session reconnection without losing local data.
-- Connectivity from mainland China; Google sync/uploads, online translation and street tiles depend on reachable external services.
+Gold is decorative. Gold-colored status text uses darker brown on pale surfaces and a lighter gold on dark surfaces; body text and controls retain high contrast. Red occupies selected actions and one welcome card; most of each screen remains porcelain or charcoal. There are no decorative color gradients or cartoon illustrations.
 
-After approval, continue on this existing branch: reconcile the approved presentation with the retained runtime, preserve storage keys/OAuth scopes/read-only Sheets/private Drive receipt logic, complete feasible free-service improvements, rerun regression checks and present the final PR for deployment approval. Reliable offline street routing, background turn-by-turn guidance and uninterrupted interpretation remain outside the current static web app's guarantees.
+Online map search and conversation-provider setup remain available in expandable sections, keeping immediate travel actions prominent. The same controls and opt-in choices are retained. Five main bottom tabs remain Today, Plan, Map, Talk and Wallet, with persistent header access to Tickets and Settings.
 
-Rebuild this review with `node scripts/build-design-review.cjs` (from the committed synthetic comparison), and validate with `node scripts/design-review-check.cjs`. Regenerate the underlying comparison first if runtime UI changes after approval.
+## Preserved behavior and data
 
-## Review the design
+- Read-only Sheets synchronization, existing OAuth client settings, scopes, fixed tracker ID and session handling are retained.
+- Private Drive receipts, selected folder checks, local pending file storage, retry/idempotency and receipt filename behavior are retained.
+- Translation, saved playback speed, opt-in online provider, microphone lifecycle, saved phrasebook and emergency phrases are retained.
+- Existing maps, saved places, GPS, Chinese Address Cards and explicit HTTPS AMap handoff are retained. The review deliberately shows a labeled map placeholder because external requests are blocked.
+- Currency estimates, expense creation/editing/export, backups, checkmarks and imported tracker records retain their existing behavior and storage keys.
+- The theme preference key and presentation helper API are retained for compatibility. The browser/PWA theme colors and app icons are updated. The app-shell cache version advances to `china-companion-v1-7-preview-2`; private data and Google responses never enter that cache.
 
-Download and open [the self-contained comparison](docs/previews/review.html) in a browser. It shows the original and proposed app at **390 × 844 CSS pixels**, with page and Light/Dark controls. Its storage is temporary memory and Google connection buttons are disabled. It cannot access the production site's local data. Do not use this fictional preview for actual travel directions.
-
-Screenshots: [before Home](docs/previews/before-home-390.png), [Light Home](docs/previews/after-home-light-390.png), [Dark Home](docs/previews/after-home-dark-390.png), [Plan](docs/previews/after-itinerary-390.png), [Tickets/hotels](docs/previews/after-bookings-390.png), [hotel reference](docs/previews/after-hotels-390.png), [large Chinese address](docs/previews/after-address-390.png), [Wallet](docs/previews/after-wallet-390.png), [Talk](docs/previews/after-translate-390.png), [countdown](docs/previews/after-countdown-390.png), and [offline startup](docs/previews/after-offline-390.png).
-
-## Proposed changes
-
-- Jade Night palette, white cards, clearer type and spacing, consistent line icons, restrained gold architecture detail, reduced-motion support, keyboard focus, safe-area padding and readable Chinese font fallbacks. No external font service is needed by the app.
-- Light is the default. Manual Light/Dark selection adds only `chinaCompanionThemeV1`; it does not migrate or remove any existing key. Theme is applied before the main UI loads.
-- Five bottom tabs: Today, Plan, Map, Talk and Wallet. Persistent header buttons keep Tickets/hotels and Settings accessible on every page. Google setup messages now refer to Settings.
-- Smart Today uses China local time, a departure countdown, the next unfinished future activity, a current/upcoming hotel card, upcoming bookings and offline reference shortcuts. It does not invent missing itinerary or address information. The planner and budget remain available below these cards.
-- Chinese hotel and selected-place cards add Copy, Show Large and Open in AMap. The large-address dialog supports Escape, focus return and text selection if clipboard access is denied.
-- AMap handoff uses the documented HTTPS search URI and an explicit external link. It sends the selected place's name/address/city only when tapped, never tokens. No API key is needed. Confirm the matching destination and choose the route in AMap.
-- Wallet prioritizes conversion and expense history. Fee explanations, optional expense details and receipt setup/backup remain available in expandable sections. “Log this amount” only prepares an expense; it never saves automatically and will not replace an unfinished draft. Receipt attachments remain optional.
-- Talk retains all four playback speeds, saved speed preference, microphone recovery and the existing opt-in online translation flow. Saved emergency phrases are added, with English and Chinese visible together.
+The synthetic downloadable previews use isolated memory-only storage. Their Content Security Policy blocks external requests, Google authorization is disabled, and microphone/location/external navigation actions are blocked. The offline review control simulates UI state; it is separate from the actual network-disabled PWA test.
 
 ## Validation
 
-- All **53 original tests** retained; **8 added tests**, **61 total passing locally**. Existing test harness loads the new presentation helper; PWA assertions are updated to the preview asset/cache versions without weakening cache/privacy checks.
-- Chromium: seven pages × two themes × widths **320, 375, 390, 430 and 820 px**; no page overflow. Checked navigation targets of at least 44 × 44 px, representative normal-text/button contrast of at least 4.5:1 and reduced-motion styling.
-- Browser checks cover theme reload persistence, byte-for-byte preservation of existing snapshot/expense/checklist/speech preference values, Chinese address dialog/Escape/focus return, converter-to-expense prefilling and saving without a receipt.
-- Actual offline browser test: service worker installed, browser network disabled, app reloaded, saved Chinese hotel data opened successfully. This is a browser test, not a physical iPhone airplane-mode certification.
-- Chromium/WebKit checks are configured in the pull-request CI. Local WebKit could not launch because required system libraries could not be installed in this workspace; inspect the PR CI result before treating WebKit as verified.
-- `npm run check` and `git diff --check`. No live Google credentials or private tracker data are used in tests or previews. Receipt/Sheet core behavior remains covered by the original suite; the successful live v1.6.1 integration is recorded separately in TRAVEL_READY_STATUS.md.
+- All 61 existing unit/integration tests remain in place, covering receipts, read-only Sheets, expenses, backups, voice recovery, addresses, themes and offline behavior.
+- Automated mobile checks cover all seven screens in both themes at widths 320, 375, 390, 430, 820, 1024 and 1366 px. They check overflow, navigation targets, representative contrast, reduced motion, theme persistence and byte-for-byte preservation of existing local records.
+- Browser interactions check the large Chinese address dialog and focus return, conversion-to-expense entry, saving an expense, and a network-disabled PWA reload with saved hotel lookup.
+- The complete review checks all seven screens in both themes, sampled visible heading/body/action text contrast of at least 4.5:1, disabled Google authorization, no script errors, extra states and wrapper widths 320–1040 px. It captures first-viewport and full-content comparisons.
+- Chromium checks run locally; the PR's CI runs Chromium and WebKit. Inspect the current commit's CI result before merge. These are emulated browsers, not physical iPhones or iPads.
+- Syntax and whitespace checks apply. No real Google-account test or private data is used for design previews.
 
-## Still requires a real device / outside a static app
+Evidence: [mobile-results.json](docs/previews/mobile-results.json), [design-review-results.json](docs/previews/design-review-results.json).
 
-- Real iPhone Safari/PWA safe-area, Dynamic Type/zoom, keyboard, screen reader, clipboard, microphone and audible language-voice checks. Linux WebKit emulation is not an iPhone.
-- Native AMap opening and actual routing must be checked on the phone. This app does not offer reliable offline street maps, background navigation or live public-transport routing.
-- Uninterrupted hands-free interpretation is not guaranteed on Safari. Arbitrary-sentence translation and speech recognition may require internet; installed device voices determine offline spoken playback.
-- Google services, map tiles and online translation can be inaccessible in mainland China. Existing local plans, addresses, expense storage and the phrasebook remain the fallback; receipts upload only when a Google connection is available.
-- This redesign has not been tested against the owner's real Google account at a new preview origin. Existing origin/configuration and scopes are unchanged; production rollout and on-device verification follow approval.
+## Still needs real iPhone / iPad / Mac checks
+
+- Safari and installed PWA safe areas, keyboard, text zoom, VoiceOver, clipboard and device orientation.
+- Actual English/Mandarin recognition and audible playback, chosen speech speed, background interruption and session recovery.
+- Native AMap opening, exact destination/entrance selection, GPS alignment and actual routes.
+- Airplane-mode launch/relaunch after normal use and after Safari restart or storage eviction.
+- Real photo/HEIC/PDF selection, private Drive upload, offline queue recovery and expired Google-session reconnection without losing local records.
+- Service reachability in mainland China. Google sync/uploads, live translation and street tiles depend on reachable external services.
+
+Reliable offline street routing, background turn-by-turn guidance and uninterrupted simultaneous interpretation remain outside the guarantees of this static web app. Design approval does not certify those capabilities.
 
 ## Reproduce
 
-Node 20+, `npm ci --ignore-scripts`, `npm run check`, `npm test`. For browser checks, `npx playwright install --with-deps chromium webkit`, then `TEST_WEBKIT=1 npm run test:mobile`. These install development tools only, not runtime services.
+Node 20+, `npm ci --ignore-scripts`, `npm run check`, `npm test`. Install development browsers using `npx playwright install --with-deps chromium webkit`, then run `TEST_WEBKIT=1 npm run test:mobile`, `node scripts/review-check.cjs` and `node scripts/design-review-check.cjs`.
 
-To regenerate the comparison and original screenshots, create a separate clean v1.6.1 worktree and set `BASELINE_DIR` to it when running `node scripts/build-review.cjs` and `node scripts/mobile-check.cjs`. Never use a signed-in browser profile or private backup as the fixture. Only synthetic screenshots are committed.
-
-AMap URI reference: https://developer.amap.com/api/uri-api/guide/search/search
+To rebuild the bundled previews, use a separate clean v1.6.1 worktree and run `BASELINE_DIR=/absolute/path/to/baseline node scripts/build-review.cjs`, followed by `node scripts/build-design-review.cjs`. Use only the committed synthetic fixture. SVG sources are in `icons/moon-gate.svg` and `icons/imperial-app.svg`; no external image service is used by the app.

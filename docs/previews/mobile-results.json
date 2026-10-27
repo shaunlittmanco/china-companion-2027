@@ -41,6 +41,22 @@
   },
   {
     "engine": "chromium",
+    "width": 1024,
+    "pages": 7,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 1366,
+    "pages": 7,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
     "test": "actual offline PWA reload and saved Chinese hotel lookup",
     "passed": true
   }

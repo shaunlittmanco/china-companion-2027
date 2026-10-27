@@ -6,7 +6,7 @@
  'use strict';
  const THEME_KEY='chinaCompanionThemeV1',START='2027-01-11',END='2027-01-21';
  const theme=value=>value==='dark'?'dark':'light';
- function applyTheme(value,doc){value=theme(value);doc.documentElement.dataset.theme=value;doc.documentElement.style.colorScheme=value;const meta=doc.querySelector('meta[name="theme-color"]');if(meta)meta.content=value==='dark'?'#101E30':'#F6F8F8';return value;}
+ function applyTheme(value,doc){value=theme(value);doc.documentElement.dataset.theme=value;doc.documentElement.style.colorScheme=value;const meta=doc.querySelector('meta[name="theme-color"]');if(meta)meta.content=value==='dark'?'#1B1D21':'#FAF7F1';return value;}
  function clock(now=new Date()){
   const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now).map(x=>[x.type,x.value]));
   return {date:`${p.year}-${p.month}-${p.day}`,minutes:Number(p.hour)*60+Number(p.minute)};

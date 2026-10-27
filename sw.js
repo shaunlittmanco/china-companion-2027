@@ -1,5 +1,5 @@
-const CACHE='china-companion-v1-7-preview-1';
-const CORE=['./','./index.html','./styles.css?v=1.7.0-preview.1','./jade-ui.js?v=1.7.0-preview.1','./app.js?v=1.7.0-preview.1','./sheet-sync.js?v=1.6.1','./receipts.js?v=1.7.0-preview.1','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.6.1','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
+const CACHE='china-companion-v1-7-preview-2';
+const CORE=['./','./index.html','./styles.css?v=1.7.0-preview.2','./jade-ui.js?v=1.7.0-preview.2','./app.js?v=1.7.0-preview.2','./sheet-sync.js?v=1.6.1','./receipts.js?v=1.7.0-preview.2','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.6.1','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('china-companion-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{

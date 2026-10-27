@@ -1,42 +1,44 @@
-/* Jade Night — presentation only;
-   no remotely hosted fonts or UI libraries. */
+/* Modern Imperial China — local presentation assets only. */
 :root {
   color-scheme:light;
-  --navy:#15263F;
+  --brand:#B3262D;
+  --brand-ink:#A01F27;
+  --deep-red:#7E1D25;
+  --lacquer:#1B1D21;
   --jade:#087F70;
-  --red:#B4453D;
-  --gold:#C18A3C;
-  --bg:#F6F8F8;
+  --jade-text:#087F70;
+  --red:#A01F27;
+  --gold:#C89A43;
+  --bg:#FAF7F1;
   --paper:#FFFFFF;
-  --ink:#15263F;
-  --muted:#5A6A73;
-  --line:#DEE7E5;
-  --soft:#EDF4F1;
-  --action:#087F70;
-  --action-ink:#fff;
-  --gold-text:#80571E;
-  --gold-soft:#FBF4E9;
-  --danger-soft:#FBEEEC;
-  --shadow:0 6px 24px #15263f06;
+  --ink:#292522;
+  --muted:#6B6058;
+  --line:#E5DDD1;
+  --soft:#F5EEE5;
+  --action:#B3262D;
+  --action-ink:#FFFFFF;
+  --gold-text:#76521C;
+  --gold-soft:#F7EEDB;
+  --danger-soft:#FCEDEA;
+  --shadow:0 5px 22px #42221505;
   --radius:20px;
+  --display:Georgia,'Times New Roman',serif;
   --chinese:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC',sans-serif}
-
 :root[data-theme=dark] {
   color-scheme:dark;
-  --bg:#101E30;
-  --paper:#192C40;
-  --ink:#EDF4F5;
-  --muted:#B2C2CB;
-  --line:#34475A;
-  --soft:#1D3943;
-  --jade:#66D4BC;
-  --action:#087F70;
-  --action-ink:#fff;
-  --gold-text:#E7B975;
-  --gold-soft:#3D342B;
-  --danger-soft:#422D34;
-  --red:#F19B92;
-  --shadow:0 6px 24px #00000010}
+  --bg:#1B1D21;
+  --paper:#25262A;
+  --ink:#FAF7F1;
+  --muted:#C8C0B7;
+  --line:#48403B;
+  --soft:#332A2A;
+  --brand-ink:#FFADA9;
+  --jade-text:#82CBB8;
+  --gold-text:#F1CA86;
+  --gold-soft:#3D3325;
+  --danger-soft:#42282A;
+  --red:#FFADA9;
+  --shadow:0 5px 22px #00000012}
 
 * {
   box-sizing:border-box}
@@ -105,7 +107,7 @@ h3 {
 p {
   color:var(--muted)}
 a {
-  color:var(--jade);
+  color:var(--brand-ink);
   text-underline-offset:3px}
 svg {
   width:24px;
@@ -134,16 +136,13 @@ svg {
   gap:10px;
   min-width:0}
 .brand-logo {
-  width:40px;
-  height:46px;
+  width:44px;
+  height:48px;
   flex:none;
   display:grid;
   place-items:center;
-  border:1px solid var(--gold);
-  border-radius:12px 12px 4px 12px;
-  color:var(--jade);
-  font-size:26px;
-  font-family:var(--chinese)}
+  color:var(--brand)}
+.brand-logo svg {width:44px;height:48px}
 .brand h1 {
   font-size:18px;
   letter-spacing:-.6px;
@@ -163,7 +162,7 @@ svg {
   font-weight:750;
   color:var(--muted)}
 .eyebrow.dark {
-  color:var(--jade)}
+  color:var(--brand-ink)}
 .header-actions {
   gap:3px;
   flex-shrink:0}
@@ -179,7 +178,7 @@ svg {
   border-radius:14px}
 .icon-btn:hover,.icon-btn.nav-active {
   background:var(--soft);
-  color:var(--jade);
+  color:var(--brand-ink);
   border-color:var(--line)}
 .hero-sub {
   justify-content:space-between;
@@ -190,7 +189,7 @@ svg {
   font-weight:650}
 #networkIndicator {
   letter-spacing:0;
-  color:var(--jade);
+  color:var(--brand-ink);
   display:inline-flex;
   align-items:center;
   gap:6px}
@@ -232,8 +231,8 @@ svg {
   position:relative;
   overflow:hidden;
   min-height:219px;
-  background:var(--navy);
-  border:1px solid #233B55;
+  background:var(--lacquer);
+  border:1px solid var(--line);
   border-radius:24px;
   padding:24px;
   color:#fff;
@@ -247,7 +246,7 @@ svg {
   font-family:var(--chinese);
   font-size:16px;
   letter-spacing:6px;
-  color:#D9B478;
+  color:var(--gold);
   margin-bottom:7px}
 .intro-card h2 {
   font-family:Georgia,'Times New Roman',var(--chinese);
@@ -260,7 +259,7 @@ svg {
 .intro-card p {
   font-size:14px;
   max-width:235px;
-  color:#D6E2E7;
+  color:#F2DEDC;
   line-height:1.55;
   margin-bottom:16px}
 .hero-link {
@@ -275,7 +274,7 @@ svg {
   font-weight:650;
   font-size:14px}
 .hero-link span {
-  color:#D9B478;
+  color:var(--gold);
   font-size:20px}
 .city-art {
   position:absolute;
@@ -284,7 +283,7 @@ svg {
   width:165px;
   height:190px;
   opacity:.22;
-  color:#D9B478}
+  color:var(--gold)}
 .quick-ribbon {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -309,7 +308,7 @@ svg {
 .quick-ribbon svg {
   width:20px;
   height:20px;
-  color:var(--jade)}
+  color:var(--brand-ink)}
 .section-title {
   display:flex;
   align-items:center;
@@ -327,7 +326,7 @@ svg {
   gap:7px;
   border:0;
   background:none;
-  color:var(--jade);
+  color:var(--brand-ink);
   padding:8px 0;
   min-height:44px;
   font-size:13px;
@@ -350,7 +349,7 @@ svg {
 .panel>p {
   font-size:14px}
 .next-card {
-  border-left:3px solid var(--jade);
+  border-left:3px solid var(--brand-ink);
   padding:18px 20px}
 .next-card-top {
   display:flex;
@@ -358,7 +357,7 @@ svg {
   justify-content:space-between;
   gap:8px;
   font-size:12px;
-  color:var(--jade);
+  color:var(--brand-ink);
   font-weight:700;
   letter-spacing:.6px}
 .next-card h3 {
@@ -418,7 +417,7 @@ svg {
   padding:20px;
   margin-top:24px}
 .offline-icon {
-  color:var(--jade)}
+  color:var(--brand-ink)}
 .offline-card h3 {
   font-size:17px}
 .offline-card p {
@@ -433,7 +432,7 @@ svg {
   margin-top:8px}
 .offline-links button {
   font-size:13px;
-  color:var(--jade);
+  color:var(--brand-ink);
   border:0;
   background:none;
   padding:4px 0;
@@ -495,11 +494,11 @@ svg {
   font-size:23px;
   line-height:1.3}
 .day-pill.selected {
-  background:var(--jade);
-  color:var(--bg);
-  border-color:var(--jade)}
+  background:var(--action);
+  color:var(--action-ink);
+  border-color:var(--brand-ink)}
 .day-pill.selected small {
-  color:var(--bg)}
+  color:var(--action-ink)}
 .controls,.map-topbar,.button-row {
   display:flex;
   gap:10px;
@@ -521,7 +520,7 @@ svg {
   font-size:12px;
   font-weight:750;
   line-height:1.5;
-  color:var(--jade);
+  color:var(--brand-ink);
   padding-top:2px;
   overflow-wrap:anywhere}
 .activity-title {
@@ -586,14 +585,14 @@ svg {
   font-weight:650;
   border-radius:7px;
   background:var(--soft);
-  color:var(--jade);
+  color:var(--brand-ink);
   padding:4px 9px;
   margin-top:8px;
   max-width:100%;
   overflow-wrap:anywhere}
 .status.confirmed {
   background:var(--soft);
-  color:var(--jade)}
+  color:var(--brand-ink)}
 .status.pending {
   background:var(--gold-soft);
   color:var(--gold-text)}
@@ -618,7 +617,7 @@ svg {
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
   padding:8px max(8px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));
-  box-shadow:0 -6px 24px #15263f05}
+  box-shadow:0 -6px 24px #42221505}
 .bottom-nav button {
   display:flex;
   align-items:center;
@@ -641,7 +640,7 @@ svg {
   font-weight:600}
 .bottom-nav button.nav-active {
   background:var(--soft);
-  color:var(--jade)}
+  color:var(--brand-ink)}
 .bottom-nav button.nav-active small {
   font-weight:750}
 input,select,textarea {
@@ -703,7 +702,7 @@ select {
   color:var(--action-ink)}
 .secondary-btn {
   background:var(--paper);
-  color:var(--jade);
+  color:var(--brand-ink);
   border-color:var(--line)}
 .danger-btn {
   background:var(--danger-soft);
@@ -796,7 +795,7 @@ select {
 .place-card button {
   border:1px solid var(--line);
   background:var(--soft);
-  color:var(--jade);
+  color:var(--brand-ink);
   border-radius:12px;
   min-width:52px;
   min-height:44px;
@@ -821,7 +820,7 @@ select {
   padding:10px 6px}
 .seg.active {
   background:var(--paper);
-  color:var(--jade);
+  color:var(--brand-ink);
   box-shadow:var(--shadow)}
 .translation-result {
   display:flex;
@@ -829,14 +828,14 @@ select {
   gap:10px;
   min-height:160px;
   padding:24px;
-  background:var(--navy);
+  background:var(--lacquer);
   color:#fff;
   border-radius:20px;
   margin:18px 0}
 .translation-result small {
   font-size:12px;
   letter-spacing:1.5px;
-  color:#E4BC81}
+  color:#F1CA86}
 .translation-result strong {
   font-family:var(--chinese);
   font-size:27px;
@@ -844,7 +843,7 @@ select {
   overflow-wrap:anywhere}
 .translation-result span {
   font-size:14px;
-  color:#D2DEE5}
+  color:#E5DED5}
 .phrase-grid {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -864,7 +863,7 @@ select {
   line-height:1.5}
 .phrase-grid button span {
   font-family:var(--chinese);
-  color:var(--jade);
+  color:var(--brand-ink);
   font-size:16px}
 #translationSource {
   white-space:pre-wrap}
@@ -872,14 +871,14 @@ select {
   display:flex;
   flex-direction:column;
   gap:4px;
-  background:var(--navy);
+  background:var(--lacquer);
   color:#fff;
-  border:1px solid #233B55;
+  border:1px solid var(--line);
   border-radius:20px;
   padding:22px;
   margin:16px 0}
 .wallet-total small {
-  color:#D2DEE5;
+  color:#E5DED5;
   font-size:14px}
 .wallet-total strong {
   font-size:38px;
@@ -888,7 +887,7 @@ select {
   letter-spacing:-1.5px;
   overflow-wrap:anywhere}
 .wallet-total span {
-  color:#D2DEE5;
+  color:#E5DED5;
   font-size:13px}
 .breakdown {
   display:grid;
@@ -907,7 +906,7 @@ select {
   font-size:12px;
   letter-spacing:0;
   background:var(--soft);
-  color:var(--jade);
+  color:var(--brand-ink);
   padding:5px 9px;
   border-radius:7px}
 .booking-card>header {
@@ -942,12 +941,12 @@ select {
 .file-import {
   display:block;
   position:relative;
-  border:1px dashed var(--jade);
+  border:1px dashed var(--brand-ink);
   border-radius:14px;
   padding:18px;
   text-align:center;
   background:var(--soft);
-  color:var(--jade);
+  color:var(--brand-ink);
   font-size:14px;
   font-weight:650;
   cursor:pointer;
@@ -971,7 +970,7 @@ select {
   width:max-content;
   padding:13px 18px;
   border-radius:14px;
-  background:var(--navy);
+  background:var(--lacquer);
   color:#fff;
   font-size:14px;
   text-align:center;
@@ -1008,7 +1007,7 @@ select {
   padding:10px 16px;
   border:1px solid var(--line);
   border-radius:10px;
-  color:var(--jade);
+  color:var(--brand-ink);
   background:var(--soft);
   font-size:13px;
   font-weight:600}
@@ -1017,7 +1016,7 @@ select {
   align-items:center;
   min-height:44px;
   font-size:14px;
-  color:var(--jade);
+  color:var(--brand-ink);
   font-weight:650}
 .add-expense {
   margin:16px 0 6px}
@@ -1039,9 +1038,9 @@ details[open]>summary {
   border-top:1px solid var(--line);
   margin-top:8px}
 .fee-details>summary {
-  color:var(--jade)}
+  color:var(--brand-ink)}
 .theme-panel {
-  border-top:3px solid var(--jade)}
+  border-top:3px solid var(--brand-ink)}
 dialog {
   position:fixed;
   inset:0;
@@ -1056,7 +1055,7 @@ dialog {
   color:var(--ink);
   box-shadow:0 20px 80px #0003}
 dialog::backdrop {
-  background:#101e30b8}
+  background:#111113b8}
 .address-dialog-top {
   display:flex;
   justify-content:space-between;
@@ -1235,5 +1234,117 @@ html {
 
 .booking-switch {display:flex;gap:6px;padding:5px;background:var(--soft);border-radius:14px;margin:8px 0 18px}
 .booking-switch button {flex:1;min-height:46px;padding:10px 8px;font-size:13px;font-weight:650;border:0;border-radius:10px;background:none;color:var(--muted)}
-.booking-switch button[aria-pressed=true] {background:var(--paper);color:var(--jade);box-shadow:var(--shadow)}
+.booking-switch button[aria-pressed=true] {background:var(--paper);color:var(--brand-ink);box-shadow:var(--shadow)}
 #itineraryList .activity:not(:last-child):before {content:"";position:absolute;left:34px;top:53px;bottom:-14px;width:1px;background:var(--line)}
+
+/* Imperial identity: architectural detail, quiet porcelain cards, restrained red. */
+.brand h1 {font-family:var(--display);font-weight:600;letter-spacing:-.45px}
+.brand h1 span {font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:12px;letter-spacing:1px}
+.hero {border-top:3px solid var(--brand);background:var(--paper)}
+.hero-sub {font-size:12px;margin-top:12px;letter-spacing:.8px}
+#main:focus:not(:focus-visible) {outline:none}
+#networkIndicator {color:var(--jade-text)}
+#networkIndicator[data-online=false] {color:var(--gold-text)}
+.page-heading {position:relative;padding:2px 0 22px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.page-heading:after {content:'';display:block;width:32px;height:3px;background:var(--gold);margin-top:18px}
+.page-heading h2 {font-family:var(--display);font-size:33px;font-weight:400;line-height:1.12;letter-spacing:-1px;max-width:95%}
+.eyebrow {font-size:11px;letter-spacing:1.5px}
+.eyebrow.dark {color:var(--brand-ink)}
+.intro-card {background:var(--deep-red);border:1px solid #A74443;border-radius:22px;padding:24px;isolation:isolate}
+.intro-card:before {content:'';position:absolute;inset:10px;border:1px solid #C89A433C;border-radius:14px;pointer-events:none}
+.intro-card:after {content:'';position:absolute;right:-25px;top:-52px;width:170px;height:170px;border:1px solid #C89A4338;border-radius:50%;pointer-events:none;z-index:-1}
+.intro-card .hero-copy {width:80%}
+.intro-card h2 {font-family:var(--display);font-size:38px;font-weight:400;line-height:1.08;max-width:250px}
+.intro-card p {color:#F2DEDC;max-width:225px;font-size:14px}
+.city-zh {color:#F1CA86;font-size:16px;letter-spacing:5px;margin-bottom:10px}
+.city-art {right:-14px;bottom:-4px;width:160px;height:200px;opacity:.28;color:#E6BE73}
+.lantern-art {position:absolute;right:25px;top:15px;width:34px;height:74px;color:#E6BE73;opacity:.7;pointer-events:none}
+.quick-ribbon {border-radius:16px;margin-bottom:24px;padding:8px 4px;box-shadow:var(--shadow)}
+.quick-ribbon svg {color:var(--brand-ink);width:19px;height:19px}
+.section-title h3 {font-family:var(--display);font-size:21px;font-weight:400;letter-spacing:-.3px}
+.panel,.next-card,.hotel-reference,.booking-card {border-radius:18px}
+.next-card {border-left:3px solid var(--brand);position:relative}
+.next-card h3 {font-family:var(--display);font-size:24px;font-weight:400;line-height:1.2}
+.next-card-top {font-size:12px;letter-spacing:.5px}
+.hotel-reference {border-top:2px solid var(--gold)}
+.hotel-reference h3 {font-family:var(--display);font-size:23px;font-weight:400;line-height:1.25}
+.hotel-reference .hotel-cn {font-size:18px}
+.hotel-reference details {border-top:1px solid var(--line);margin-top:14px}
+.address-actions .secondary-btn {background:var(--soft)}
+.offline-card {background:var(--soft);border-top:2px solid var(--gold)}
+.offline-icon {color:var(--jade-text)}
+.offline-card h3 {font-family:var(--display);font-size:21px;font-weight:400}
+.metric:last-child {background:var(--paper);border-top:2px solid var(--gold)}
+.metric strong {font-variant-numeric:tabular-nums;font-weight:600}
+.day-pill {border-radius:12px;min-height:80px}
+.day-pill.selected {background:var(--action);border-color:var(--action);color:var(--action-ink)}
+.day-pill.selected small {color:var(--action-ink)}
+.activity {border-radius:16px;padding-top:20px;padding-bottom:20px}
+.activity-title {font-weight:600;font-size:17px}
+.activity.done {background:var(--soft)}
+.done-check:checked:before {background:var(--jade);border-color:var(--jade)}
+.status.confirmed {color:var(--jade-text);background:color-mix(in srgb,var(--jade) 9%,var(--paper))}
+.status:not(.confirmed):not(.pending) {color:var(--muted)}
+.bottom-nav {box-shadow:0 -6px 24px #1B1D2105;padding-top:7px}
+.bottom-nav button {border-radius:12px;position:relative;gap:4px}
+.bottom-nav button.nav-active {background:var(--soft);color:var(--brand-ink)}
+.bottom-nav button.nav-active:before {content:'';position:absolute;top:1px;width:20px;height:2px;border-radius:2px;background:var(--brand)}
+.bottom-nav small {font-size:12px;font-weight:500}
+.primary-btn {background:var(--brand);border-color:var(--brand);box-shadow:0 3px 10px #7E1D2510}
+.primary-btn:hover {background:var(--deep-red);border-color:var(--deep-red)}
+.secondary-btn {color:var(--brand-ink);border-color:var(--line)}
+input::placeholder,textarea::placeholder {color:var(--muted);opacity:1}
+input,textarea,select {border-radius:11px;background:var(--paper)}
+.notice {background:var(--soft);border-left:2px solid var(--gold)}
+.online-opt {background:var(--paper);border-radius:14px}
+.map-shell {border-radius:18px;border-top:2px solid var(--gold)}
+.map-placeholder {background:var(--soft);min-height:346px}
+.map-placeholder span {font-family:var(--display);font-size:32px}
+.translate-mode,.booking-switch {border-radius:12px;background:var(--soft)}
+.seg.active,.booking-switch button[aria-pressed=true] {box-shadow:var(--shadow);border-bottom:2px solid var(--brand)}
+.translation-result {background:var(--lacquer);border-top:2px solid var(--gold)}
+.translation-result strong {font-weight:500;font-size:28px}
+.phrase-grid button {border-radius:14px}
+.wallet-total {background:var(--lacquer);border:1px solid #49413A;border-top:2px solid var(--gold);position:relative;overflow:hidden}
+.wallet-total:after {content:'';position:absolute;right:-18px;bottom:-42px;width:150px;height:150px;border:1px solid #C89A432B;border-radius:50%;pointer-events:none}
+.wallet-total strong {font-family:var(--display);font-size:40px;font-weight:400;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.booking-card {border-top:2px solid var(--gold);position:relative}
+.booking-card h4 {font-family:var(--display);font-size:23px;font-weight:400}
+.booking-card>header {border-bottom:1px solid var(--line);padding-bottom:14px}
+.booking-card .amount {font-variant-numeric:tabular-nums;font-weight:500}
+.expense-card {border-radius:16px}
+.expense-actions button {background:var(--paper)}
+.theme-panel {border-top:2px solid var(--gold)}
+.theme-panel h3,.panel>h3 {font-family:var(--display);font-size:22px;font-weight:400}
+.theme-panel:before {content:'';display:block;width:28px;height:3px;background:var(--brand);margin:0 0 16px}
+#page-settings .panel {margin-bottom:20px}
+#page-settings details>summary {color:var(--brand-ink)}
+dialog {border-top:3px solid var(--gold);border-radius:20px}
+#addressTitle {font-family:var(--display);font-weight:400;font-size:25px;line-height:1.2}
+#addressChinese,#addressLarge {font-weight:400}
+@media(min-width:600px) {
+  .brand-logo,.brand-logo svg {width:48px;height:52px}
+  .intro-card h2 {font-size:49px;max-width:420px}
+  .intro-card p {max-width:350px}
+  .city-art {width:220px;height:230px;right:14px}
+  .lantern-art {right:55px;top:10px;width:42px;height:90px}
+  .page-heading h2 {font-size:40px}
+  .section-kicker {font-size:11px;letter-spacing:.6px}
+}
+@media(max-width:380px) {
+  .brand-logo,.brand-logo svg {width:34px;height:42px}
+  .brand h1 {font-size:16px}
+  .brand .eyebrow {font-size:11px;letter-spacing:.7px}
+  .intro-card {padding:22px;min-height:220px}
+  .intro-card h2 {font-size:34px;max-width:215px}
+  .intro-card .hero-copy {width:90%}
+  .city-art {width:142px;right:-20px;opacity:.22}
+  .lantern-art {right:20px;width:27px}
+  .page-heading h2 {font-size:31px}
+  .section-title h3 {font-size:20px}
+  .next-card h3 {font-size:23px}
+  .activity-title {font-size:16px}
+}
+
+/* Window-lattice ornament stays decorative, away from functional text. */
+.page-heading:before {content:'';position:absolute;right:0;top:0;width:45px;height:45px;opacity:.13;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23C89A43' stroke-width='1.4'%3E%3Cpath d='M1 1h46v46H1zM9 1v9h9v9H9v10h9v9H9v9M39 1v9h-9v9h9v10h-9v9h9v9M1 24h46'/%3E%3C/svg%3E") center/contain no-repeat}

@@ -19,7 +19,7 @@ async function main(){
   const browser=await engine.launch();
   try{
    if(baseline&&name==='chromium'){const c=await context(browser);const p=await c.newPage();await p.goto(origin+'/before/');await p.locator('#page-home.active').waitFor();await shot(p,'before-home-390');await p.locator('.bottom-nav [data-nav="wallet"]').click();await shot(p,'before-wallet-390');await c.close();if(process.argv.includes('--before-only'))continue;}
-   for(const width of [320,375,390,430,820]){
+   for(const width of [320,375,390,430,820,1024,1366]){
     const c=await context(browser,width);const p=await c.newPage(),errors=[];p.on('pageerror',e=>errors.push(e.message));await p.goto(origin+'/');await p.locator('#page-home.active').waitFor();const storageBefore=await p.evaluate(()=>['chinaCompanionPrivateV2','chinaCompanionExpensesV1','chinaCompanionDoneV1','chinaCompanionSpeechRateV1'].map(k=>localStorage.getItem(k)));
     assert.equal(await p.locator('.bottom-nav button').count(),5);
     for(const page of ['home','itinerary','map','translate','wallet','bookings','settings']){
@@ -45,7 +45,7 @@ async function main(){
     await p.locator('#expenseDesc').fill('Mobile TEST without receipt');await p.locator('#expenseAmount').fill('1600');await p.locator('#saveExpense').click();await p.waitForFunction(()=>JSON.parse(localStorage.getItem('chinaCompanionExpensesV1')).length===3);
     await p.locator(navSelector('settings')).click();await p.locator('#themeSelect').selectOption('dark');await p.reload();assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionExpensesV1')).length),3);
     await c.close();
-    const early=await context(browser,390,{day:'2026-10-26'}),ep=await early.newPage();await ep.goto(origin+'/');await shot(ep,'after-countdown-390');await early.close();
+    const early=await context(browser,390,{day:'2026-10-27'}),ep=await early.newPage();await ep.goto(origin+'/');await shot(ep,'after-countdown-390');await early.close();
     const oc=await context(browser),op=await oc.newPage();await op.goto(origin+'/');await op.evaluate(async()=>{await navigator.serviceWorker.ready;});await oc.setOffline(true);await op.reload();await op.locator('#page-home.active').waitFor();assert.match(await op.locator('#networkIndicator').innerText(),/Offline/);await op.locator(navSelector('bookings')).click();await op.locator('#showHotels').click();assert.match(await op.locator('#hotelList').innerText(),/云舍/);await op.locator(navSelector('home')).click();await shot(op,'after-offline-390');await oc.close();report.push({engine:name,test:'actual offline PWA reload and saved Chinese hotel lookup',passed:true});
    }
   }finally{await browser.close();}

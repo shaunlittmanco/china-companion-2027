@@ -7,7 +7,9 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     },
     {
       "screen": "itinerary",
@@ -15,7 +17,9 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     },
     {
       "screen": "map",
@@ -23,7 +27,9 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     },
     {
       "screen": "translate",
@@ -31,7 +37,9 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     },
     {
       "screen": "wallet",
@@ -39,7 +47,9 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     },
     {
       "screen": "bookings",
@@ -47,7 +57,9 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     },
     {
       "screen": "settings",
@@ -55,12 +67,14 @@
         "light",
         "dark"
       ],
-      "overflow": false
+      "overflow": false,
+      "contrast": "at least 4.5:1 for checked text",
+      "fullContentCaptured": true
     }
   ],
   "extraStates": [
     "large Chinese address",
-    "77-day departure countdown on 26 Oct 2026",
+    "76-day departure countdown on 27 Oct 2026",
     "simulated offline quick access"
   ],
   "wrapperWidths": [
