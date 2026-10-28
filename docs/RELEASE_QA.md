@@ -1,5 +1,11 @@
 # v1.7 release gate — BLOCKED pending owner/account/device checks
 
+## Current checkpoint — preview.7, HOLD
+
+Live hosted preview.6 tests found a stale Synced badge for offline queued edits and shared cache cleanup across worker scopes. Both have failing-before regression coverage and are fixed in preview.7. Local syntax and 130 Node tests pass; exact-head full CI and hosted preview.7 revalidation remain mandatory. Cache names now use `cc27:<registration-scope>:v1-7-preview-7`; do not expect or clear origin-wide legacy caches. Dedicated QA storage remains mandatory because private localStorage/IndexedDB still share an origin.
+
+The immutable preview.6 stage passed actual Google read-only/two-way ITEM readback and desktop network-offline queue/reload/reconnect, after repairing only its QA-profile cache conflict. Those results do not validate the revised candidate, actual second-device synchronization, physical airplane-mode/PWA cold launch, HEIC or genuine expiry. Root production stays v1.6.1. A revised staging publication needs owner approval. Historical evidence follows.
+
 ## Latest checkpoint — preview.6
 
 See the 28 October resume in V1_7_CONTINUATION_REPORT.md. Current suite: 128/128; actual built-in-browser DOM layout matrix: 168 passing checks. Private backup export/restore/repeated-restore round trip passed. A receipt session-cancellation defect is fixed in preview.6. Exact-origin live candidate Google sync, actual HEIC, physical devices and current-head full browser CI remain required. Historical preview.5 results below are retained as history. Use cache `china-companion-v1-7-preview-6` and preview.6 assets when checking the current candidate.

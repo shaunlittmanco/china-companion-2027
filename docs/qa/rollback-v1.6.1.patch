@@ -858,7 +858,7 @@ zbp~|yqc5omZ`V};x1>^onEocvBl^`WW7+cbNx>(!-@fgscw~+Z_t-J4U+v?abv)Oe
 ZC7R{=fe{=3<s1zB9XeoclCz(9=l^Mh6E6S&
 
 diff --git a/index.html b/index.html
-index 2235578..dc51147 100644
+index 854e3e5..dc51147 100644
 --- a/index.html
 +++ b/index.html
 @@ -1,57 +1,52 @@
@@ -869,7 +869,7 @@ index 2235578..dc51147 100644
 +<meta name="theme-color" content="#101a2e"><meta name="description" content="Private offline-first China travel companion">
  <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
  <link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="icons/favicon.png">
--<script src="jade-ui.js?v=1.7.0-preview.6"></script><link rel="stylesheet" href="styles.css?v=1.7.0-preview.6">
+-<script src="jade-ui.js?v=1.7.0-preview.7"></script><link rel="stylesheet" href="styles.css?v=1.7.0-preview.7">
 +<link rel="stylesheet" href="styles.css?v=1.6.1"><link rel="preconnect" href="https://unpkg.com">
  <title>China Companion 2027</title>
  </head><body>
@@ -997,7 +997,7 @@ index 2235578..dc51147 100644
 -<dialog id="addressDialog" aria-labelledby="addressTitle"><div class="address-dialog-top"><span class="eyebrow dark">SHOW THIS ADDRESS · 出示地址</span><button id="closeAddress" class="icon-btn" aria-label="Close address"><span data-icon="close"></span></button></div><h2 id="addressTitle"></h2><p id="addressChinese" lang="zh-CN"></p><p id="addressLarge" lang="zh-CN"></p><p class="caption">Please confirm the place and entrance with your driver.</p><button id="copyLargeAddress" class="primary-btn full">Copy address</button></dialog>
 +<nav class="bottom-nav" aria-label="Main navigation"><button data-nav="home" class="nav-active"><span>⌂</span><small>Home</small></button><button data-nav="itinerary"><span>▤</span><small>Plan</small></button><button data-nav="map"><span>⌖</span><small>Map</small></button><button data-nav="translate"><span>文</span><small>Talk</small></button><button data-nav="wallet"><span>¥</span><small>Wallet</small></button><button data-nav="bookings"><span>▣</span><small>Tickets</small></button><button data-nav="settings"><span>⚙</span><small>More</small></button></nav>
  <div id="toast" class="toast" aria-live="polite"></div>
--</div><script async src="https://accounts.google.com/gsi/client"></script><script defer src="sheet-sync.js?v=1.7.0-preview.6"></script><script defer src="receipt-store.js?v=1.6.1"></script><script defer src="travel-data.js?v=1.7.0-preview.6"></script><script defer src="receipts.js?v=1.7.0-preview.6"></script><script defer src="packing.js?v=1.7.0-preview.6"></script><script defer src="packing-sync.js?v=1.7.0-preview.6"></script><script defer src="packing-ui.js?v=1.7.0-preview.6"></script><script defer src="smart-travel.js?v=1.7.0-preview.6"></script><script defer src="companion-ui.js?v=1.7.0-preview.6"></script><script defer src="app.js?v=1.7.0-preview.6"></script><dialog id="menuDialog" class="menu-dialog" aria-labelledby="menuTitle"><div class="menu-dialog-top"><h2 id="menuTitle">Menu</h2><button id="closeMenu" class="icon-btn" aria-label="Close Menu">×</button></div><nav id="menuContents" aria-label="All app features"></nav></dialog><dialog id="planConfirm" class="plan-dialog" aria-labelledby="planConfirmTitle"><h2 id="planConfirmTitle">Review your local plan.</h2><div id="planConfirmBody"></div><div class="button-row"><button class="secondary-btn" data-smart="cancel-plan">Keep current plan</button><button class="primary-btn" data-smart="confirm-plan">Confirm local plan</button></div></dialog><dialog id="packingDialog" class="plan-dialog" aria-labelledby="packingDialogTitle"><h2 id="packingDialogTitle">Packing details</h2><div id="packingDialogBody"></div><div class="button-row"><button class="secondary-btn" data-packing="close-dialog">Cancel</button><button class="primary-btn" data-packing="save-dialog">Save locally</button></div></dialog><dialog id="packingConfirm" class="plan-dialog" aria-label="Confirm packing change"><div id="packingConfirmBody"></div><div class="button-row"><button class="secondary-btn" data-packing="cancel-confirm">Keep current checks</button><button class="primary-btn" data-packing="confirm">Confirm</button></div></dialog></body></html>
+-</div><script async src="https://accounts.google.com/gsi/client"></script><script defer src="sheet-sync.js?v=1.7.0-preview.7"></script><script defer src="receipt-store.js?v=1.6.1"></script><script defer src="travel-data.js?v=1.7.0-preview.7"></script><script defer src="receipts.js?v=1.7.0-preview.7"></script><script defer src="packing.js?v=1.7.0-preview.7"></script><script defer src="packing-sync.js?v=1.7.0-preview.7"></script><script defer src="packing-ui.js?v=1.7.0-preview.7"></script><script defer src="smart-travel.js?v=1.7.0-preview.7"></script><script defer src="companion-ui.js?v=1.7.0-preview.7"></script><script defer src="app.js?v=1.7.0-preview.7"></script><dialog id="menuDialog" class="menu-dialog" aria-labelledby="menuTitle"><div class="menu-dialog-top"><h2 id="menuTitle">Menu</h2><button id="closeMenu" class="icon-btn" aria-label="Close Menu">×</button></div><nav id="menuContents" aria-label="All app features"></nav></dialog><dialog id="planConfirm" class="plan-dialog" aria-labelledby="planConfirmTitle"><h2 id="planConfirmTitle">Review your local plan.</h2><div id="planConfirmBody"></div><div class="button-row"><button class="secondary-btn" data-smart="cancel-plan">Keep current plan</button><button class="primary-btn" data-smart="confirm-plan">Confirm local plan</button></div></dialog><dialog id="packingDialog" class="plan-dialog" aria-labelledby="packingDialogTitle"><h2 id="packingDialogTitle">Packing details</h2><div id="packingDialogBody"></div><div class="button-row"><button class="secondary-btn" data-packing="close-dialog">Cancel</button><button class="primary-btn" data-packing="save-dialog">Save locally</button></div></dialog><dialog id="packingConfirm" class="plan-dialog" aria-label="Confirm packing change"><div id="packingConfirmBody"></div><div class="button-row"><button class="secondary-btn" data-packing="cancel-confirm">Keep current checks</button><button class="primary-btn" data-packing="confirm">Confirm</button></div></dialog></body></html>
 +</div><script async src="https://accounts.google.com/gsi/client"></script><script defer src="sheet-sync.js?v=1.6.1"></script><script defer src="receipt-store.js?v=1.6.1"></script><script defer src="travel-data.js?v=1.6.1"></script><script defer src="receipts.js?v=1.6.1"></script><script defer src="app.js?v=1.6.1"></script></body></html>
 diff --git a/manifest.webmanifest b/manifest.webmanifest
 index 1f57f91..58a961f 100644
@@ -1007,20 +1007,20 @@ index 1f57f91..58a961f 100644
 -{"id":"./","name":"China Companion 2027","short_name":"China 2027","start_url":"./index.html","scope":"./","display":"standalone","background_color":"#FAF7F1","theme_color":"#FAF7F1","orientation":"portrait-primary","icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
 +{"id":"./","name":"China Companion 2027","short_name":"China 2027","start_url":"./index.html","scope":"./","display":"standalone","background_color":"#f4f6fb","theme_color":"#14223c","orientation":"portrait-primary","icons":[{"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
 diff --git a/package-lock.json b/package-lock.json
-index efea1c2..9c6298d 100644
+index 1c7edd1..9c6298d 100644
 --- a/package-lock.json
 +++ b/package-lock.json
 @@ -1,16 +1,15 @@
  {
    "name": "china-companion-2027",
--  "version": "1.7.0-preview.6",
+-  "version": "1.7.0-preview.7",
 +  "version": "1.6.1",
    "lockfileVersion": 3,
    "requires": true,
    "packages": {
      "": {
        "name": "china-companion-2027",
--      "version": "1.7.0-preview.6",
+-      "version": "1.7.0-preview.7",
 +      "version": "1.6.1",
        "devDependencies": {
          "fake-indexeddb": "6.2.6",
@@ -1092,13 +1092,13 @@ index efea1c2..9c6298d 100644
        "version": "2.3.1",
        "resolved": "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz",
 diff --git a/package.json b/package.json
-index 57ebf31..68fd055 100644
+index d58c125..68fd055 100644
 --- a/package.json
 +++ b/package.json
 @@ -1,19 +1 @@
 -{
 -  "name": "china-companion-2027",
--  "version": "1.7.0-preview.6",
+-  "version": "1.7.0-preview.7",
 -  "private": true,
 -  "engines": {
 -    "node": ">=20"
@@ -2639,17 +2639,33 @@ index 7a50606..5928fff 100644
 -.packing-sync{padding:14px 18px}.packing-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.packing-overview>*{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;min-width:0;margin:0;font-size:.86rem}.packing-overview span{font-size:.8rem}.packing-stages summary{min-height:44px;font-weight:650}#packingStage,[data-packing-bag]{scroll-margin-top:155px}.packing-overview strong{overflow-wrap:anywhere}
 +.expense-card{align-items:flex-start}.expense-main{width:100%;min-width:0;overflow-wrap:anywhere}.expense-main>small{display:block;margin:5px 0}.expense-amount{font-weight:750;margin:9px 0}.expense-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.expense-actions button{border:1px solid #d9e1ed;border-radius:9px;padding:9px 12px;background:#f4f7fc;color:#294773;min-height:42px}.expense-actions button:disabled{opacity:.55}button:disabled{cursor:default;opacity:.6}details summary{cursor:pointer;padding:10px 0;font-weight:650}input[type="checkbox"]{flex-shrink:0}input,select,textarea{min-width:0;max-width:100%;font-size:16px}.place-card>div{min-width:0;overflow-wrap:anywhere}.caption{overflow-wrap:anywhere}#translationSource{white-space:pre-wrap}#expenseForm h3{margin-top:0}@media(max-width:450px){.two-grid{grid-template-columns:minmax(0,1fr)}.button-row{flex-wrap:wrap}.button-row button{min-width:130px}}
 diff --git a/sw.js b/sw.js
-index a0ad88b..fff49d1 100644
+index 92bb775..fff49d1 100644
 --- a/sw.js
 +++ b/sw.js
-@@ -1,5 +1,5 @@
--const CACHE='china-companion-v1-7-preview-6';
--const CORE=['./packing.js?v=1.7.0-preview.6','./packing-sync.js?v=1.7.0-preview.6','./packing-ui.js?v=1.7.0-preview.6','./smart-travel.js?v=1.7.0-preview.6','./companion-ui.js?v=1.7.0-preview.6','./','./index.html','./styles.css?v=1.7.0-preview.6','./jade-ui.js?v=1.7.0-preview.6','./app.js?v=1.7.0-preview.6','./sheet-sync.js?v=1.7.0-preview.6','./receipts.js?v=1.7.0-preview.6','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.7.0-preview.6','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
+@@ -1,9 +1,7 @@
+-// Keep each worker scope independent, including legacy production at the same origin.
+-const CACHE_PREFIX='cc27:'+self.registration.scope+':';
+-const CACHE=CACHE_PREFIX+'v1-7-preview-7';
+-const CORE=['./packing.js?v=1.7.0-preview.7','./packing-sync.js?v=1.7.0-preview.7','./packing-ui.js?v=1.7.0-preview.7','./smart-travel.js?v=1.7.0-preview.7','./companion-ui.js?v=1.7.0-preview.7','./','./index.html','./styles.css?v=1.7.0-preview.7','./jade-ui.js?v=1.7.0-preview.7','./app.js?v=1.7.0-preview.7','./sheet-sync.js?v=1.7.0-preview.7','./receipts.js?v=1.7.0-preview.7','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.7.0-preview.7','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
 +const CACHE='china-companion-v1-6-1';
 +const CORE=['./','./index.html','./styles.css?v=1.6.1','./app.js?v=1.6.1','./sheet-sync.js?v=1.6.1','./receipts.js?v=1.6.1','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.6.1','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
  self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting()));});
- self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('china-companion-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
+-self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
++self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('china-companion-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
  self.addEventListener('fetch',event=>{
+  const url=new URL(event.request.url);
+  if(event.request.method!=='GET'||url.origin!==self.location.origin)return;
+@@ -11,8 +9,8 @@ self.addEventListener('fetch',event=>{
+  // No Google responses, tokens or private tracker data enter Cache Storage.
+  event.respondWith((async()=>{
+   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),5000);
+-  try{const res=await fetch(event.request,{signal:controller.signal,cache:'no-store'});if(res.ok){const clone=res.clone();event.waitUntil(caches.open(CACHE).then(c=>c.put(event.request,clone)));return res;}return await (await caches.open(CACHE)).match(event.request)||res;}
+-  catch{const saved=await (await caches.open(CACHE)).match(event.request);return saved||Response.error();}
++  try{const res=await fetch(event.request,{signal:controller.signal,cache:'no-store'});if(res.ok){const clone=res.clone();event.waitUntil(caches.open(CACHE).then(c=>c.put(event.request,clone)));return res;}return await caches.match(event.request)||res;}
++  catch{const saved=await caches.match(event.request);return saved||Response.error();}
+   finally{clearTimeout(timer);}
+  })());
+ });
 diff --git a/tests/app.test.cjs b/tests/app.test.cjs
 index 195f31f..c90cc96 100644
 --- a/tests/app.test.cjs
@@ -2698,6 +2714,34 @@ index c095b19..0000000
 -test('Chinese hotel address can be copied and shown large without source mutation',async()=>{const a=app();try{let copied;a.w.navigator.clipboard={writeText:async t=>{copied=t;}};const before=a.w.localStorage.getItem('chinaCompanionPrivateV2');a.w.document.querySelector('[data-copy-hotel]').click();await new Promise(r=>setImmediate(r));assert.equal(copied,'云舍 · 演示酒店\n示例路88号（演示地址，请勿导航）');const opener=a.w.document.querySelector('[data-large-hotel]');opener.click();assert.equal(a.el('addressDialog').hasAttribute('open'),true);assert.match(a.el('addressLarge').textContent,/示例路88号/);a.el('closeAddress').click();assert.equal(a.el('addressDialog').hasAttribute('open'),false);assert.equal(a.w.localStorage.getItem('chinaCompanionPrivateV2'),before);}finally{a.close();}});
 -test('quick conversion prepares an optional expense without saving or replacing an active draft',()=>{const a=app();try{a.el('cnyInput').value='99';a.el('expenseFixed').value='25';a.el('logConversion').click();assert.equal(a.el('expenseFixed').value,'0');assert.equal(a.el('expenseCNY').value,'99');assert.equal(a.el('expenseEditor').open,true);assert.equal(JSON.parse(a.w.localStorage.getItem('chinaCompanionExpensesV1')).length,2);a.el('expenseDesc').value='Keep this draft';a.el('expenseCNY').value='20';a.el('cnyInput').value='88';a.el('logConversion').click();assert.equal(a.el('expenseCNY').value,'20');assert.equal(a.el('expenseDesc').value,'Keep this draft');}finally{a.close();}});
 -test('saved emergency phrases work without online translation or microphone access',()=>{const a=app();try{assert.match(a.el('phraseChips').textContent,/Please call an ambulance/);assert.match(a.el('phraseChips').textContent,/请帮我报警/);assert.equal(a.el('onlineTranslate').checked,false);assert.equal(a.el('speechSpeed').value,'0.55');}finally{a.close();}});
+diff --git a/tests/packing-browser.test.cjs b/tests/packing-browser.test.cjs
+deleted file mode 100644
+index 4e5d0bb..0000000
+--- a/tests/packing-browser.test.cjs
++++ /dev/null
+@@ -1,22 +0,0 @@
+-const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),P=require('../packing'),S=require('../packing-sync');
+-test('offline edit after confirmed sync renders Pending Sync rather than stale Synced', {timeout:2000}, async()=>{
+- const row={'Record Type':'ITEM','Item / Task':'Fictional QA scarf',Bag:'Unassigned',Category:'QA',Quantity:1,Status:'Active','Item ID':'qa-scarf','Record ID':'qa-record'};
+- const records=S.parse([[],[],S.HEADERS,S.HEADERS.map(h=>row[h]??'')]);
+- let data=S.ingest({trip:{},hotels:[],smartState:{packing:{}}},records),click,api,finish;
+- const synced=new Promise(resolve=>finish=resolve),stored={chinaCompanionPickerApiKeyV1:'FICTIONAL_KEY',chinaCompanionProjectNumberV1:'123'};
+- const controls={'#packingConsent':{checked:true},'#googleClientId':{value:'123-fictional.apps.googleusercontent.com'}};
+- const picker={ViewId:{SPREADSHEETS:'spreadsheets'},DocsViewMode:{LIST:'list'},Response:{ACTION:'action',DOCUMENTS:'docs'},Action:{PICKED:'picked'},Document:{ID:'id'}};
+- picker.DocsView=class{setMode(){return this;}};
+- picker.PickerBuilder=class{addView(){return this;}setOAuthToken(){return this;}setDeveloperKey(){return this;}setAppId(){return this;}setOrigin(){return this;}setCallback(fn){this.callback=fn;return this;}build(){return this;}setVisible(){this.callback({action:'picked',docs:[{id:'fictional-workbook'}]});}};
+- const sandbox={module:{exports:{}},require:()=>P,URL,Date,console,AbortController,setTimeout,clearTimeout,crypto:require('node:crypto').webcrypto,navigator:{onLine:true},location:{origin:'https://example.test'},setInterval:()=>{},localStorage:{getItem:k=>stored[k]},document:{visibilityState:'visible',querySelector:k=>controls[k],addEventListener:(n,fn)=>{if(n==='click')click=fn;}},window:{addEventListener:()=>{}},google:{picker,accounts:{oauth2:{initTokenClient:options=>({requestAccessToken:()=>options.callback({access_token:'FICTIONAL_TOKEN',scope:S.SCOPE,expires_in:3600})})}}},fetch:async url=>({ok:true,status:200,json:async()=>url.includes('/values/')?{values:[[],[],S.HEADERS,S.HEADERS.map(h=>row[h]??'')]}:{spreadsheetId:'fictional-workbook',properties:{title:'China Trip Command Center 2027'},sheets:[{properties:{title:S.TAB,gridProperties:{columnCount:14,rowCount:100}}}]}}),ChinaPackingUI:{render:()=>{if(api?.panel(data).includes('Packing Sync · Synced'))finish();}}};
+- vm.runInNewContext(fs.readFileSync('packing-sync.js','utf8'),sandbox);api=sandbox.module.exports;
+- api.initBrowser({sheetId:()=> 'fictional-workbook',getData:()=>data,saveData:next=>{data=next;},notify:message=>assert.fail(message)});
+- click({target:{closest:()=>({dataset:{packingSync:'connect'}})}});await synced;
+- assert.match(api.panel(data),/<summary>Packing Sync · Synced<\/summary>/);
+- sandbox.navigator.onLine=false;
+- data={...data,smartState:api.queued(data,{...data.smartState,packing:P.updateItem(data,'qa-scarf',{notes:'Retain offline proposal'})})};api.changed();
+- assert.equal(Object.keys(P.state(data).sync.pending).length,1);
+- assert.match(api.panel(data),/<summary>Packing Sync · Pending Sync<\/summary>/);
+- assert.doesNotMatch(api.panel(data),/Packing records refreshed\./,'A prior successful refresh must not describe a newer pending edit');
+- assert.equal(P.state(data).sync.pending['qa-record'].draft.Notes,'Retain offline proposal');
+-});
 diff --git a/tests/packing.test.cjs b/tests/packing.test.cjs
 deleted file mode 100644
 index 87b1242..0000000
@@ -2784,15 +2828,22 @@ index 87b1242..0000000
 - assert.equal(sweeps.length,1);assert.equal(sweeps[0]['Record ID'],'manual-sweep-a');assert.equal(sweeps[0].Status,'Checked');
 -});
 diff --git a/tests/pwa.test.cjs b/tests/pwa.test.cjs
-index ee491e9..17f5686 100644
+index 1291313..17f5686 100644
 --- a/tests/pwa.test.cjs
 +++ b/tests/pwa.test.cjs
-@@ -1,5 +1,5 @@
+@@ -1,12 +1,5 @@
  const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
  function runtime(overrides={}){const handlers={};const ctx={URL,Request,Response,AbortController,setTimeout,clearTimeout,self:{addEventListener:(n,f)=>handlers[n]=f,location:{origin:'https://example.test'},registration:{scope:'https://example.test/china/'},skipWaiting:async()=>{},clients:{claim:async()=>{}}},...overrides};vm.runInNewContext(fs.readFileSync('sw.js','utf8'),ctx);return {handlers,ctx};}
--test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.7.0-preview.6')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
--test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{match:async request=>new Response('cached:'+new URL(request.url).pathname)}});for(const path of ['index.html','app.js?v=1.7.0-preview.6','receipts.js?v=1.7.0-preview.6','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
--test('cache activation preserves unrelated app caches',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','china-companion-v1-7-preview-1','china-companion-v1-7-preview-2','china-companion-v1-7-preview-3','china-companion-v1-7-preview-4','china-companion-v1-7-preview-5','china-companion-v1-7-preview-6','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','china-companion-v1-7-preview-1','china-companion-v1-7-preview-2','china-companion-v1-7-preview-3','china-companion-v1-7-preview-4','china-companion-v1-7-preview-5']);});
+-test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.7.0-preview.7')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
+-test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{open:async name=>{assert.equal(name,'cc27:https://example.test/china/:v1-7-preview-7');return{match:async request=>new Response('cached:'+new URL(request.url).pathname)};},match:async()=>assert.fail('Do not search caches from another scope')}});for(const path of ['index.html','app.js?v=1.7.0-preview.7','receipts.js?v=1.7.0-preview.7','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
+-test('cache activation preserves all legacy caches with unknown scope',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-6-1','china-companion-v1-7-preview-6','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,[]);});
+-test('activation removes only old caches for its own scope and preserves production and sibling stages',async()=>{
+- const own='cc27:https://example.test/china/:',sibling='cc27:https://example.test/china/acceptance/other/:';
+- const keys=['china-companion-v1-6-1','china-companion-v1-7-preview-7',own+'v1-7-preview-6',own+'v1-7-preview-7',sibling+'v1-7-preview-6','another-app'],removed=[];
+- const {handlers}=runtime({caches:{keys:async()=>keys,delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;
+- assert.deepEqual(removed,[own+'v1-7-preview-6']);
+- assert.ok(!removed.some(k=>k.startsWith('china-companion-')),'Do not delete legacy production caches from a staging worker');
+-});
 +test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.6.1')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
 +test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{match:async request=>new Response('cached:'+new URL(request.url).pathname)}});for(const path of ['index.html','app.js?v=1.6.1','receipts.js?v=1.6.1','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
 +test('cache activation preserves unrelated app caches',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,['china-companion-v1-5','china-companion-v1-6']);});

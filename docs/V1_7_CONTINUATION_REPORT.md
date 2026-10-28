@@ -1,5 +1,18 @@
 # v1.7 continuation report — 28 October 2026
 
+## 28 October 2026 hosted acceptance — preview.7 fixes (release HOLD)
+
+The owner-approved frozen preview.6 stage is published under acceptance/6d95030/; all production runtime hashes remain v1.6.1. Normal owner-controlled Chrome sign-in, real read-only import, selected-file consent, approved two-item app/Sheet readback, stable-ID edit/move and explicit app-versus-Sheet conflict passed. Real hosted-stage network-offline reload retained an approved QA draft; reconnect readback confirmed it once, with zero pending/conflicts. This is desktop DevTools network blocking, not physical airplane-mode cold launch or genuine OAuth expiry.
+
+Two defects were reproduced during live testing:
+
+- After a successful sync, an offline edit showed “Synced” while one durable record was pending. The summary and message now reflect the queue. A browser-adapter regression exercises legitimate simulated consent/readback, then an offline edit; it fails on the prior implementation and passes after the fix.
+- Root and staged workers used one origin-wide cache cleanup prefix. A root worker update left the staged candidate with only three required cached files. In the isolated QA profile only, the obsolete root tab/worker was removed and the staged worker reinstalled; all 18 staged CORE entries were verified before the successful offline reload. New workers now use scope-specific cache keys and read only their own cache, preserving legacy and sibling caches. A failing-before unit regression and a same-origin browser lifecycle/rollback regression cover this.
+
+Candidate runtime/assets/cache advance together to 1.7.0-preview.7. All 130 Node tests and syntax checks pass locally. Full current-head CI is required. The published frozen preview.6 stage is intentionally unchanged; publishing a revised staging path requires separate approval. No Google Cloud configuration change, new credentials, additional live identity, genuine record change or cleanup deletion occurred.
+
+Outstanding: live preview.7 revalidation, real second device, genuine authorization expiry, safely isolated CHECK/SWEEP/Manila/Home, physical iPhone/PWA/HEIC/GPS/audio. Ordinary packing sessions include genuine inventory, so those live checkpoint tests were not started under the two-item approval. Keep PR Draft; do not merge or release.
+
 ## 28 October 2026 resume — preview.6 (release HOLD)
 
 Runtime fix: receipt-session cancellation guard on the current branch. Version **1.7.0-preview.6**; asset URLs and worker cache advance together. The PR remains Draft/unmerged and public production remains v1.6.1. No release gate is waived.

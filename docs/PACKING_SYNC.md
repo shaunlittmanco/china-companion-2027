@@ -53,3 +53,8 @@ Official integration references: [per-file scopes](https://developers.google.com
 ## 28 October read-only verification
 
 Connected metadata/schema checks still confirm seven unique starter ITEM and Record IDs. No Sheet writes or candidate-origin two-way pass was produced. Preview.6 changes only the receipt response-session guard plus versioned assets/tests; packing source and protocol are unchanged. See the latest continuation report for current evidence and owner gates.
+
+
+## Honest offline status
+
+A durable pending queue always prevents a Synced summary, even if the latest completed network operation succeeded. Last successful readback time remains historical information. Offline edits remain pending through reload; reconnection reads before writing and verifies canonical identity afterward. A stale successful message must not describe a newer pending edit.
