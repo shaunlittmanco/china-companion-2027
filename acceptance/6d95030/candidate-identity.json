@@ -1,0 +1,24 @@
+{
+  "commit": "6d95030ff3b73db1ec5749ab5118c5047580cb37",
+  "version": "1.7.0-preview.6",
+  "assetHashes": {
+    "packing.js": "2f31cfb3675113fcacec4c46a9ce632eeaa3626f8251d9901b948b906a142fb2",
+    "packing-sync.js": "6f4574c0549bf6708fb7f8da1ce30e3f06ef700e62fba2845bfe8557d256ecf6",
+    "packing-ui.js": "156fc4247643574f3d6e5d90c0da9968b20160313cc5069ebc08465f57d47064",
+    "smart-travel.js": "dc951251c62b291aaca68d8f8944f9a25ad20c06dbc2d88346ef4533148452eb",
+    "companion-ui.js": "ad755954d809bfa9052a3e8974293fed79d9f5e9b21939271c5d89d005496506",
+    "index.html": "a2de368d85c475f659775f6cc3d2fb5b6683e7426cc3022807f743651150252c",
+    "styles.css": "657b4afb50fc2146cf2def17e43e20edcd51a659eb4fbac59a2a035230f00288",
+    "jade-ui.js": "802b1ef4937a41b4a1875e1ad3d3f5ff10fdc38bd56a6fbb6b785e47a33f5e3f",
+    "app.js": "c05dad24e30cf6594be75202ceb7e14d6d7ae51f814ea0fb29a03c3f61b5881c",
+    "sheet-sync.js": "54a7d59913b1dbf2917b244516cfe70f4b265e340422a304ad8c548162ccf122",
+    "receipts.js": "11c2a0762918a8f9d62730242d0ab83be80db62f8814e7247f90574559afe739",
+    "receipt-store.js": "f8e927ecdc9673f7da69868e552a833debbbb0d7fb189ed5a6c040f77ef80041",
+    "travel-data.js": "e5e323806e46effb4befbec985c14896623ec27dd5d9170f6a603b3109ecb8d1",
+    "manifest.webmanifest": "e2cf3d6fcd22065dd932d2b46d65efdac179f35f8d2c54d70624c0e3f6bef758",
+    "icons/icon-192.png": "3a8cd9016fce927216bf4cc5bf64358322f21a18c1ffa2e7c4cce47d151f04c5",
+    "icons/icon-512.png": "c6a3414d3863aaf981f972cb7756f36363cb4595c5bf1987c621cbd3cc2b4e96",
+    "icons/favicon.png": "841489f568aee9d852aae5fd66a1be3ab805e63822cbdf7986386aa5327eb931",
+    "sw.js": "3a3d8f1ea6487cdb75566caa534718e5cf07958a6c8bf5390e8e1c48f4f7f3b1"
+  }
+}
