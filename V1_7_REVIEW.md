@@ -109,3 +109,7 @@ See [implementation and owner tests](docs/PACKING_SYNC.md) and [release gates](d
 | Beijing checkout | [Final hotel](docs/previews/full-packing-beijing-light-dark.png) |
 | Manila | [Baggage collection](docs/previews/full-packing-airport-light-dark.png) |
 | Back Home | [Reconciliation and media backup](docs/previews/full-packing-return-light-dark.png) |
+
+## Current candidate — preview.6
+
+Receipt readback now rejects cancellation during JSON decoding; runtime fix on the current preview.6 branch. Current Node suite: 128/128. Built-in-browser DOM layout checks: 168 passing screen/theme/width combinations. The private production backup passed isolated candidate round-trip and repeated-restore checks. Live candidate OAuth/packing writes and physical-device gates remain open. No merge/deployment. See the 28 October continuation report.

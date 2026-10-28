@@ -1,5 +1,10 @@
 # v1.7 release gate — BLOCKED pending owner/account/device checks
 
+## Latest checkpoint — preview.6
+
+See the 28 October resume in V1_7_CONTINUATION_REPORT.md. Current suite: 128/128; actual built-in-browser DOM layout matrix: 168 passing checks. Private backup export/restore/repeated-restore round trip passed. A receipt session-cancellation defect is fixed in preview.6. Exact-origin live candidate Google sync, actual HEIC, physical devices and current-head full browser CI remain required. Historical preview.5 results below are retained as history. Use cache `china-companion-v1-7-preview-6` and preview.6 assets when checking the current candidate.
+
+
 Design approval is complete. Production deployment is conditionally authorized by [the owner’s PR #1 authorization](https://github.com/shaunlittmanco/china-companion-2027/pull/1#issuecomment-6433127953), **only after all critical checks truly pass**. Do not merge based on CI alone. This report does not mark physical devices or live account flows passed.
 
 The previously approved Imperial design and original v1.7 features are preserved. Subsequent owner instructions add Packing & Bags, hotel-to-hotel/return-home checks and opt-in bidirectional packing sync as mandatory release gates. Runtime assets now include those additions. Recheck the latest PR head and CI before release. See [Packing implementation and account checklist](PACKING_SYNC.md).

@@ -49,3 +49,7 @@ Use the latest committed candidate, a private backup and `docs/RELEASE_QA.md`. S
 `tests/packing.test.cjs` covers the model/codec/queue/auth failures, schema/ID guards, two simulated simultaneous writers, lost-response recovery, source reorder and completed-history retention. `tests/app.test.cjs` exercises the actual Menu, offline add/move, durable queue and independent per-bag checkout/sweep UI. The review and mobile scripts cover Light/Dark, widths and fictional interaction flows. Release-check verifies pending packing data through service-worker upgrade/offline/rollback/forward recovery. See latest CI and `RELEASE_QA.md` for actual execution results; automated simulations do not replace owner checks.
 
 Official integration references: [per-file scopes](https://developers.google.com/workspace/sheets/api/scopes), [Google Picker](https://developers.google.com/workspace/drive/picker/guides/overview), [bounded table append](https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheets.values/append).
+
+## 28 October read-only verification
+
+Connected metadata/schema checks still confirm seven unique starter ITEM and Record IDs. No Sheet writes or candidate-origin two-way pass was produced. Preview.6 changes only the receipt response-session guard plus versioned assets/tests; packing source and protocol are unchanged. See the latest continuation report for current evidence and owner gates.

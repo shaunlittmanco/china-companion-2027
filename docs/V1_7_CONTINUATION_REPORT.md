@@ -1,3 +1,34 @@
+# v1.7 continuation report — 28 October 2026
+
+## 28 October 2026 resume — preview.6 (release HOLD)
+
+Runtime fix: receipt-session cancellation guard on the current branch. Version **1.7.0-preview.6**; asset URLs and worker cache advance together. The PR remains Draft/unmerged and public production remains v1.6.1. No release gate is waived.
+
+### Confirmed defect and fix
+
+A synthetic receipt readback paused during JSON decoding reproduced acceptance after Disconnect: the upload resolved as verified despite cancellation. The Drive client now rechecks its session after decoding, rejecting stale metadata and retaining local receipt bytes and the reserved ID for retry. One regression failed on the original code and passes after the fix. No uploader schema, credentials or production data changed. Fictional review bundles and the source rollback patch were refreshed.
+
+### New evidence from this Mac Work run
+
+- Syntax and **128/128 Node regression tests pass** on preview.6. An intermediate run caught three expected PWA assertions pinned to preview.5; those were updated with the new cache version and the complete suite rerun successfully.
+- Actual preview.6 runtime assets were confirmed in the built-in browser. **168 DOM layout checks pass**: 12 screens × 2 themes × 7 widths (320, 375, 390, 430, 820, 1024, 1366), checking horizontal overflow, active page and theme. This is not a physical Safari/VoiceOver test or the complete CI browser interaction suite.
+- Existing production Google configuration and folder selection persist. Production read-only refresh and owner-approved synthetic JPG/PNG/PDF uploads passed in the prior part of this same Work workflow. Drive metadata independently confirms the three identities, expected filenames/types and private sharing. These are v1.6.1 live results, not candidate-origin OAuth evidence.
+- The backup download timeout was a browser event-detection failure: the file existed in Downloads and the app completed serialization. A private local copy validates, excludes Google auth configuration and retains the original snapshot, checklists and three verified QA receipt references. It restores into a separate local-origin candidate; a second restore adds zero entries. Exporting again preserves the snapshot, checklists, expenses and receipts exactly (creation timestamp excluded). No backup defect was reproduced.
+- Connected read-only metadata/header checks confirm all supported tabs; seven packing starter ITEM IDs/Record IDs remain unique. Hotels inspection was explicitly owner-approved after automated review blocked the original broad read. No Sheet write occurred. These connector checks do not prove candidate-origin refresh.
+- Owner approved cleanup only of the three synthetic QA expenses/files. All three matching Drive files were moved to recoverable Trash, and no matching file remains in the existing folder. One local entry was removed after owner handled the native confirmation; two local QA entries were still present at the last read. Do not call cleanup complete. A verified pre-cleanup backup is retained privately. No genuine record was deleted.
+- Standalone Chromium remains blocked by the execution sandbox's Mach-service permissions. A separate WebKit launch also aborts. The exact-origin account helper therefore cannot run here. The regenerated rollback patch applies and its isolated baseline syntax/regression checks complete before the browser-stage failure. New full browser migration/rollback/forward evidence must come from exact-head CI; historical CI is not substituted for this candidate.
+
+### Remaining mandatory gates and continuation
+
+1. Confirm/remove only the two remaining approved local QA entries through the native browser confirmations; retain the verified backup. Drive Trash can restore the matching QA files if needed.
+2. Run the unmodified exact-origin `scripts/account-qa.cjs` outside the execution sandbox, using the existing configuration and workbook. Local-origin backup/layout QA is not an OAuth acceptance environment.
+3. Verify actual candidate read-only refresh of all supported tabs and the seven packing starters. Before `--packing-write`, obtain approval of one exact temporary packing-record plan, then separately complete file consent/Picker selection. No temporary Sheet writes have been authorized or made in this run.
+4. Verify live app/Sheet stable-ID upserts/readback, independent CHECK/SWEEP/home, offline/expiry/retry and real two-device conflicts with unchanged unrelated tabs.
+5. Complete physical iPhone/iPad/Mac checks in RELEASE_QA: candidate identity, Light/Dark/safe areas/keyboard/VoiceOver, actual HEIC, GPS/AMap, microphone/audio, offline cold launch, backup/restore and second-device convergence. Live snow/DiDi/routing are not claimed.
+6. Check the final PR head's new CI and all critical account/device gates before merge/deploy. Production stays unchanged while any gate is open.
+
+Private backups, records, IDs, receipt links, tokens and screenshots containing private trip data are intentionally excluded from GitHub. Current-head CI status is recorded in the PR after push.
+
 # v1.7 continuation report — 27 October 2026
 
 **Release decision: HOLD. v1.7 has not been merged or deployed.** The owner's approved design and conditional release authorization remain in effect, with the new packing/sync requirements as additional gates. No real-account or physical-device check has been marked passed.
