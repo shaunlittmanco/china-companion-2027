@@ -1,0 +1,24 @@
+{
+  "commit": "9223081aad86866e20b40c2d7dc0e97e1d6f9d59",
+  "version": "1.7.0-preview.7",
+  "assetHashes": {
+    "app.js": "c05dad24e30cf6594be75202ceb7e14d6d7ae51f814ea0fb29a03c3f61b5881c",
+    "companion-ui.js": "ad755954d809bfa9052a3e8974293fed79d9f5e9b21939271c5d89d005496506",
+    "icons/favicon.png": "841489f568aee9d852aae5fd66a1be3ab805e63822cbdf7986386aa5327eb931",
+    "icons/icon-192.png": "3a8cd9016fce927216bf4cc5bf64358322f21a18c1ffa2e7c4cce47d151f04c5",
+    "icons/icon-512.png": "c6a3414d3863aaf981f972cb7756f36363cb4595c5bf1987c621cbd3cc2b4e96",
+    "index.html": "5caa399bf5650db008dbb437bc68e935b62f6c5a26fb384df79fcb784528580f",
+    "jade-ui.js": "802b1ef4937a41b4a1875e1ad3d3f5ff10fdc38bd56a6fbb6b785e47a33f5e3f",
+    "manifest.webmanifest": "e2cf3d6fcd22065dd932d2b46d65efdac179f35f8d2c54d70624c0e3f6bef758",
+    "packing-sync.js": "a6033b5f018a3a7decd399ec39749fc6e7796aa6d3c7d1758815bee49e8a262b",
+    "packing-ui.js": "156fc4247643574f3d6e5d90c0da9968b20160313cc5069ebc08465f57d47064",
+    "packing.js": "2f31cfb3675113fcacec4c46a9ce632eeaa3626f8251d9901b948b906a142fb2",
+    "receipt-store.js": "f8e927ecdc9673f7da69868e552a833debbbb0d7fb189ed5a6c040f77ef80041",
+    "receipts.js": "11c2a0762918a8f9d62730242d0ab83be80db62f8814e7247f90574559afe739",
+    "sheet-sync.js": "54a7d59913b1dbf2917b244516cfe70f4b265e340422a304ad8c548162ccf122",
+    "smart-travel.js": "dc951251c62b291aaca68d8f8944f9a25ad20c06dbc2d88346ef4533148452eb",
+    "styles.css": "657b4afb50fc2146cf2def17e43e20edcd51a659eb4fbac59a2a035230f00288",
+    "sw.js": "2bac8a1ddadbc70447f85e9d23902841bfd214d1f635226329091da39f85f26d",
+    "travel-data.js": "e5e323806e46effb4befbec985c14896623ec27dd5d9170f6a603b3109ecb8d1"
+  }
+}
