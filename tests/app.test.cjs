@@ -99,3 +99,46 @@ test('complete backup merges vlog and notes into an existing trip while preservi
 test('Packing Menu uses permanent bags, offline edits queue durably, transfers retain identity and expenses stay unchanged',async()=>{const seed=JSON.parse(JSON.stringify(require('../scripts/preview-fixture.cjs'))),app=start({seed});try{const initial=app.w.localStorage.getItem('chinaCompanionPrivateV2'),money=app.w.localStorage.getItem('chinaCompanionExpensesV1');app.w.document.querySelector('[data-smart="menu-nav"][data-page="packing"]').click();await flush();assert.equal(app.w.localStorage.getItem('chinaCompanionPrivateV2'),initial,'Navigation must not modify private records');assert.equal(app.w.document.querySelectorAll('[data-packing-bag]').length,4);app.w.document.querySelector('[data-packing="add-item"]').click();app.set('packItemName','Offline fictional souvenir');app.set('packItemBag','personal');app.w.document.querySelector('[data-packing="save-dialog"]').click();let d=JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2')),item=app.w.ChinaPacking.inventory(d).find(i=>i.name==='Offline fictional souvenir');assert.ok(item);assert.equal(item.packed,false);assert.ok(Object.keys(d.smartState.packing.sync.pending).length>0);app.w.document.querySelector('[data-packing="edit-item"][data-id="'+item.id+'"]').click();app.set('packItemBag','cabin');app.w.document.querySelector('[data-packing="save-dialog"]').click();d=JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2'));assert.equal(app.w.ChinaPacking.inventory(d).find(i=>i.id===item.id).bag,'cabin');assert.equal(app.w.localStorage.getItem('chinaCompanionExpensesV1'),money);assert.match(app.el('packingSyncPanel').textContent,/Pending Sync/);assert.equal(app.w.document.querySelectorAll('.bottom-nav button').length,5);}finally{app.close();}});
 test('Packing Journey UI displays four per-bag checklists and checkout room sweep independent from home packing',async()=>{const app=start({seed:require('../scripts/preview-fixture.cjs')});try{app.w.document.querySelector('[data-smart="menu-nav"][data-page="packing"]').click();app.w.document.querySelector('[data-packing="mode"][data-value="journey"]').click();app.w.document.querySelector('[data-packing="open-stage"][data-id="home-outbound"]').click();app.w.document.querySelector('[data-packing="prepare-all"]').click();assert.equal(app.el('packingConfirm').open,true);app.w.document.querySelector('[data-packing="confirm"]').click();assert.match(app.el('packingStage').textContent,/9\/9 belongings/);const hotel=app.w.document.querySelector('[data-packing="open-stage"][data-id$=":checkout"]');hotel.click();assert.equal(app.w.document.querySelectorAll('[data-stage-bag]').length,4);assert.equal(app.w.document.querySelectorAll('[data-packing-task]').length,13);assert.match(app.el('packingStage').textContent,/0\/9 belongings/);const dropdown=app.w.document.querySelector('[data-packing-task="0"]');dropdown.value='checked';dropdown.dispatchEvent(new app.w.Event('change',{bubbles:true}));assert.equal(app.w.document.querySelector('[data-packing-task="0"]').value,'checked');assert.match(app.el('packingStage').textContent,/critical belongings unresolved/);}finally{app.close();}});
 test('private tracker is configured locally, never switches a bound workbook or requests OAuth before setup',async()=>{const app=start({offline:false});try{let requests=0;app.w.google={accounts:{oauth2:{initTokenClient(){requests++;return{requestAccessToken(){}};}}}};app.set('googleClientId','123456789-public_test.apps.googleusercontent.com');app.click('googleConnect');assert.equal(requests,0);const id='fictional_private_tracker_00000001';app.set('googleSheetId','https://docs.google.com/spreadsheets/d/'+id+'/edit');app.click('saveTrackerConfig');assert.equal(app.w.localStorage.getItem('chinaCompanionSheetIdV1'),id);assert.equal(app.el('trackerSourceLink').href,'https://docs.google.com/spreadsheets/d/'+id+'/edit');app.set('googleSheetId','different_fictional_tracker_0000001');app.click('saveTrackerConfig');assert.equal(app.w.localStorage.getItem('chinaCompanionSheetIdV1'),id);assert.match(app.el('toast').textContent,/bound to its existing workbook/);assert.equal(requests,0);}finally{app.close();}});
+test('opening checkpoints is read-only until an intentional saved packing action',()=>{
+ const app=start({offline:true,seed:require('../scripts/preview-fixture.cjs')});
+ try{
+  const saved=()=>JSON.parse(app.w.localStorage.getItem('chinaCompanionPrivateV2'));
+  const pack=()=>app.w.ChinaPacking.state(saved());
+  const pending=()=>Object.keys(pack().sync?.pending||{});
+  app.w.document.querySelector('[data-smart="menu-nav"][data-page="packing"]').click();
+  app.w.document.querySelector('[data-packing="mode"][data-value="journey"]').click();
+  const before=JSON.stringify(saved()),initialCount=pending().length;
+  const home='home-outbound';
+  app.w.document.querySelector('[data-packing="open-stage"][data-id="'+home+'"]').click();
+  assert.match(app.el('packingStage').textContent,/Home/);
+  assert.equal(JSON.stringify(saved()),before,'merely viewing Home must not persist any data');
+  assert.equal(pack().sessions?.[home],undefined);
+  assert.equal(pending().length,initialCount,'opening Home must not queue any CHECK or task');
+  const checkout=app.w.document.querySelector('[data-packing="open-stage"][data-id$=":checkout"]');
+  assert.ok(checkout,'fictional preview hotel checkout is available');
+  const stage=checkout.dataset.id;
+  checkout.click();
+  assert.match(app.el('packingStage').textContent,/Checkout sweep/);
+  assert.equal(JSON.stringify(saved()),before,'viewing checkout must not persist any data');
+  assert.equal(pack().sessions?.[stage],undefined);
+  assert.equal(pending().length,initialCount,'opening a stage must not queue room SWEEP tasks');
+  const item=app.w.document.querySelector('[data-packing="verify-item"]');
+  if(item){
+   item.click();
+   assert.equal(app.el('packingDialog').open,true);
+   app.w.document.querySelector('[data-packing="close-dialog"]').click();
+   assert.equal(JSON.stringify(saved()),before,'dismissing a verify dialog cannot start a stage');
+  }
+  const first=app.w.document.querySelector('[data-packing-task="0"]');
+  assert.ok(first,'checkout has a real room task to verify');
+  first.value='checked';
+  first.dispatchEvent(new app.w.Event('change',{bubbles:true}));
+  assert.equal(pack().sessions?.[home],undefined,'untouched Home must remain absent');
+  assert.equal(pack().sessions?.[stage]?.tasks?.[app.w.ChinaPacking.SWEEP[0]],'checked');
+  assert.ok(pending().length>initialCount,'first saved check is the point at which sync proposals are queued');
+  const queued=JSON.stringify(pack().sync.pending);
+  const reopen=app.w.document.querySelector('[data-packing="open-stage"][data-id="'+stage+'"]');
+  reopen.click();
+  assert.equal(JSON.stringify(pack().sync.pending),queued,'reopening a started session does not queue again');
+ }finally{app.close();}
+});
