@@ -1,3 +1,7 @@
+## Current checkpoint — 29 October 2026, preview.8
+
+See [preview.8 acceptance](docs/PREVIEW8_ACCEPTANCE.md) for the current implementation, private recovery validation, evidence limits and release HOLD. Global Search, deliberate AMap iOS handoff and passive checkpoint coverage are implemented. Historical sections below retain their original dates and must not override this checkpoint. Production remains v1.6.1; PR #1 stays Draft/unmerged. New staging publication and applying iPhone recovery require separate owner approval.
+
 # v1.7 Modern Imperial China — Smart Travel review
 
 **Design approved; production approval is conditional on all critical release gates. Existing PR #1 remains draft/unmerged. See [release QA and owner handoff](docs/RELEASE_QA.md).** Production stays at the existing URL on v1.6.1. This extends the existing branch; it does not rebuild the app.

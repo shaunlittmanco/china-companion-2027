@@ -29,5 +29,28 @@
   const a=address(place),keyword=[a.chineseName||a.name,a.address].filter(Boolean).join(' ');
   const url=new URL('https://uri.amap.com/search');url.searchParams.set('keyword',keyword);if(a.city)url.searchParams.set('city',a.city);url.searchParams.set('src','ChinaCompanion2027');url.searchParams.set('callnative','1');return url.href;
  }
- return {THEME_KEY,START,END,theme,applyTheme,clock,timeMinutes,today,address,addressText,amapUrl};
+ function coordinates(p={}){
+  if(!['GCJ-02','WGS-84'].includes(p.coordinateSystem)||p.latitude==null||p.longitude==null||String(p.latitude).trim()===''||String(p.longitude).trim()==='')return null;
+  const lat=Number(p.latitude),lon=Number(p.longitude);return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180?{lat,lon,dev:p.coordinateSystem==='GCJ-02'?'0':'1'}:null;
+ }
+ function amapNative(place={},origin=null,mode=null){
+  const a=address(place),name=a.chineseName||place.activity||a.name,c=coordinates(place),modes={Walking:'2',Bicycle:'3',Metro:'1',Bus:'1',DiDi:'0',Driving:'0',Transit:'1',Cycling:'3'};
+  const u=new URL('iosamap://'+(mode&&modes[mode]?'path':c?'viewMap':'poi'));u.searchParams.set('sourceApplication','ChinaCompanion2027');
+  if(mode&&modes[mode]){
+   u.searchParams.set('t',modes[mode]);u.searchParams.set('dname',name);
+   const o=coordinates(origin||{});
+   // dev applies to both endpoints. Mixed/unknown systems use names, never relabel GPS.
+   if(c&&(!o||o.dev===c.dev)){u.searchParams.set('dlat',c.lat);u.searchParams.set('dlon',c.lon);u.searchParams.set('dev',c.dev);if(o){u.searchParams.set('slat',o.lat);u.searchParams.set('slon',o.lon);}}
+   if(origin?.name)u.searchParams.set('sname',origin.name);
+  }else if(c){u.searchParams.set('poiname',name);u.searchParams.set('lat',c.lat);u.searchParams.set('lon',c.lon);u.searchParams.set('dev',c.dev);}
+  else u.searchParams.set('name',[a.city,name,a.address].filter(Boolean).join(' '));
+  return u.href;
+ }
+ function isIOS(nav=globalThis.navigator){return /iPhone|iPad|iPod/.test(nav?.userAgent||'')||nav?.platform==='MacIntel'&&nav?.maxTouchPoints>1;}
+ function amapActions(place,options={}){
+  const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const web=new URL(options.web||amapUrl(place));web.searchParams.set('callnative','0');
+  return `${isIOS()?`<a class="secondary-btn" href="${esc(amapNative(place,options.origin,options.mode))}" referrerpolicy="no-referrer">Open in AMap App</a>`:''}<a class="secondary-btn" href="${esc(web.href)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open AMap Website ↗</a><small class="amap-help">${isIOS()?'If the app does not open, use the website link. AMap uses your installed app language; confirm the Chinese destination and entrance.':'On iPhone, open the installed AMap app or use the website.'}</small>`;
+ }
+ return {THEME_KEY,START,END,theme,applyTheme,clock,timeMinutes,today,address,addressText,amapUrl,coordinates,amapNative,amapActions,isIOS};
 });

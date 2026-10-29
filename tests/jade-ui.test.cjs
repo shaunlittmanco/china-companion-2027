@@ -10,3 +10,51 @@ test('manual theme selection defaults to Light and changes only its new preferen
 test('Chinese hotel address can be copied and shown large without source mutation',async()=>{const a=app();try{let copied;a.w.navigator.clipboard={writeText:async t=>{copied=t;}};const before=a.w.localStorage.getItem('chinaCompanionPrivateV2');a.w.document.querySelector('[data-copy-hotel]').click();await new Promise(r=>setImmediate(r));assert.equal(copied,'云舍 · 演示酒店\n示例路88号（演示地址，请勿导航）');const opener=a.w.document.querySelector('[data-large-hotel]');opener.click();assert.equal(a.el('addressDialog').hasAttribute('open'),true);assert.match(a.el('addressLarge').textContent,/示例路88号/);a.el('closeAddress').click();assert.equal(a.el('addressDialog').hasAttribute('open'),false);assert.equal(a.w.localStorage.getItem('chinaCompanionPrivateV2'),before);}finally{a.close();}});
 test('quick conversion prepares an optional expense without saving or replacing an active draft',()=>{const a=app();try{a.el('cnyInput').value='99';a.el('expenseFixed').value='25';a.el('logConversion').click();assert.equal(a.el('expenseFixed').value,'0');assert.equal(a.el('expenseCNY').value,'99');assert.equal(a.el('expenseEditor').open,true);assert.equal(JSON.parse(a.w.localStorage.getItem('chinaCompanionExpensesV1')).length,2);a.el('expenseDesc').value='Keep this draft';a.el('expenseCNY').value='20';a.el('cnyInput').value='88';a.el('logConversion').click();assert.equal(a.el('expenseCNY').value,'20');assert.equal(a.el('expenseDesc').value,'Keep this draft');}finally{a.close();}});
 test('saved emergency phrases work without online translation or microphone access',()=>{const a=app();try{assert.match(a.el('phraseChips').textContent,/Please call an ambulance/);assert.match(a.el('phraseChips').textContent,/请帮我报警/);assert.equal(a.el('onlineTranslate').checked,false);assert.equal(a.el('speechSpeed').value,'0.55');}finally{a.close();}});
+
+test('local search matches English, Taglish and Chinese feature synonyms without scanning private configuration',()=>{
+ const S=require('../smart-travel'),d=structuredClone(fixture.chinaCompanionPrivateV2);d.oauthToken='DO_NOT_INDEX_TOKEN';d.receipts=[{url:'DO_NOT_INDEX_RECEIPT_URL'}];
+ for(const [q,page,sub]of [['maleta','packing','bags'],['签证','packing','home-outbound'],['checkout','packing','checkout'],['resibo','settings','receipts'],['酒店','bookings','hotels'],['instagram','vlog','instagram']])assert.ok(S.searchLocal(d,q).some(r=>r.target.page===page&&r.target.sub===sub),q);
+ assert.equal(S.searchLocal(d,'DO_NOT_INDEX').length,0);assert.equal(S.searchLocal(d,'unfindable-fictional-xyz').length,0);
+});
+test('global search is offline, groups local content, navigates bag items and preserves saved data and unsaved drafts',()=>{
+ const a=app();try{
+ const before=Object.fromEntries(Object.keys(a.w.localStorage).map(k=>[k,a.w.localStorage.getItem(k)]));a.el('expenseDesc').value='Keep unsaved expense';
+ a.el('openSearch').click();assert.equal(a.el('globalSearchDialog').open,true);assert.equal(a.w.document.activeElement.id,'globalSearchInput');
+ a.el('globalSearchInput').value='maleta';a.el('globalSearchInput').dispatchEvent(new a.w.Event('input'));assert.match(a.el('globalSearchResults').textContent,/Packing & Bags/);
+ a.el('globalSearchInput').dispatchEvent(new a.w.KeyboardEvent('keydown',{key:'Enter',bubbles:true}));assert.equal(a.el('globalSearchDialog').open,false);assert.ok(a.el('page-packing').classList.contains('active'));assert.ok(a.el('packingSearch'));
+ const item=a.w.ChinaPacking.inventory(JSON.parse(before.chinaCompanionPrivateV2))[0];a.el('openSearch').click();a.el('globalSearchInput').value=item.name;a.el('globalSearchInput').dispatchEvent(new a.w.Event('input'));
+ const itemResult=[...a.w.document.querySelectorAll('#globalSearchResults [data-search-result]')].find(b=>b.closest('section').getAttribute('aria-label')==='My Belongings');assert.ok(itemResult);itemResult.click();assert.equal(a.el('packingSearch').value,item.name);assert.equal(a.w.document.activeElement.dataset.id,item.id);
+ assert.equal(a.el('expenseDesc').value,'Keep unsaved expense');for(const[k,v]of Object.entries(before))assert.equal(a.w.localStorage.getItem(k),v,k);
+ }finally{a.close();}
+});
+test('global search supports arrows, Escape and focus return from all primary screens and Menu',()=>{
+ const a=app();try{for(const page of ['home','itinerary','map','translate','wallet']){a.w.document.querySelector('.bottom-nav [data-nav="'+page+'"]').click();a.el('openSearch').click();a.el('globalSearchInput').dispatchEvent(new a.w.KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}));assert.ok(a.w.document.activeElement.hasAttribute('data-search-result'));a.w.document.activeElement.dispatchEvent(new a.w.KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(a.el('globalSearchDialog').open,false);assert.equal(a.w.document.activeElement.id,'openSearch');}
+ a.el('openMenu').click();a.w.document.querySelector('#menuContents [data-smart="search"]').click();assert.equal(a.el('menuDialog').open,false);assert.equal(a.el('globalSearchDialog').open,true);
+ }finally{a.close();}
+});
+test('searching and opening every checkpoint, cancelling verification, and reopening sessions never queues passive writes',()=>{
+ const a=app();try{const key='chinaCompanionPrivateV2',before=a.w.localStorage.getItem(key),data=JSON.parse(before);for(const stage of a.w.ChinaPacking.timeline(data)){a.w.ChinaPackingUI.navigate(stage.id);assert.equal(a.w.localStorage.getItem(key),before,stage.id);const verify=a.w.document.querySelector('#packingStage [data-packing="verify-item"]');if(verify){verify.click();a.w.document.querySelector('[data-packing="close-dialog"]').click();assert.equal(a.w.localStorage.getItem(key),before);}}
+ a.w.ChinaPackingUI.navigate('home-outbound');const verify=a.w.document.querySelector('#packingStage [data-packing="verify-item"]'),id=verify.dataset.id;verify.click();a.el('packDisposition').value='packed';a.w.document.querySelector('[data-packing="save-dialog"]').click();const after=a.w.localStorage.getItem(key),saved=JSON.parse(after);assert.equal(a.w.ChinaPacking.state(saved).sessions['home-outbound'].checks[id].state,'packed');assert.ok(Object.keys(a.w.ChinaPacking.state(saved).sync.pending).length);a.w.ChinaPackingUI.navigate('home-outbound');assert.equal(a.w.localStorage.getItem(key),after);
+ }finally{a.close();}
+});
+test('AMap native links preserve Chinese text, validate coordinate systems and only plan deliberate route modes',()=>{
+ const place={name:'Example & place',chineseName:'测试景点',addressCN:'示例路 #1'},search=new URL(UI.amapNative(place));assert.equal(search.protocol,'iosamap:');assert.equal(search.hostname,'poi');assert.equal(search.searchParams.get('name'),'测试景点 示例路 #1');
+ for(const [system,dev]of [['GCJ-02','0'],['WGS-84','1']]){const pin=new URL(UI.amapNative({...place,latitude:30,longitude:120,coordinateSystem:system}));assert.equal(pin.hostname,'viewMap');assert.equal(pin.searchParams.get('dev'),dev);}
+ for(const bad of [{latitude:30,longitude:120},{latitude:91,longitude:120,coordinateSystem:'GCJ-02'},{latitude:'',longitude:120,coordinateSystem:'GCJ-02'}])assert.equal(new URL(UI.amapNative({...place,...bad})).hostname,'poi');
+ const dest={...place,latitude:30,longitude:120,coordinateSystem:'GCJ-02'},origin={name:'Origin',latitude:31,longitude:121,coordinateSystem:'GCJ-02'};
+ for(const [mode,t]of [['Walking','2'],['Bicycle','3'],['Metro','1'],['DiDi','0']]){const u=new URL(UI.amapNative(dest,origin,mode));assert.equal(u.hostname,'path');assert.equal(u.searchParams.get('t'),t);assert.equal(u.searchParams.get('dev'),'0');assert.equal(u.searchParams.get('dlon'),'120');assert.equal(u.searchParams.has('navi'),false);}
+ const mixed=new URL(UI.amapNative(dest,{...origin,coordinateSystem:'WGS-84'},'Walking'));assert.equal(mixed.searchParams.has('dlat'),false);assert.equal(mixed.searchParams.has('slat'),false);assert.equal(mixed.searchParams.get('dname'),'测试景点');
+ assert.equal(UI.isIOS({userAgent:'iPhone'}),true);assert.equal(UI.isIOS({userAgent:'Macintosh',platform:'MacIntel',maxTouchPoints:5}),true);
+});
+test('iPhone hotel and saved-place UI offers one native action and an explicit website fallback without auto-launch',()=>{
+ const a=app();try{Object.defineProperty(a.w.navigator,'userAgent',{value:'iPhone',configurable:true});a.w.document.querySelector('[data-nav="bookings"]').click();const links=[...a.el('hotelList').querySelectorAll('a')],native=links.find(l=>l.textContent==='Open in AMap App'),web=links.find(l=>l.textContent.includes('Open AMap Website'));assert.ok(native);assert.equal(native.getAttribute('target'),null);assert.ok(native.href.startsWith('iosamap://poi'));assert.equal(new URL(web.href).searchParams.get('callnative'),'0');assert.match(a.el('hotelList').textContent,/installed app language/);
+ a.w.document.querySelector('[data-nav="map"]').click();a.w.document.querySelector('[data-map-place]').click();assert.ok(a.el('mapSelectedPlace').querySelector('a[href^="iosamap:"]'));assert.match(a.el('mapSelectedPlace').textContent,/Open AMap Website/);
+ }finally{a.close();}
+});
+
+test('a repeated identical task check does not add revisions; a changed task queues only that task',()=>{
+ const P=require('../packing'),S=require('../packing-sync');let d=structuredClone(fixture.chinaCompanionPrivateV2),id=P.timeline(d).find(t=>t.type==='checkout').id;
+ const first=S.queued(d,{...d.smartState,packing:P.setTask(d,id,P.SWEEP[0],'checked')});d={...d,smartState:first};const existing=JSON.stringify(P.state(d).sync.pending);
+ const same=S.queued(d,{...d.smartState,packing:P.setTask(d,id,P.SWEEP[0],'checked')});assert.equal(JSON.stringify(same.packing.sync.pending),existing);
+ d={...d,smartState:{...same,packing:{...same.packing,sync:{...same.packing.sync,pending:{}}}}};const changed=S.queued(d,{...d.smartState,packing:P.setTask(d,id,P.SWEEP[1],'checked')});assert.equal(Object.keys(changed.packing.sync.pending).length,1);assert.equal(Object.values(changed.packing.sync.pending)[0].draft['Item / Task'],P.SWEEP[1]);
+});

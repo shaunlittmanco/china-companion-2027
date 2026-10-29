@@ -1,3 +1,7 @@
+## Current checkpoint — 29 October 2026, preview.8
+
+See [preview.8 acceptance](PREVIEW8_ACCEPTANCE.md) for the current implementation, private recovery validation, evidence limits and release HOLD. Global Search, deliberate AMap iOS handoff and passive checkpoint coverage are implemented. Historical sections below retain their original dates and must not override this checkpoint. Production remains v1.6.1; PR #1 stays Draft/unmerged. New staging publication and applying iPhone recovery require separate owner approval.
+
 # v1.7 continuation report — 28 October 2026
 
 ## 28 October 2026 hosted acceptance — preview.7 fixes (release HOLD)

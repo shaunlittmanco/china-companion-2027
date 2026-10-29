@@ -1,3 +1,7 @@
+## Current checkpoint — 29 October 2026, preview.8
+
+See [preview.8 acceptance](PREVIEW8_ACCEPTANCE.md) for the current implementation, private recovery validation, evidence limits and release HOLD. Global Search, deliberate AMap iOS handoff and passive checkpoint coverage are implemented. Historical sections below retain their original dates and must not override this checkpoint. Production remains v1.6.1; PR #1 stays Draft/unmerged. New staging publication and applying iPhone recovery require separate owner approval.
+
 # Packing & Bags — implementation and release checkpoint
 
 This extends the existing app/PR, without changing production. The authoritative packing inventory is the existing private **Packing & Bags** tab, A:N, headers on row 3. The separate Packing & Requirements importer still supplies administrative preparation. No new workbook/tab is created, hidden or deleted. Public demo/fixtures contain fictional records only.

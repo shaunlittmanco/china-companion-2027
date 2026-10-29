@@ -110,5 +110,41 @@ const SHOTS=[['arrival','Entrance / name sign','Wide arrival and visible place n
 function shots(a,quick=false){return SHOTS.filter(s=>!quick||s[4]).map(([id,title,angle,platform,must,seconds,framing])=>({id:a.id+':'+id,title,angle,platform,must,seconds,framing}));}
 function scripts(a){const g=guideFor(a);return {history:g?.history||'No researched history is saved for this place. Keep narration observational until verified.',intro:g?.intro||`We’re at ${a.activity} in ${a.city}. Let’s take a look around.`,voiceover:g?.voiceover||'Describe only what you can see and what you personally experience. Add sourced history after verification.',closing:g?.closing||'That’s my favourite detail here. Let’s head to the next stop.',source:g?.source||'',verifiedAt:g?.verifiedAt||''};}
 function storyPrompts(date,itinerary){const a=itinerary.filter(a=>a.date===date);return [{id:date+':open',title:'Opening moment',caption:'A new day in '+(a[0]?.city||'China'),must:true},{id:date+':place',title:'Place highlight',caption:a.find(a=>!/(transfer|hotel|airport)/i.test(a.activity))?.activity||'A little look around',must:true},{id:date+':food',title:'Food / activity',caption:'Today’s little discovery',must:false},{id:date+':visual',title:'Strong visual',caption:'Keeping this view',must:false},{id:date+':close',title:'Natural closing',caption:'That’s today. More tomorrow.',must:false}];}
-return {DISCOVERIES,mergeState,TICKET_STATES,DAY,CITIES,GUIDES,MODES,num,match,safeUrl,stale,guideFor,attractionFor,ticket,updateTicket,optionComparison,cityRows,foodFor,related,extractDate,routes,routeKey,amapRoute,snowDecision,plans,applyPlan,effectiveItinerary,scenarioAdvice,shots,scripts,storyPrompts};
+// Explicit local-only index: never traverse credentials, receipt links or arbitrary backup fields.
+const SEARCH_FEATURES=[
+ ['Packing & Bags','Menu → My Trip → Packing & Bags','packing','bags','packing luggage maleta bagahe 行李 打包'],
+ ['My Bags','Packing & Bags → My Bags','packing','bags','inventory belongings luggage maleta 我的行李'],
+ ['Packing Journey','Packing & Bags → Packing Journey','packing','journey','checkpoints hotel checkin checkout 旅程'],
+ ['Home Packing','Packing Journey → Home Packing','packing','home-outbound','departure checklist visa passport 签证 护照'],
+ ['Room Sweep / Hotel Checkout','Packing Journey → Hotel Checkout','packing','checkout','hotel room sweep checkout check out 酒店 退房'],
+ ['Manila Airport','Packing Journey → Manila Airport','packing','manila-airport','arrival baggage claim 马尼拉'],
+ ['Back Home','Packing Journey → Back Home','packing','home-return','return unpack home 回家'],
+ ['Hotels','Menu → My Trip → Hotels','bookings','hotels','hotel stay address 酒店 住宿'],
+ ['Bookings and Tickets','Menu → My Trip → Bookings','bookings','tickets','booking reservation flight train ticket 预订 机票 火车票'],
+ ['Plan / Itinerary','Plan','itinerary','','activities attractions itinerary schedule 行程 景点'],
+ ['Wallet and Expenses','Wallet','wallet','','expense money payment budget spending 钱包 费用'],
+ ['Google Drive Receipts','Menu → App & Data → Google Drive Receipts','settings','receipts','receipt upload resibo 收据 发票'],
+ ['Map and Saved Landmarks','Map','map','','map landmarks addresses amap 地图 高德 地址'],
+ ['Talk and Translation','Talk','translate','','talk translate microphone audio chinese 说话 翻译'],
+ ['Saved Options','Menu → Travel Tools → Saved Options','options','','choices alternatives options 备选'],
+ ['Vlog Kit','Menu → Create & Capture → Vlog Hub','vlog','youtube','vlog camera youtube shot filming 视频'],
+ ['Instagram Stories','Menu → Create & Capture → Instagram Stories','vlog','instagram','ig instagram stories social media'],
+ ['Smart Plan A/B/C','Menu → My Trip → Smart Plan','smart','','wulong fairy mountain snow 武隆 仙女山'],
+ ['Offline Resources','Menu → Travel Tools → Offline Resources','resources','','offline saved resources 离线'],
+ ['Backup and Restore','Wallet → Backup and Restore','wallet','backup','backup restore recovery 备份 恢复'],
+ ['Settings','Menu → App & Data → Settings','settings','','settings google sync configuration 设置']
+];
+function searchLocal(d,q,places=[]){
+ const words=txt(q).normalize('NFKC').toLowerCase().split(/\s+/).filter(Boolean),hits=[];
+ const add=(group,title,path,target,terms='')=>{if(!title)return;const text=[title,path,terms].join(' ').normalize('NFKC').toLowerCase();if(!words.length?group==='Features':words.every(w=>text.includes(w)))hits.push({group,title:String(title),path:String(path),target});};
+ for(const[title,path,page,sub,terms]of SEARCH_FEATURES)add('Features',title,path,{kind:'feature',page,sub},terms);
+ const seen=new Set();
+ for(const a of effectiveItinerary(d)){add('Places & Activities',a.activity,[a.city,a.date,a.time].filter(Boolean).join(' · '),{kind:'activity',id:a.id},[a.chineseName,a.addressCN,a.area,a.notes,a.transport].filter(Boolean).join(' '));seen.add(a.activity+'|'+a.city);}
+ const rows=[...places,...(d.hotels||[]).map(h=>({name:h.Hotel,chineseName:h['Chinese Name']||h['Hotel CN'],city:h.City,addressCN:h['Chinese Address']||h['Address CN']||h.Address,notes:h.Notes})),...(d.attractions||[]).map(a=>({name:a['Attraction / Activity'],chineseName:a['Chinese Name'],city:a.City,addressCN:a['Chinese Address'],notes:a.Notes})),...(d.mapSaved||[]),...(d.smartState?.savedNearby||[]).map(a=>({...a,name:a.activity})),...(d.food||[]).map(r=>({name:r['Restaurant / Food']||r['Food / Place']||r.Restaurant||r.Food||r.Place||r.Item,city:r.City,notes:r.Notes})),...(d.transport||[]).map(r=>({name:[r.From,r.To].filter(Boolean).join(' → '),city:r.City,notes:[r.Mode,r.Notes].filter(Boolean).join(' ')}))];
+ for(const p of rows){const key=p.name+'|'+p.city;if(!p.name||seen.has(key))continue;seen.add(key);const safe={name:p.name,chineseName:p.chineseName||'',city:p.city||'',addressCN:p.addressCN||'',notes:p.notes||''};if(['GCJ-02','WGS-84'].includes(p.coordinateSystem))Object.assign(safe,{latitude:p.latitude,longitude:p.longitude,coordinateSystem:p.coordinateSystem});add('Places & Activities',safe.name,safe.city||'Saved place',{kind:'place',place:safe},[safe.chineseName,safe.addressCN,safe.notes].join(' '));}
+ for(const i of Packing.inventory(d,{archived:true})){const bag=Packing.bags(d).find(b=>b.id===i.bag)?.name||i.bag;add('My Belongings',i.name,bag+(i.archived?' · Archived':''),{kind:'item',id:i.id},[i.category,i.notes,bag].join(' '));}
+ return hits.slice(0,60);
+}
+
+return {SEARCH_FEATURES,searchLocal,DISCOVERIES,mergeState,TICKET_STATES,DAY,CITIES,GUIDES,MODES,num,match,safeUrl,stale,guideFor,attractionFor,ticket,updateTicket,optionComparison,cityRows,foodFor,related,extractDate,routes,routeKey,amapRoute,snowDecision,plans,applyPlan,effectiveItinerary,scenarioAdvice,shots,scripts,storyPrompts};
 });
