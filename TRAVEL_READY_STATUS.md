@@ -57,3 +57,28 @@ Do not label the app fully travel-ready until the remaining device, network and 
 - Diamond UnionPay fee: https://www.bdo.com.ph/personal/cards/credit-cards/fees-and-charges-update
 - Wallet platform estimate: https://www.bdo.com.ph/personal/cards/credit-cards/cashless-payments-in-china
 - GCash Global Pay: https://gcash.com/services/global-pay
+
+## v1.7 Smart Travel draft — 27 October 2026
+
+The existing design branch now extends Modern Imperial China with Menu/sidebar, Activity Details/tickets, optional read-only tracker datasets, saved-option comparisons, conditional Plan A/B/C, local route/price references, Vlog Kit/Hub, daily Stories, Travel Mode and offline progress/backup support. See V1_7_REVIEW.md and docs/SMART_TRAVEL.md for screenshots, data boundaries and partial/live-provider limitations.
+
+88 automated tests pass with synthetic data. Local Chromium covers 12 screens in two themes at seven widths, plus activity sections and actual offline PWA reload. PR CI additionally runs WebKit; the current result belongs in the PR. These checks do not certify a physical iPhone or the new batch under real app-origin OAuth.
+
+The earlier v1.6.1 app-origin Sheets refresh and one PNG Drive upload verification above are historical verified checks, not a new live certification of every v1.7 feature. This upgrade retains receipt and authorization implementations and adds separately authorized file access for packing. Production release is conditionally authorized only after all critical checks; no merge or deployment has been performed. Venue pricing, snow conditions and DiDi quotes are not live integrations; dates/sources and unknowns remain explicit. Other-day disruption planning is advice, not a full automatic schedule generator.
+
+
+## Conditional release QA — 27 October 2026
+
+Design is approved, but the owner’s PR conversation explicitly blocks merge/deployment until real app-origin Google account checks and physical iPhone checks pass. Those checks were not performed or marked passed. See docs/RELEASE_QA.md for exact acceptance cases and safe staging instructions.
+
+Rechecked: 124 tests and syntax pass; local Chromium mobile checks pass; full bounded private workbook rows map through the extended mapper without warnings, including all seven added tabs (connector/component verification, not app-origin OAuth). Real Chromium service-worker upgrade, offline reload, pinned v1.6.1 rollback and forward recovery preserve synthetic legacy records, pending receipt bytes/reserved ID, notes and vlog progress. An isolated exact-origin account-QA launcher is provided; its network-blocked smoke test passes, but no live owner login has been performed. A source-only rollback patch has been prepared and apply-checked. Packing inventory/journey/return-home and opt-in two-way sync are now added runtime release gates; see docs/PACKING_SYNC.md. They have synthetic tests, but no real account/device pass is claimed.
+
+Public Pages deployment metadata identifies successful production commit 89ab875d8d4f51286b1fd024cb2293c02f40c536. Eight live runtime files match that baseline byte-for-byte. Production remains v1.6.1; no new deployment or merge was performed. Public main metadata reports protection disabled and visible rulesets empty; detailed protection settings are unavailable to the integration (403). No permissions/protections changed. Main must not be merged merely because CI is green while owner/device gates remain open.
+
+## Packing and synchronization continuation
+
+The existing branch now includes permanent three-bag inventory plus Unassigned, independent hotel arrivals/checkouts/transfers and room sweeps, Manila baggage claim and manual Back Home verification. The existing dedicated tab is read-only imported; opt-in file-scoped writes use stable IDs, a durable pending queue, canonical upserts, shared recovery revisions, preflight/readback and explicit conflict resolution. Other tabs remain read-only; receipt code/schema stay unchanged. Public runtime/previews no longer embed the workbook ID; enter the existing private tracker URL/ID once in Settings, keeping existing OAuth/Picker configuration. This does not rewrite historical commits.
+
+See [implementation and owner tests](docs/PACKING_SYNC.md) and [release gates](docs/RELEASE_QA.md). Automated simulations are separate from actual-account Google consent, cross-device sync, real HEIC/PDF uploads and physical Safari/PWA checks. Production stays v1.6.1 until those gates pass.
+
+Latest continuation: [full implementation, commit list and remaining owner actions](docs/V1_7_CONTINUATION_REPORT.md). Production remains at the verified v1.6.1 commit; real file authorization, account read/write and physical-device acceptance remain blocked.

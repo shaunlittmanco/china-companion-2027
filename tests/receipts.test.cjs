@@ -18,6 +18,15 @@ test('shared/wrong folder and malformed remote metadata are rejected',async()=>{
 test('Drive permission denial and 401 expiration keep the outbox',async()=>{for(const status of [401,403,429,503]){const {client,queue}=await setup({fetcher:async()=>response({},status)});await assert.rejects(client.upload('expense-001'));assert.ok(await queue.get('expense-001'));if(status===401)assert.equal(client.authorized(),false);}});
 test('denied scope never stores a usable session',()=>{const client=create({getFolder:()=>folder});assert.throws(()=>client.authorize({...auth,scope:'https://www.googleapis.com/auth/drive.readonly'}));assert.equal(client.authorized(),false);});
 
+test('disconnect during receipt readback decoding rejects the stale result and preserves retry identity',async()=>{
+ let release,decoding;const entered=new Promise(resolve=>decoding=resolve),held=new Promise(resolve=>release=resolve);
+ const metadata={id:'drive_test_0001',name:'synthetic.pdf',parents:[folder.id],shared:false,size:String(file.size),appProperties:{expenseId:'expense-001'}};
+ const {client,queue}=await setup({fetcher:async u=>u.includes('/files/'+folder.id)?response(folder):u.includes('generateIds')?response({ids:[metadata.id]}):{status:200,ok:true,json:async()=>{decoding();await held;return metadata;}}});
+ const upload=client.upload('expense-001');await entered;client.disconnect();release();
+ await assert.rejects(upload,e=>e.code==='auth');
+ const pending=await queue.get('expense-001');assert.equal(pending.driveFileId,metadata.id);assert.equal(await pending.blob.text(),await file.text());
+});
+
 test('receipt filename includes date, city, merchant, CNY, payment method and the saved expense ID',()=>{
  const {filenameForExpense,safeFilename}=require('../receipts');
  const expense={id:'94a23b10-26df-4daa-9ba2-40fe8729e117',date:'2027-01-12',city:'Shanghai',desc:'Test Tea Shop',amountCNY:28.5,method:'GCash Global Pay via Alipay+'};

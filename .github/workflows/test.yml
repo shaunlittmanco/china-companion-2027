@@ -17,3 +17,30 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: npm test
+  mobile:
+    # Keep the runner compatible with the pinned browser binaries.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:mobile
+        env:
+          TEST_WEBKIT: '1'
+      - run: node scripts/release-check.cjs
+      - run: node scripts/account-qa.cjs --smoke
+      - run: node scripts/review-check.cjs
+      - run: node scripts/design-review-check.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: imperial-china-fictional-mobile-previews
+          path: |
+            docs/previews/*.png
+            docs/previews/*results.json

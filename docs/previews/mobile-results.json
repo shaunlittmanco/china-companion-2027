@@ -1,0 +1,63 @@
+[
+  {
+    "engine": "chromium",
+    "width": 320,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 390,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 430,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 820,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 1024,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "width": 1366,
+    "pages": 12,
+    "themes": "light/dark",
+    "overflow": false,
+    "storagePreserved": true
+  },
+  {
+    "engine": "chromium",
+    "test": "actual offline PWA reload and saved Chinese hotel lookup",
+    "passed": true
+  }
+]
