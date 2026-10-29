@@ -1420,3 +1420,36 @@ dialog::backdrop{background:#10111485}
   .activity > .done-check {grid-area:checkbox;align-self:start;}
   #itineraryList .activity:not(:last-child)::before {display:none;}
 }
+
+/* Trip Guide v1.7.1: visual previews and readable long-form travel content. */
+.place-preview h3{font-size:25px;margin:8px 0}
+.guide-intro{white-space:pre-line;line-height:1.75;overflow-wrap:break-word}
+.guide-photo-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.guide-photo-gallery figure{margin:0;min-width:0}
+.guide-photo-gallery figure:first-child{grid-column:1/-1}
+.guide-photo-gallery img{display:block;width:100%;height:130px;object-fit:cover;border-radius:12px;background:var(--soft)}
+.guide-photo-gallery figure:first-child img{height:220px}
+.guide-photo-gallery figcaption{margin-top:5px;font-size:12px;line-height:1.4}
+.guide-photo-gallery figcaption a{color:var(--brand-ink);overflow-wrap:anywhere}
+.food-idea,.discovery-item{padding:14px 0;border-bottom:1px solid var(--line)}
+.food-idea:last-child,.discovery-item:last-child{border-bottom:0}
+.food-idea p,.discovery-item p{margin:7px 0;line-height:1.6}
+.food-idea small,.discovery-item small{color:var(--muted);display:block}
+.chinese-story{font-size:20px;line-height:1.75;white-space:pre-wrap;letter-spacing:.3px}
+.transport-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 15px}
+.transport-choices .secondary-btn{font-size:13px;padding:10px 4px;min-height:48px}
+.transport-choices .transport-selected{background:var(--jade);color:#fff;border-color:var(--jade)}
+#paymentMethodInfo{line-height:1.5}
+#paymentComparison .line{align-items:flex-start;gap:14px;font-size:13px}
+#paymentComparison .line span{flex:1;min-width:0}
+#paymentComparison .line b{white-space:nowrap}
+@media (max-width:599px){
+ .guide-photo-gallery figure:first-child img{height:180px}
+ .hero{padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:8px}
+ .hero-sub{font-size:10px;margin-top:6px;letter-spacing:.3px}
+ .brand-logo,.brand-logo svg{width:34px;height:36px}
+ .brand .eyebrow{font-size:9px;letter-spacing:.5px}
+ .brand h1{font-size:17px}
+}
+
+/* Sticky header dimensions remain fixed while scrolling to keep touch targets stable. */
