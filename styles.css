@@ -1445,10 +1445,11 @@ dialog::backdrop{background:#10111485}
 #paymentComparison .line b{white-space:nowrap}
 @media (max-width:599px){
  .guide-photo-gallery figure:first-child img{height:180px}
- html[data-scrolled=yes] .hero{padding-top:calc(8px + env(safe-area-inset-top,0px));padding-bottom:6px;transition:padding .16s ease}
- html[data-scrolled=yes] .hero-sub{display:none}
- html[data-scrolled=yes] .brand-logo,html[data-scrolled=yes] .brand-logo svg{width:30px;height:32px}
- html[data-scrolled=yes] .brand .eyebrow{display:none}
- html[data-scrolled=yes] .brand h1{font-size:16px}
+ .hero{padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:8px}
+ .hero-sub{font-size:10px;margin-top:6px;letter-spacing:.3px}
+ .brand-logo,.brand-logo svg{width:34px;height:36px}
+ .brand .eyebrow{font-size:9px;letter-spacing:.5px}
+ .brand h1{font-size:17px}
 }
-@media(prefers-reduced-motion:reduce){html[data-scrolled=yes] .hero{transition:none}}
+
+/* Sticky header dimensions remain fixed while scrolling to keep touch targets stable. */
