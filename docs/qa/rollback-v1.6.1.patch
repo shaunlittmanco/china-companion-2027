@@ -1238,10 +1238,10 @@ index 508e69d..54ba7a0 100644
 +return {SCOPE,TABS,table,isoDate,mapWorkbook,create,SyncError};
  });
 diff --git a/styles.css b/styles.css
-index 60a8be8..5928fff 100644
+index bebbbde..5928fff 100644
 --- a/styles.css
 +++ b/styles.css
-@@ -1,1397 +1,9 @@
+@@ -1,1422 +1,9 @@
 -/* Modern Imperial China — local presentation assets only. */
 -:root {
 -  color-scheme:light;
@@ -2644,6 +2644,31 @@ index 60a8be8..5928fff 100644
 -.search-result{display:block;width:100%;text-align:left;min-height:52px;padding:12px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--paper);color:var(--ink);font:inherit;overflow-wrap:anywhere}
 -.search-result strong,.search-result small{display:block}.search-result small,.amap-help{color:var(--muted);font-size:13px}.search-result:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}.amap-help{display:block;flex-basis:100%}
 -@media(max-width:520px){.header-top{flex-wrap:wrap}.header-actions{margin-left:auto}.search-dialog{padding:16px;max-height:80dvh}}
+-
+-
+-/* On phones, long schedule windows belong above the activity title, not inside
+-   the former 55px timeline rail. Keep all words intact, even at 320px. */
+-@media (max-width:599px) {
+-  .activity {
+-    grid-template-columns:minmax(0,1fr) 44px;
+-    grid-template-areas:"schedule checkbox" "description checkbox";
+-    column-gap:12px;
+-    row-gap:8px;
+-    align-items:start;
+-  }
+-  .activity > .time-tick {
+-    grid-area:schedule;
+-    overflow-wrap:normal;
+-    word-break:normal;
+-    white-space:normal;
+-    font-size:12px;
+-    line-height:1.45;
+-    padding-top:0;
+-  }
+-  .activity > .activity-main {grid-area:description;}
+-  .activity > .done-check {grid-area:checkbox;align-self:start;}
+-  #itineraryList .activity:not(:last-child)::before {display:none;}
+-}
 +.expense-card{align-items:flex-start}.expense-main{width:100%;min-width:0;overflow-wrap:anywhere}.expense-main>small{display:block;margin:5px 0}.expense-amount{font-weight:750;margin:9px 0}.expense-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.expense-actions button{border:1px solid #d9e1ed;border-radius:9px;padding:9px 12px;background:#f4f7fc;color:#294773;min-height:42px}.expense-actions button:disabled{opacity:.55}button:disabled{cursor:default;opacity:.6}details summary{cursor:pointer;padding:10px 0;font-weight:650}input[type="checkbox"]{flex-shrink:0}input,select,textarea{min-width:0;max-width:100%;font-size:16px}.place-card>div{min-width:0;overflow-wrap:anywhere}.caption{overflow-wrap:anywhere}#translationSource{white-space:pre-wrap}#expenseForm h3{margin-top:0}@media(max-width:450px){.two-grid{grid-template-columns:minmax(0,1fr)}.button-row{flex-wrap:wrap}.button-row button{min-width:130px}}
 diff --git a/sw.js b/sw.js
 index 5d6b524..fff49d1 100644
