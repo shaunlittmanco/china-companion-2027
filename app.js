@@ -233,7 +233,8 @@ function paymentOptions(){
  $('#paymentMethodInfo').textContent=(config.description||'')+' · Card billing: PHP only. Check checkout fee waiver.';
  const total=$('#walletTotal'),breakdown=$('#walletBreakdown'),comparison=$('#paymentComparison');
  if(!Number.isFinite(r)||r<=0){
-  total.innerHTML='<small>Cannot estimate from a missing reference rate</small><strong>Enter a valid PHP/CNY rate</strong><span>Online daily reference may be unavailable in China. No fake default rate is used.</span>';
+  const posted=Number(actual);
+  total.innerHTML=actual!==''&&Number.isFinite(posted)&&posted>0?'<small>Final PHP charged · entered</small><strong>'+php(posted)+'</strong><span>No public FX reference available. This is your manually entered actual charge including fees.</span>':'<small>Cannot estimate from a missing reference rate</small><strong>Enter a valid PHP/CNY rate</strong><span>Online daily reference may be unavailable in China. No fake default rate is used.</span>';
   breakdown.textContent='Reference unavailable; enter your observed rate or final posted PHP amount.';
   comparison.textContent='Rate unavailable; comparison disabled.';
   return;
@@ -258,7 +259,7 @@ function expenseDefaults(){
  $('#expenseIssuer').value=f.issuer;$('#expensePlatform').value=f.platform;renderExpenseCalculation();
 }
 function expenseInputs(){return {id:editingExpenseId||crypto.randomUUID(),localDateTime:$('#expenseDateTime').value,desc:$('#expenseDesc').value,city:$('#expenseCity').value,method:$('#expenseMethod').value,category:$('#expenseCategory').value,cny:$('#expenseCNY').value,rate:$('#expenseRate').value,issuerPercent:$('#expenseIssuer').value,platformPercent:$('#expensePlatform').value,fixedPHP:$('#expenseFixed').value,actualPHP:$('#expenseAmount').value,inTracker:$('#expenseInTracker').checked,trackerPaidId:$('#expenseTrackerPaid').value};}
-function renderExpenseCalculation(){try{const result=ChinaTravelData.calculate({cny:$('#expenseCNY').value,rate:$('#expenseRate').value,issuerPercent:$('#expenseIssuer').value,platformPercent:$('#expensePlatform').value,fixedPHP:$('#expenseFixed').value,actualPHP:$('#expenseAmount').value});$('#expenseCalculation').textContent=`Estimated ${php(result.estimatedPHP)} (fees ${php(result.feePHP)}) · ${result.basis==='actual'?'Actual charged: '+php(result.actualPHP):'No posted amount yet; totals use the estimate'}. Actual amount already includes fees.`;}catch(e){$('#expenseCalculation').textContent=e.message;}}
+function renderExpenseCalculation(){try{const result=ChinaTravelData.calculate({cny:$('#expenseCNY').value,rate:$('#expenseRate').value,issuerPercent:$('#expenseIssuer').value,platformPercent:$('#expensePlatform').value,fixedPHP:$('#expenseFixed').value,actualPHP:$('#expenseAmount').value});$('#expenseCalculation').textContent=`${result.estimatedPHP===null?'Reference FX unavailable':('Estimated '+php(result.estimatedPHP)+' (fees '+php(result.feePHP)+')')} · ${result.basis==='actual'?'Actual charged: '+php(result.actualPHP):'No posted amount yet; totals use the estimate'}. Actual amount already includes fees.`;}catch(e){$('#expenseCalculation').textContent=e.message;}}
 function writeExpenses(next){localStorage.setItem(EXP,JSON.stringify(next));expenses=next;}
 function patchExpense(id,patch){const index=expenses.findIndex(e=>e.id===id);if(index<0)return false;const next=expenses.slice();next[index]={...next[index],...patch};writeExpenses(next);renderExpenses();renderMetrics();return true;}
 function renderExpenses(){
