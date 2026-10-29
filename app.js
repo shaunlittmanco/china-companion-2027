@@ -215,10 +215,12 @@ async function refreshDailyFx(){
  if(!navigator.onLine){status.textContent+='Offline; enter a rate manually if needed.';return;}
  try{
   const latest=await FX.refresh();
+  if(!window.document?.querySelector?.('#fxRate'))return;
   if(!$('#fxRate').dataset.manual){$('#fxRate').value=latest.rate;$('#expenseRate').value=latest.rate;}
   status.textContent='Daily central-bank reference: '+latest.date+' · ₱'+latest.rate+'/CNY (Frankfurter). Not GCash/Visa/UnionPay actual checkout FX. Verify final posted amount.';
   renderMoney();
  }catch{
+  if(!window.document?.querySelector?.('#fxRate'))return;
   status.textContent=(saved?'Cached reference '+saved.date+' retained. ':'')+'FX provider unavailable. Enter a rate or use the last cached reference; final actual PHP is authoritative.';
   renderMoney();
  }
