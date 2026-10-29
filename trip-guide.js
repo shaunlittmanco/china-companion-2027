@@ -88,6 +88,27 @@ const FOOD={
  ['Beijing-style hotpot','老北京涮锅','Traditional hotpot usually based on sliced lamb/beef.','Hotpot','Ask for beef-only order and single-person portions.'],
  ['Tanghulu','糖葫芦','Sugar-coated fruit snack; verify fillings.','Dessert','High sugar; seasonal fruit choices vary.']
  ]};
+// Additional dish-oriented options. These are not claims about nearby restaurants or current menus.
+FOOD.Shanghai.push(
+ ['Shengjianbao pan-fried buns','生煎包','Crisp-bottom soup buns, often pork-filled.','Snack','Check fillings and watch for hot soup; garnish may contain scallions.'],
+ ['Pork wonton soup','鲜肉小馄饨','Light dumplings in broth, commonly served solo.','Soup','Ask to omit scallions and vegetables.'],
+ ['Beef rice bowl','牛肉盖饭','A simple meat-and-rice option when available.','Rice','Confirm beef-only topping and no onion or garlic garnish.'],
+ ['Reserve-style coffee','咖啡','A sit-down coffee break after sightseeing.','Café','Check lactose-free milk availability and caffeine timing.']);
+FOOD.Chongqing.push(
+ ['Beef barbecue skewers','烤牛肉串','Grilled meat skewers as an alternative to a full hotpot.','BBQ','Confirm beef cuts and any minimum number of skewers.'],
+ ['Spicy beef rice bowl','麻辣牛肉盖饭','A one-plate solo meal with spicy beef and rice.','Rice','Ask for no vegetables, scallions or garlic pieces.'],
+ ['Beef wontons','牛肉抄手','Wontons with beef filling where available; many shops use pork.','Dumplings','Ask specifically whether the filling is beef.'],
+ ['Mixue-style ice cream','冰淇淋','Budget-friendly dessert break.','Dessert','Dairy and sugar content vary by product.']);
+FOOD.Chengdu.push(
+ ['Spicy grilled beef skewers','香辣牛肉串','Street-style beef skewers with Sichuan seasoning.','BBQ','Ask about chili, oil and non-beef ingredients.'],
+ ['Beef rice bowl','牛肉盖饭','Straightforward rice + beef option.','Rice','Confirm no vegetables or offal.'],
+ ['Sichuan tea house','盖碗茶','Gaiwan tea and local tea-house atmosphere.','Tea','Not a meal; tea choice and venue prices vary.'],
+ ['Chengdu wontons','抄手','Regional wontons often include pork filling.','Dumplings','Ask about filling rather than assuming beef.']);
+FOOD.Beijing.push(
+ ['Beef dumplings','牛肉饺子','Dumplings with beef filling in shops that offer them.','Dumplings','Confirm filling, scallion and vegetable ingredients.'],
+ ['Beef skewers','牛肉串','Grilled skewers found at some barbecue spots.','BBQ','Check the meat type and price per skewer.'],
+ ['Zhajiang noodles','炸酱面','Classic Beijing noodles usually based on pork sauce.','Noodles','Not beef-only; contains vegetable garnish by default.'],
+ ['Chinese tea stop','中国茶','Warm indoor break between winter attractions.','Tea','Venue and prices should be checked.']);
 function guideFor(a){const city=String(a?.city||'');const name=norm(a?.activity||a?.name);return GUIDE.find(g=>city.includes(g.city)&&g.names.some(n=>{const k=norm(n);return k.length>2&&(name.includes(k)||k.includes(name)&&name.length>4)}))||null;}
 function ideasFor(city){return (IDEAS[city]||[]).map(([activity,chineseName,category,notes])=>({city,activity,chineseName,category,notes,source:'Curated guide idea · verify current access',suggested:true}));}
 function foodsFor(city){return (FOOD[city]||[]).map(([name,cn,description,category,caution])=>({name,cn,description,category,caution,city,source:'Curated dish idea · not a specific restaurant or live menu'}));}
