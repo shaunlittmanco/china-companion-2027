@@ -5,7 +5,7 @@ test('offline startup serves cached index and scripts after network failure',asy
 test('cache activation preserves all legacy caches with unknown scope',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-6-1','china-companion-v1-7-preview-6','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,[]);});
 test('activation removes only old caches for its own scope and preserves production and sibling stages',async()=>{
  const own='cc27:https://example.test/china/:',sibling='cc27:https://example.test/china/acceptance/other/:';
- const keys=['china-companion-v1-6-1','china-companion-v1-7-1',own+'v1-7-preview-7',own+'v1-7-1',sibling+'v1-7-preview-6','another-app'],removed=[];
+ const keys=['china-companion-v1-6-1','china-companion-v1-7-1',own+'v1-7-preview-7',own+'v1-7-preview-8',own+'v1-7-1',sibling+'v1-7-preview-6','another-app'],removed=[];
  const {handlers}=runtime({caches:{keys:async()=>keys,delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;
  assert.deepEqual(removed,[own+'v1-7-preview-7',own+'v1-7-preview-8']);
  assert.ok(!removed.some(k=>k.startsWith('china-companion-')),'Do not delete legacy production caches from a staging worker');
