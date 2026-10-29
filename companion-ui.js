@@ -40,7 +40,7 @@ function initSearch(){
 
 function init(context){C=context;initSearch();root.ChinaPackingUI?.init(context);
  $('#menuContents').innerHTML=menuMarkup();$('#sidebarContents').innerHTML=menuMarkup();
- const compact=()=>{document.documentElement.dataset.scrolled=window.scrollY>95?'yes':'no';};window.addEventListener('scroll',compact,{passive:true});compact();
+
  $('#openMenu').addEventListener('click',()=>{lastOpener=$('#openMenu');$('#menuDialog').showModal();$('#openMenu').setAttribute('aria-expanded','true');});
  $('#closeMenu').addEventListener('click',closeMenu);$('#menuDialog').addEventListener('click',e=>{if(e.target===$('#menuDialog'))closeMenu();});
  $('#menuDialog').addEventListener('close',()=>{$('#openMenu').setAttribute('aria-expanded','false');lastOpener?.focus();});
