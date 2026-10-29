@@ -36,7 +36,7 @@ index 6a3ae3f..a2b63b5 100644
 diff --git a/app.js b/app.js
 --- a/app.js
 +++ b/app.js
-@@ -1,394 +1,300 @@
+@@ -1,396 +1,300 @@
 -'use strict';
 -(() => {
 -const UI=globalThis.ChinaJade;
@@ -254,10 +254,12 @@ diff --git a/app.js b/app.js
 - if(!navigator.onLine){status.textContent+='Offline; enter a rate manually if needed.';return;}
 - try{
 -  const latest=await FX.refresh();
+-  if(!window.document?.querySelector?.('#fxRate'))return;
 -  if(!$('#fxRate').dataset.manual){$('#fxRate').value=latest.rate;$('#expenseRate').value=latest.rate;}
 -  status.textContent='Daily central-bank reference: '+latest.date+' · ₱'+latest.rate+'/CNY (Frankfurter). Not GCash/Visa/UnionPay actual checkout FX. Verify final posted amount.';
 -  renderMoney();
 - }catch{
+-  if(!window.document?.querySelector?.('#fxRate'))return;
 -  status.textContent=(saved?'Cached reference '+saved.date+' retained. ':'')+'FX provider unavailable. Enter a rate or use the last cached reference; final actual PHP is authoritative.';
 -  renderMoney();
 - }
@@ -3766,7 +3768,7 @@ diff --git a/tests/pwa.test.cjs b/tests/pwa.test.cjs
 -test('cache activation preserves all legacy caches with unknown scope',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-6-1','china-companion-v1-7-preview-6','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,[]);});
 -test('activation removes only old caches for its own scope and preserves production and sibling stages',async()=>{
 - const own='cc27:https://example.test/china/:',sibling='cc27:https://example.test/china/acceptance/other/:';
-- const keys=['china-companion-v1-6-1','china-companion-v1-7-1',own+'v1-7-preview-7',own+'v1-7-1',sibling+'v1-7-preview-6','another-app'],removed=[];
+- const keys=['china-companion-v1-6-1','china-companion-v1-7-1',own+'v1-7-preview-7',own+'v1-7-preview-8',own+'v1-7-1',sibling+'v1-7-preview-6','another-app'],removed=[];
 - const {handlers}=runtime({caches:{keys:async()=>keys,delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;
 - assert.deepEqual(removed,[own+'v1-7-preview-7',own+'v1-7-preview-8']);
 - assert.ok(!removed.some(k=>k.startsWith('china-companion-')),'Do not delete legacy production caches from a staging worker');
