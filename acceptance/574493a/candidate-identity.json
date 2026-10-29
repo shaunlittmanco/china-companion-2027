@@ -1,0 +1,135 @@
+{
+  "commit": "574493adf28c24afca2112988e8d5bf47443cd07",
+  "version": "1.7.0-preview.8",
+  "stagePath": "acceptance/574493a/",
+  "productionRuntimeVersion": "1.6.1",
+  "publication": "QA staging only; not production release",
+  "files": [
+    {
+      "file": "app.js",
+      "path": "acceptance/574493a/app.js",
+      "bytes": 64248,
+      "sha256": "2312e620fc2d15e6db9cafa89bdb187967ac42cedfb9035d87aaafda21d773de",
+      "gitBlob": "c01b0eec8ddf4fc513436653007fc0a70730bba4"
+    },
+    {
+      "file": "companion-ui.js",
+      "path": "acceptance/574493a/companion-ui.js",
+      "bytes": 44850,
+      "sha256": "46336776f7c862779f5245ba0d368626992fe5d7ab4135c3e3860de7d3c21638",
+      "gitBlob": "f55e59e9072ff89d2754b59d326b5d39edc52d1a"
+    },
+    {
+      "file": "icons/favicon.png",
+      "path": "acceptance/574493a/icons/favicon.png",
+      "bytes": 1541,
+      "sha256": "841489f568aee9d852aae5fd66a1be3ab805e63822cbdf7986386aa5327eb931",
+      "gitBlob": "0b70b497ba7f2931ae5b0ae938bfc90743bfddef"
+    },
+    {
+      "file": "icons/icon-192.png",
+      "path": "acceptance/574493a/icons/icon-192.png",
+      "bytes": 6995,
+      "sha256": "3a8cd9016fce927216bf4cc5bf64358322f21a18c1ffa2e7c4cce47d151f04c5",
+      "gitBlob": "7da8893fe86d027e2066a86a6d34fae593f16add"
+    },
+    {
+      "file": "icons/icon-512.png",
+      "path": "acceptance/574493a/icons/icon-512.png",
+      "bytes": 23486,
+      "sha256": "c6a3414d3863aaf981f972cb7756f36363cb4595c5bf1987c621cbd3cc2b4e96",
+      "gitBlob": "db53f9ca21d16ac2900b3aa3db1045617cab76f9"
+    },
+    {
+      "file": "index.html",
+      "path": "acceptance/574493a/index.html",
+      "bytes": 33364,
+      "sha256": "b398a41852f0de0e0be79d9bf3d8705556b1c2783184933ac6da5cf5590d19bb",
+      "gitBlob": "5f483ebb2e8b8c9e5fcb57c09af3840fd9f50eb1"
+    },
+    {
+      "file": "jade-ui.js",
+      "path": "acceptance/574493a/jade-ui.js",
+      "bytes": 5936,
+      "sha256": "b18a54ed0a681df9344232f1feae3e6f0c1900e76dccb0f140806a85a63a1ba8",
+      "gitBlob": "0ebea4be382f810abd0762b7a2f0f7dff07ad0c5"
+    },
+    {
+      "file": "manifest.webmanifest",
+      "path": "acceptance/574493a/manifest.webmanifest",
+      "bytes": 409,
+      "sha256": "e2cf3d6fcd22065dd932d2b46d65efdac179f35f8d2c54d70624c0e3f6bef758",
+      "gitBlob": "1f57f91069cd65606033cdba30eabe9c5a2bf55f"
+    },
+    {
+      "file": "packing-sync.js",
+      "path": "acceptance/574493a/packing-sync.js",
+      "bytes": 31094,
+      "sha256": "a6033b5f018a3a7decd399ec39749fc6e7796aa6d3c7d1758815bee49e8a262b",
+      "gitBlob": "ba68c674f0b240c3140e6cf3b5a2d25869cd07cc"
+    },
+    {
+      "file": "packing-ui.js",
+      "path": "acceptance/574493a/packing-ui.js",
+      "bytes": 27531,
+      "sha256": "07139db8633fba96abffa580bfc2abc277fd570c81395db387d54a91f66adc8b",
+      "gitBlob": "5d2ed711c7fd261587d6ae2e69b6940fe81316e9"
+    },
+    {
+      "file": "packing.js",
+      "path": "acceptance/574493a/packing.js",
+      "bytes": 17717,
+      "sha256": "2f31cfb3675113fcacec4c46a9ce632eeaa3626f8251d9901b948b906a142fb2",
+      "gitBlob": "59ce72bd060d50457c3310558f64cd85c43b4281"
+    },
+    {
+      "file": "receipt-store.js",
+      "path": "acceptance/574493a/receipt-store.js",
+      "bytes": 2744,
+      "sha256": "f8e927ecdc9673f7da69868e552a833debbbb0d7fb189ed5a6c040f77ef80041",
+      "gitBlob": "4d73a06d12a7bc2bfd3a99740e94a0908e333869"
+    },
+    {
+      "file": "receipts.js",
+      "path": "acceptance/574493a/receipts.js",
+      "bytes": 15594,
+      "sha256": "11c2a0762918a8f9d62730242d0ab83be80db62f8814e7247f90574559afe739",
+      "gitBlob": "0a44c03862d9bfa462519a3f09984dcbc44c37d6"
+    },
+    {
+      "file": "sheet-sync.js",
+      "path": "acceptance/574493a/sheet-sync.js",
+      "bytes": 12044,
+      "sha256": "54a7d59913b1dbf2917b244516cfe70f4b265e340422a304ad8c548162ccf122",
+      "gitBlob": "508e69d5c10da2d267714d7fda3d0046ccb547c9"
+    },
+    {
+      "file": "smart-travel.js",
+      "path": "acceptance/574493a/smart-travel.js",
+      "bytes": 25683,
+      "sha256": "79f3848655ddf15a6fdb3f8cfb736fcaf95bef1b3438cf2ac6d0b8ddfc6ddeb6",
+      "gitBlob": "5d58f0cbb3a24f1160a0fd190e498df351952606"
+    },
+    {
+      "file": "styles.css",
+      "path": "acceptance/574493a/styles.css",
+      "bytes": 42075,
+      "sha256": "e5f5e6e7d373c34f23a932f044a20bab0c82d3b7af70358ac7bf70c6d52eba48",
+      "gitBlob": "60a8be841a1256c5a6731906566bd06151f7029c"
+    },
+    {
+      "file": "sw.js",
+      "path": "acceptance/574493a/sw.js",
+      "bytes": 2009,
+      "sha256": "cdf73c01b9e6828e774f249713946fe3eba4cb770c32f801fd82c605b99d775a",
+      "gitBlob": "5d6b5248571af70338d88f4c63715a5eaf2ac237"
+    },
+    {
+      "file": "travel-data.js",
+      "path": "acceptance/574493a/travel-data.js",
+      "bytes": 5691,
+      "sha256": "e5e323806e46effb4befbec985c14896623ec27dd5d9170f6a603b3109ecb8d1",
+      "gitBlob": "7e10b7e3a3ccc27ca34986889d755ba229dd6eaf"
+    }
+  ]
+}
