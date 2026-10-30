@@ -58,7 +58,7 @@ function panel(d){
  '<div class="button-row"><button class="secondary-btn" data-packing-sync="connect">Connect unified sync</button><button class="secondary-btn" data-packing-sync="refresh">Refresh / Retry</button><button class="secondary-btn" data-packing-sync="disconnect">Disconnect writes</button></div>'+
  (!autoWrites&&browserClient?.hasToken()?'<div class="notice"><b>Writes paused for review.</b><p>'+pending+' Packing records currently pending. Check them before enabling automatic uploads. Existing pending QA proposals must not be approved accidentally.</p>'+ (pending?'<details><summary>Review pending records ('+pending+')</summary><ul>'+preview+'</ul></details>':'<p>No pending Packing & Bags records detected.</p>')+'<button class="secondary-btn" data-packing-sync="enable">I reviewed changes · Enable auto-sync</button></div>':'')+
  '<p class="caption">Online and signed-in: sync after local changes, foreground return and approximately every five minutes. Offline: queue locally. On conflict, pause writes and preserve both versions. Never runs in the background while the iPhone PWA is closed.</p>'+
- [...conflicts,...dailyConflict].slice(0,16).map(([id,c])=>'<details class="notice"><summary>Conflict: '+esc(c.local?.['Item / Task']||id)+'</summary><pre>'+esc(JSON.stringify({device:c.local,sheet:c.remote},null,2))+'</pre>'+(!c.history&& !daily.conflicts?.[id]?'<button class="secondary-btn" data-packing-sync="local" data-id="'+esc(id)+'">Keep device version</button><button class="secondary-btn" data-packing-sync="remote" data-id="'+esc(id)+'">Use Sheet version</button>':'<p>Review both versions before any change. No write attempted.</p>')+'</details>').join('')+
+ [...conflicts,...dailyConflict].slice(0,16).map(([id,c])=>'<details class="notice"><summary>Conflict: '+esc(c.local?.['Item / Task']||id)+'</summary><pre>'+esc(JSON.stringify({device:c.local,sheet:c.remote},null,2))+'</pre>'+(!c.history&& !daily.conflicts?.[id]?'<button class="secondary-btn" data-packing-sync="local" data-id="'+esc(id)+'">Keep device version</button><button class="secondary-btn" data-packing-sync="remote" data-id="'+esc(id)+'">Use Sheet version</button>':'<button class="secondary-btn" data-packing-sync="daily-local" data-id="'+esc(id)+'">Keep device day · explicit write</button><button class="secondary-btn" data-packing-sync="daily-remote" data-id="'+esc(id)+'">Use Sheet day</button>')+'</details>').join('')+
  '</details>';
 }
 function loadPicker(){return new Promise((resolve,reject)=>{if(globalThis.google?.picker)return resolve();const go=()=>globalThis.gapi.load('picker',{callback:resolve,onerror:()=>reject(Error('Google Picker could not load.')),timeout:15000,ontimeout:()=>reject(Error('Google Picker timed out.'))});if(globalThis.gapi)return go();const script=document.createElement('script');script.src='https://apis.google.com/js/api.js';script.onload=go;script.onerror=()=>reject(Error('Google Picker is unavailable.'));document.head.append(script);});}
@@ -112,6 +112,10 @@ function initBrowser(c){
    if(!browserClient.hasToken())throw Error('Reconnect Google first.');
    if(!confirm('Enable automatic Google Sheet writes for the reviewed pending Packing & Bags records AND Daily Carry? This may include old QA proposals. Cancel if any entry is unfamiliar.'))return;
    autoWrites=true;reviewed=true;syncBoth(true);refresh();
+  }
+  if(action==='daily-local'||action==='daily-remote'){
+   if(!confirm('Resolve the saved Daily Carry conflict for '+el.dataset.id+' using the '+(action==='daily-local'?'device':'Sheet')+' version? Review both records before confirming.'))return;
+   dailyClient?.resolve(el.dataset.id,action==='daily-local'?'device':'sheet').then(()=>{if(autoWrites)syncBoth(true);}).catch(e=>c.notify(e.message));
   }
   if(action==='local'||action==='remote'){
    const next=resolve(c.getData(),el.dataset.id,action);c.saveData({...c.getData(),smartState:{...c.getData().smartState,packing:next}});
