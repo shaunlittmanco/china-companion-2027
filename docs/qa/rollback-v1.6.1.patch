@@ -5333,24 +5333,31 @@ index 87b1242..0000000
 diff --git a/tests/pwa.test.cjs b/tests/pwa.test.cjs
 --- a/tests/pwa.test.cjs
 +++ b/tests/pwa.test.cjs
-@@ -1,12 +1,5 @@
+@@ -1,12 +1,12 @@
 -const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 -function runtime(overrides={}){const handlers={};const ctx={URL,Request,Response,AbortController,setTimeout,clearTimeout,self:{addEventListener:(n,f)=>handlers[n]=f,location:{origin:'https://example.test'},registration:{scope:'https://example.test/china/'},skipWaiting:async()=>{},clients:{claim:async()=>{}}},...overrides};vm.runInNewContext(fs.readFileSync('sw.js','utf8'),ctx);return {handlers,ctx};}
--test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.7.1')));assert.ok(requests.some(r=>r.url.endsWith('trip-guide.js?v=1.7.1')));assert.ok(requests.some(r=>r.url.endsWith('fx-rates.js?v=1.7.1')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
--test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{open:async name=>{assert.equal(name,'cc27:https://example.test/china/:v1-7-1');return{match:async request=>new Response('cached:'+new URL(request.url).pathname)};},match:async()=>assert.fail('Do not search caches from another scope')}});for(const path of ['index.html','app.js?v=1.7.1','receipts.js?v=1.7.1','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
+-test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.7.2')));assert.ok(requests.some(r=>r.url.endsWith('trip-guide.js?v=1.7.2')));assert.ok(requests.some(r=>r.url.endsWith('fx-rates.js?v=1.7.2')));assert.ok(requests.some(r=>r.url.endsWith('daily-carry.js?v=1.7.2')));assert.ok(requests.some(r=>r.url.endsWith('daily-carry-ui.js?v=1.7.2')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
+-test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{open:async name=>{assert.equal(name,'cc27:https://example.test/china/:v1-7-2');return{match:async request=>new Response('cached:'+new URL(request.url).pathname)};},match:async()=>assert.fail('Do not search caches from another scope')}});for(const path of ['index.html','app.js?v=1.7.2','receipts.js?v=1.7.2','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
 -test('cache activation preserves all legacy caches with unknown scope',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-6-1','china-companion-v1-7-preview-6','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,[]);});
 -test('activation removes only old caches for its own scope and preserves production and sibling stages',async()=>{
 - const own='cc27:https://example.test/china/:',sibling='cc27:https://example.test/china/acceptance/other/:';
-- const keys=['china-companion-v1-6-1','china-companion-v1-7-1',own+'v1-7-preview-7',own+'v1-7-preview-8',own+'v1-7-1',sibling+'v1-7-preview-6','another-app'],removed=[];
+- const keys=['china-companion-v1-6-1','china-companion-v1-7-2',own+'v1-7-preview-7',own+'v1-7-preview-8',own+'v1-7-1',own+'v1-7-2',sibling+'v1-7-preview-6','another-app'],removed=[];
 - const {handlers}=runtime({caches:{keys:async()=>keys,delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;
-- assert.deepEqual(removed,[own+'v1-7-preview-7',own+'v1-7-preview-8']);
+- assert.deepEqual(removed,[own+'v1-7-preview-7',own+'v1-7-preview-8',own+'v1-7-1']);
 - assert.ok(!removed.some(k=>k.startsWith('china-companion-')),'Do not delete legacy production caches from a staging worker');
 -});
 +const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 +function runtime(overrides={}){const handlers={};const ctx={URL,Request,Response,AbortController,setTimeout,clearTimeout,self:{addEventListener:(n,f)=>handlers[n]=f,location:{origin:'https://example.test'},registration:{scope:'https://example.test/china/'},skipWaiting:async()=>{},clients:{claim:async()=>{}}},...overrides};vm.runInNewContext(fs.readFileSync('sw.js','utf8'),ctx);return {handlers,ctx};}
-+test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.6.1')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
-+test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{match:async request=>new Response('cached:'+new URL(request.url).pathname)}});for(const path of ['index.html','app.js?v=1.6.1','receipts.js?v=1.6.1','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
-+test('cache activation preserves unrelated app caches',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-5','china-companion-v1-6','china-companion-v1-6-1','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,['china-companion-v1-5','china-companion-v1-6']);});
++test('PWA install precaches every versioned asset and all files exist in repository',async()=>{let requests;const {handlers}=runtime({caches:{open:async()=>({addAll:async reqs=>requests=reqs})}});let done;handlers.install({waitUntil:p=>done=p});await done;assert.ok(requests.some(r=>r.url.endsWith('receipt-store.js?v=1.6.1')));assert.ok(requests.some(r=>r.url.endsWith('travel-data.js?v=1.7.1')));assert.ok(requests.some(r=>r.url.endsWith('trip-guide.js?v=1.7.1')));assert.ok(requests.some(r=>r.url.endsWith('fx-rates.js?v=1.7.1')));for(const req of requests){assert.equal(req.cache,'reload');let name=new URL(req.url).pathname.replace('/china/','');if(!name)name='index.html';assert.ok(fs.existsSync(name),name+' is missing');}const manifest=JSON.parse(fs.readFileSync('manifest.webmanifest'));assert.equal(manifest.display,'standalone');assert.equal(manifest.scope,'./');assert.ok(manifest.icons.some(x=>x.sizes==='192x192'));assert.ok(manifest.icons.some(x=>x.sizes==='512x512'));});
++test('offline startup serves cached index and scripts after network failure',async()=>{const {handlers}=runtime({fetch:async()=>{throw Error('offline')},caches:{open:async name=>{assert.equal(name,'cc27:https://example.test/china/:v1-7-1');return{match:async request=>new Response('cached:'+new URL(request.url).pathname)};},match:async()=>assert.fail('Do not search caches from another scope')}});for(const path of ['index.html','app.js?v=1.7.1','receipts.js?v=1.7.1','receipt-store.js?v=1.6.1']){let result;handlers.fetch({request:new Request('https://example.test/china/'+path),respondWith:p=>result=p});assert.match(await (await result).text(),/^cached:/);}});
++test('cache activation preserves all legacy caches with unknown scope',async()=>{const removed=[];const {handlers}=runtime({caches:{keys:async()=>['china-companion-v1-6-1','china-companion-v1-7-preview-6','another-app'],delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;assert.deepEqual(removed,[]);});
++test('activation removes only old caches for its own scope and preserves production and sibling stages',async()=>{
++ const own='cc27:https://example.test/china/:',sibling='cc27:https://example.test/china/acceptance/other/:';
++ const keys=['china-companion-v1-6-1','china-companion-v1-7-1',own+'v1-7-preview-7',own+'v1-7-preview-8',own+'v1-7-1',sibling+'v1-7-preview-6','another-app'],removed=[];
++ const {handlers}=runtime({caches:{keys:async()=>keys,delete:async name=>removed.push(name)}});let done;handlers.activate({waitUntil:p=>done=p});await done;
++ assert.deepEqual(removed,[own+'v1-7-preview-7',own+'v1-7-preview-8']);
++ assert.ok(!removed.some(k=>k.startsWith('china-companion-')),'Do not delete legacy production caches from a staging worker');
++});
 diff --git a/tests/receipts.test.cjs b/tests/receipts.test.cjs
 index 73dd1ae..cfb1476 100644
 --- a/tests/receipts.test.cjs
@@ -6279,3 +6286,333 @@ diff --git a/companion-ui.js b/companion-ui.js
 +}
 +root.ChinaCompanionUI={init,render,onNav,open,openPlace(place){open('place-'+(place.city||place.City||'')+'-'+(place.name||place.Hotel), 'go',{...place,id:'place-'+(place.city||place.City||'')+'-'+(place.name||place.Hotel),activity:place.name||place.Hotel,city:place.city||place.City,date:C.getDay()});}};
 +})(globalThis);
+diff --git a/scripts/release-check.cjs b/scripts/release-check.cjs
+--- a/scripts/release-check.cjs
++++ b/scripts/release-check.cjs
+@@ -1,57 +1,57 @@
+-/* Actual browser/SW upgrade + rollback using isolated synthetic data, never a signed-in profile. */
+-const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http=require('node:http'),cp=require('node:child_process');
+-const root=path.resolve(__dirname,'..'),BASELINE='89ab875d8d4f51286b1fd024cb2293c02f40c536';
+-const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'china-release-qa-')),before=path.join(temporary,'baseline');fs.mkdirSync(before);
+-const archive=cp.spawnSync('git',['archive',BASELINE],{cwd:root,maxBuffer:32*1024*1024});if(archive.status!==0)throw Error('Pinned baseline unavailable. Fetch full git history before release checks.');
+-const extract=cp.spawnSync('tar',['-x','-C',before],{input:archive.stdout});if(extract.status!==0)throw Error('Could not prepare pinned baseline.');
+-// Check the prepared patch in an extracted copy, including the baseline's own regression suite.
+-const rollback=path.join(temporary,'rollback-patch');fs.mkdirSync(rollback);
+-const currentArchive=cp.spawnSync('git',['archive','HEAD'],{cwd:root,maxBuffer:64*1024*1024});
+-if(currentArchive.status!==0||cp.spawnSync('tar',['-x','-C',rollback],{input:currentArchive.stdout}).status!==0)throw Error('Could not prepare isolated rollback-patch checkout.');
+-const applied=cp.spawnSync('git',['apply',path.join(root,'docs/qa/rollback-v1.6.1.patch')],{cwd:rollback,encoding:'utf8'});
+-if(applied.status!==0)throw Error('Rollback patch failed: '+applied.stderr);
+-fs.symlinkSync(path.join(root,'node_modules'),path.join(rollback,'node_modules'),'dir');
+-for(const args of [['run','check'],['test']]){const check=cp.spawnSync(process.platform==='win32'?'npm.cmd':'npm',args,{cwd:rollback,encoding:'utf8',maxBuffer:8*1024*1024});if(check.status!==0)throw Error('Patched baseline validation failed: '+check.stdout+' '+check.stderr);}
+-let serving=before;
+-const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png'};
+-const server=http.createServer((req,res)=>{const u=new URL(req.url,'http://localhost');let relative=u.pathname.replace(/^\/china\//,'').replace(/\/$/,'/index.html');const staged=relative.startsWith('acceptance/'),source=staged?root:serving;if(staged)relative=relative.slice('acceptance/'.length);const file=path.resolve(source,relative||'index.html');if(!u.pathname.startsWith('/china/')||!file.startsWith(source+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type',types[path.extname(file)]||'text/plain');res.end(fs.readFileSync(file));});
+-const keys=['chinaCompanionPrivateV2','chinaCompanionExpensesV1','chinaCompanionDoneV1','chinaCompanionSpeechRateV1','chinaCompanionGoogleClientIdV1','chinaCompanionSheetIdV1','chinaCompanionPickerApiKeyV1','chinaCompanionProjectNumberV1','chinaCompanionReceiptsFolderV1'];
+-const trip={schemaVersion:2,trip:{budgetPHP:150000,baselineSpentPHP:100},itinerary:[{id:'release-test-place',date:'2027-01-11',time:'09:00',city:'Shanghai',activity:'Synthetic release QA place',addressCN:'测试地址',status:'Planned'}],bookings:[],hotels:[],mapSaved:[{city:'Shanghai',name:'Synthetic saved address',addressCN:'测试地址'}]};
+-const pending={id:'release-test-pending',date:'2027-01-11',localDateTime:'2027-01-11T10:00',city:'Shanghai',desc:'Synthetic pending receipt',method:'Cash',amount:80,amountCNY:10,receiptStatus:'pending'};
+-const uploaded={id:'release-test-uploaded',date:'2027-01-11',city:'Shanghai',desc:'Synthetic verified receipt',method:'Cash',amount:40,inTracker:true,receipt:{id:'synthetic_uploaded_0001',verified:true},receiptStatus:'uploaded'};
+-async function waitWorker(page,cache){await page.evaluate(async()=>{const r=await navigator.serviceWorker.ready;await r.update();});await page.waitForFunction(async expected=>{const prefix=expected.startsWith('cc27:')?expected.slice(0,expected.lastIndexOf(':')+1):'china-companion-';const keys=(await caches.keys()).filter(k=>k.startsWith(prefix));const r=await navigator.serviceWorker.getRegistration();return keys.length===1&&keys[0]===expected&&r?.active?.state==='activated'&&!r.installing&&!r.waiting;},cache);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);}
+-async function snapshot(page){return page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),keys);}
+-async function receipt(page){return page.evaluate(async()=>{const r=await ChinaReceipts.store().get('release-test-pending');return r&&{id:r.expenseId,name:r.filename,reserved:r.driveFileId,bytes:await r.blob.text()};});}
+-(async()=>{let browser,context;const errors=[];try{
+- await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port+'/china/';browser=await chromium.launch();context=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Shanghai'});
+- await context.addInitScript(()=>{const RealDate=Date;window.Date=class extends RealDate{constructor(...a){super(...(a.length?a:['2027-01-11T00:00:00Z']));}static now(){return new RealDate('2027-01-11T00:00:00Z').valueOf();}};});
+- await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
+- const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin);await waitWorker(page,'china-companion-v1-6-1');
+- await page.evaluate(({trip,pending,uploaded})=>{localStorage.setItem('chinaCompanionPrivateV2',JSON.stringify(trip));localStorage.setItem('chinaCompanionExpensesV1',JSON.stringify([pending,uploaded]));localStorage.setItem('chinaCompanionDoneV1',JSON.stringify({'release-test-place':true}));localStorage.setItem('chinaCompanionSpeechRateV1','0.55');localStorage.setItem('chinaCompanionGoogleClientIdV1','TEST_PUBLIC_CLIENT.apps.googleusercontent.com');localStorage.setItem('chinaCompanionSheetIdV1','release_synthetic_tracker_0001');localStorage.setItem('chinaCompanionPickerApiKeyV1','TEST_CONFIG_NOT_A_CREDENTIAL');localStorage.setItem('chinaCompanionProjectNumberV1','1234567');localStorage.setItem('chinaCompanionReceiptsFolderV1',JSON.stringify({id:'synthetic_private_folder_0001',name:'China Trip 2027 - Receipts'}));}, {trip,pending,uploaded});
+- await page.evaluate(async()=>{await ChinaReceipts.store().put({expenseId:'release-test-pending',blob:new Blob(['synthetic receipt bytes'],{type:'application/pdf'}),originalName:'synthetic.pdf',filename:'original-reserved-name.pdf',driveFileId:'synthetic_reserved_id_0001'});});
+- const baseline=await snapshot(page),queued=await receipt(page);
+- serving=root;await page.reload();await page.locator('#openMenu').waitFor();await waitWorker(page,'cc27:'+origin+':v1-7-2');await page.reload();
+- assert.deepEqual(await snapshot(page),baseline,'Upgrade changed existing private records/configuration');assert.deepEqual(await receipt(page),queued,'Upgrade changed receipt bytes/reserved upload ID');assert.match(await page.locator('#totalSpent').innerText(),/180.00/,'Paid tracker expense counted twice');
+- await page.locator('#openMenu').click();await page.locator('#closeMenu').click();await page.locator('.bottom-nav [data-nav="itinerary"]').click();await page.locator('#itineraryList [data-smart="open"]').click();await page.locator('#activityNote').fill('Synthetic release note');await page.locator('[data-smart="save-note"]').click();await page.locator('[data-smart="activity-tab"][data-value="vlog"]').click();await page.locator('[data-smart-check="shot"]').first().check();
+- await page.locator('#openMenu').click();await page.locator('#menuContents [data-page="packing"]').click();await page.locator('[data-packing="add-item"]').first().click();await page.locator('#packItemName').fill('Synthetic rollback packing item');await page.locator('#packItemBag').selectOption('personal');await page.locator('[data-packing="save-dialog"]').click();await page.locator('[data-packing="mode"][data-value="journey"]').click();await page.locator('.packing-stages summary').click();await page.locator('.packing-stages [data-packing="open-stage"][data-id="home-outbound"]').click();await page.locator('[data-packing="prepare-all"]').click();await page.locator('[data-packing="confirm"]').click();assert.match(await page.locator('#packingStage').innerText(),/1\/1 belongings/);const packingState=await page.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionPrivateV2')).smartState.packing);assert.ok(Object.keys(packingState.sync.pending).length>0,'Packing edit must create durable pending records');
+- const withProgress=await snapshot(page);await context.setOffline(true);await page.reload();await page.locator('#page-home.active').waitFor();assert.match(await page.locator('#networkIndicator').innerText(),/Offline/);assert.deepEqual(await snapshot(page),withProgress);assert.deepEqual(await receipt(page),queued);await context.setOffline(false);
+- // Restore the pinned source online, then verify the rollback PWA works offline without deleting v1.7 data.
+- serving=before;await page.reload();await waitWorker(page,'china-companion-v1-6-1');await page.reload();assert.deepEqual(await snapshot(page),withProgress,'Rollback discarded private records/new progress');assert.deepEqual(await receipt(page),queued,'Rollback discarded pending receipt');
+- await context.setOffline(true);await page.reload();await page.locator('#page-home.active').waitFor();assert.deepEqual(await snapshot(page),withProgress);assert.deepEqual(await receipt(page),queued);await context.setOffline(false);
+- // Forward recovery confirms new progress still works after a rollback cycle.
+- serving=root;await page.reload();await waitWorker(page,'cc27:'+origin+':v1-7-2');await page.reload();await page.locator('.bottom-nav [data-nav="itinerary"]').click();await page.locator('#itineraryList [data-smart="open"]').click();assert.equal(await page.locator('#activityNote').inputValue(),'Synthetic release note');await page.locator('[data-smart="activity-tab"][data-value="vlog"]').click();assert.equal(await page.locator('[data-smart-check="shot"]').first().isChecked(),true);assert.deepEqual(await snapshot(page),withProgress);assert.deepEqual(await receipt(page),queued);assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionPrivateV2')).smartState.packing),packingState,'Packing inventories, fresh checks and outbox survive rollback/forward recovery');assert.deepEqual(errors,[]);
+- // Real same-origin worker lifecycle: a stage must preserve root caches and survive a legacy root update.
+- const staged=await context.newPage(),stageOrigin=origin+'acceptance/',stageCache='cc27:'+stageOrigin+':v1-7-2';
+- await staged.goto(stageOrigin);await waitWorker(staged,stageCache);await staged.reload();
+- assert.equal(await staged.evaluate(()=>caches.has('china-companion-v1-6-1')),true,'Staging activation removed the production cache');
+- assert.equal(await staged.evaluate(name=>caches.has(name),'cc27:'+origin+':v1-7-2'),true,'Staging activation removed a sibling scope cache');
+- serving=before;await page.reload();await waitWorker(page,'china-companion-v1-6-1');
+- assert.equal(await staged.evaluate(name=>caches.has(name),stageCache),true,'Legacy root activation removed the staging cache');
+- await context.setOffline(true);await staged.reload();await staged.locator('#openMenu').waitFor();
+- assert.deepEqual(await snapshot(staged),withProgress,'Staged offline reload changed saved data');
+- assert.deepEqual(await receipt(staged),queued,'Staged offline reload lost pending media');
+- await context.setOffline(false);await staged.close();
+- serving=root;await page.reload();await waitWorker(page,'cc27:'+origin+':v1-7-2');
+- assert.equal(fs.readFileSync(path.join(root,'receipt-store.js'),'utf8'),fs.readFileSync(path.join(before,'receipt-store.js'),'utf8'),'Outbox schema changed');
+- console.log(JSON.stringify({passed:true,baseline:BASELINE,candidate:cp.execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),checks:['Prepared rollback patch applies and baseline syntax/regression suite passes','Actual Chromium baseline → candidate service-worker update','Legacy records, OAuth configuration and uploaded-receipt reference preserved','Pending PDF bytes, reserved Drive ID and filename preserved','No duplicate paid-tracker spending','Candidate offline reload preserves notes, vlog, bag inventory, independent stage checks and pending packing outbox','Pinned v1.6.1 rollback and offline reload preserve data','Forward recovery restores working v1.7 progress','Same-origin staging and root workers preserve each other’s caches; stage reload works offline after legacy-root activation','No external API calls or signed-in profile used'],physicalDevice:false,liveGoogleAccount:false},null,2));
+- }finally{await context?.close();await browser?.close();server.close();fs.rmSync(temporary,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exitCode=1;});
++/* Actual browser/SW upgrade + rollback using isolated synthetic data, never a signed-in profile. */
++const {chromium}=require('playwright'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http=require('node:http'),cp=require('node:child_process');
++const root=path.resolve(__dirname,'..'),BASELINE='89ab875d8d4f51286b1fd024cb2293c02f40c536';
++const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'china-release-qa-')),before=path.join(temporary,'baseline');fs.mkdirSync(before);
++const archive=cp.spawnSync('git',['archive',BASELINE],{cwd:root,maxBuffer:32*1024*1024});if(archive.status!==0)throw Error('Pinned baseline unavailable. Fetch full git history before release checks.');
++const extract=cp.spawnSync('tar',['-x','-C',before],{input:archive.stdout});if(extract.status!==0)throw Error('Could not prepare pinned baseline.');
++// Check the prepared patch in an extracted copy, including the baseline's own regression suite.
++const rollback=path.join(temporary,'rollback-patch');fs.mkdirSync(rollback);
++const currentArchive=cp.spawnSync('git',['archive','HEAD'],{cwd:root,maxBuffer:64*1024*1024});
++if(currentArchive.status!==0||cp.spawnSync('tar',['-x','-C',rollback],{input:currentArchive.stdout}).status!==0)throw Error('Could not prepare isolated rollback-patch checkout.');
++const applied=cp.spawnSync('git',['apply',path.join(root,'docs/qa/rollback-v1.6.1.patch')],{cwd:rollback,encoding:'utf8'});
++if(applied.status!==0)throw Error('Rollback patch failed: '+applied.stderr);
++fs.symlinkSync(path.join(root,'node_modules'),path.join(rollback,'node_modules'),'dir');
++for(const args of [['run','check'],['test']]){const check=cp.spawnSync(process.platform==='win32'?'npm.cmd':'npm',args,{cwd:rollback,encoding:'utf8',maxBuffer:8*1024*1024});if(check.status!==0)throw Error('Patched baseline validation failed: '+check.stdout+' '+check.stderr);}
++let serving=before;
++const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png'};
++const server=http.createServer((req,res)=>{const u=new URL(req.url,'http://localhost');let relative=u.pathname.replace(/^\/china\//,'').replace(/\/$/,'/index.html');const staged=relative.startsWith('acceptance/'),source=staged?root:serving;if(staged)relative=relative.slice('acceptance/'.length);const file=path.resolve(source,relative||'index.html');if(!u.pathname.startsWith('/china/')||!file.startsWith(source+path.sep)||!fs.existsSync(file)){res.writeHead(404);res.end();return;}res.setHeader('Cache-Control','no-store');res.setHeader('Content-Type',types[path.extname(file)]||'text/plain');res.end(fs.readFileSync(file));});
++const keys=['chinaCompanionPrivateV2','chinaCompanionExpensesV1','chinaCompanionDoneV1','chinaCompanionSpeechRateV1','chinaCompanionGoogleClientIdV1','chinaCompanionSheetIdV1','chinaCompanionPickerApiKeyV1','chinaCompanionProjectNumberV1','chinaCompanionReceiptsFolderV1'];
++const trip={schemaVersion:2,trip:{budgetPHP:150000,baselineSpentPHP:100},itinerary:[{id:'release-test-place',date:'2027-01-11',time:'09:00',city:'Shanghai',activity:'Synthetic release QA place',addressCN:'测试地址',status:'Planned'}],bookings:[],hotels:[],mapSaved:[{city:'Shanghai',name:'Synthetic saved address',addressCN:'测试地址'}]};
++const pending={id:'release-test-pending',date:'2027-01-11',localDateTime:'2027-01-11T10:00',city:'Shanghai',desc:'Synthetic pending receipt',method:'Cash',amount:80,amountCNY:10,receiptStatus:'pending'};
++const uploaded={id:'release-test-uploaded',date:'2027-01-11',city:'Shanghai',desc:'Synthetic verified receipt',method:'Cash',amount:40,inTracker:true,receipt:{id:'synthetic_uploaded_0001',verified:true},receiptStatus:'uploaded'};
++async function waitWorker(page,cache){await page.evaluate(async()=>{const r=await navigator.serviceWorker.ready;await r.update();});await page.waitForFunction(async expected=>{const prefix=expected.startsWith('cc27:')?expected.slice(0,expected.lastIndexOf(':')+1):'china-companion-';const keys=(await caches.keys()).filter(k=>k.startsWith(prefix));const r=await navigator.serviceWorker.getRegistration();return keys.length===1&&keys[0]===expected&&r?.active?.state==='activated'&&!r.installing&&!r.waiting;},cache);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);}
++async function snapshot(page){return page.evaluate(keys=>Object.fromEntries(keys.map(k=>[k,localStorage.getItem(k)])),keys);}
++async function receipt(page){return page.evaluate(async()=>{const r=await ChinaReceipts.store().get('release-test-pending');return r&&{id:r.expenseId,name:r.filename,reserved:r.driveFileId,bytes:await r.blob.text()};});}
++(async()=>{let browser,context;const errors=[];try{
++ await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port+'/china/';browser=await chromium.launch();context=await browser.newContext({viewport:{width:390,height:844},timezoneId:'Asia/Shanghai'});
++ await context.addInitScript(()=>{const RealDate=Date;window.Date=class extends RealDate{constructor(...a){super(...(a.length?a:['2027-01-11T00:00:00Z']));}static now(){return new RealDate('2027-01-11T00:00:00Z').valueOf();}};});
++ await context.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
++ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(origin);await waitWorker(page,'china-companion-v1-6-1');
++ await page.evaluate(({trip,pending,uploaded})=>{localStorage.setItem('chinaCompanionPrivateV2',JSON.stringify(trip));localStorage.setItem('chinaCompanionExpensesV1',JSON.stringify([pending,uploaded]));localStorage.setItem('chinaCompanionDoneV1',JSON.stringify({'release-test-place':true}));localStorage.setItem('chinaCompanionSpeechRateV1','0.55');localStorage.setItem('chinaCompanionGoogleClientIdV1','TEST_PUBLIC_CLIENT.apps.googleusercontent.com');localStorage.setItem('chinaCompanionSheetIdV1','release_synthetic_tracker_0001');localStorage.setItem('chinaCompanionPickerApiKeyV1','TEST_CONFIG_NOT_A_CREDENTIAL');localStorage.setItem('chinaCompanionProjectNumberV1','1234567');localStorage.setItem('chinaCompanionReceiptsFolderV1',JSON.stringify({id:'synthetic_private_folder_0001',name:'China Trip 2027 - Receipts'}));}, {trip,pending,uploaded});
++ await page.evaluate(async()=>{await ChinaReceipts.store().put({expenseId:'release-test-pending',blob:new Blob(['synthetic receipt bytes'],{type:'application/pdf'}),originalName:'synthetic.pdf',filename:'original-reserved-name.pdf',driveFileId:'synthetic_reserved_id_0001'});});
++ const baseline=await snapshot(page),queued=await receipt(page);
++ serving=root;await page.reload();await page.locator('#openMenu').waitFor();await waitWorker(page,'cc27:'+origin+':v1-7-1');await page.reload();
++ assert.deepEqual(await snapshot(page),baseline,'Upgrade changed existing private records/configuration');assert.deepEqual(await receipt(page),queued,'Upgrade changed receipt bytes/reserved upload ID');assert.match(await page.locator('#totalSpent').innerText(),/180.00/,'Paid tracker expense counted twice');
++ await page.locator('#openMenu').click();await page.locator('#closeMenu').click();await page.locator('.bottom-nav [data-nav="itinerary"]').click();await page.locator('#itineraryList [data-smart="open"]').click();await page.locator('#activityNote').fill('Synthetic release note');await page.locator('[data-smart="save-note"]').click();await page.locator('[data-smart="activity-tab"][data-value="vlog"]').click();await page.locator('[data-smart-check="shot"]').first().check();
++ await page.locator('#openMenu').click();await page.locator('#menuContents [data-page="packing"]').click();await page.locator('[data-packing="add-item"]').first().click();await page.locator('#packItemName').fill('Synthetic rollback packing item');await page.locator('#packItemBag').selectOption('personal');await page.locator('[data-packing="save-dialog"]').click();await page.locator('[data-packing="mode"][data-value="journey"]').click();await page.locator('.packing-stages summary').click();await page.locator('.packing-stages [data-packing="open-stage"][data-id="home-outbound"]').click();await page.locator('[data-packing="prepare-all"]').click();await page.locator('[data-packing="confirm"]').click();assert.match(await page.locator('#packingStage').innerText(),/1\/1 belongings/);const packingState=await page.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionPrivateV2')).smartState.packing);assert.ok(Object.keys(packingState.sync.pending).length>0,'Packing edit must create durable pending records');
++ const withProgress=await snapshot(page);await context.setOffline(true);await page.reload();await page.locator('#page-home.active').waitFor();assert.match(await page.locator('#networkIndicator').innerText(),/Offline/);assert.deepEqual(await snapshot(page),withProgress);assert.deepEqual(await receipt(page),queued);await context.setOffline(false);
++ // Restore the pinned source online, then verify the rollback PWA works offline without deleting v1.7 data.
++ serving=before;await page.reload();await waitWorker(page,'china-companion-v1-6-1');await page.reload();assert.deepEqual(await snapshot(page),withProgress,'Rollback discarded private records/new progress');assert.deepEqual(await receipt(page),queued,'Rollback discarded pending receipt');
++ await context.setOffline(true);await page.reload();await page.locator('#page-home.active').waitFor();assert.deepEqual(await snapshot(page),withProgress);assert.deepEqual(await receipt(page),queued);await context.setOffline(false);
++ // Forward recovery confirms new progress still works after a rollback cycle.
++ serving=root;await page.reload();await waitWorker(page,'cc27:'+origin+':v1-7-1');await page.reload();await page.locator('.bottom-nav [data-nav="itinerary"]').click();await page.locator('#itineraryList [data-smart="open"]').click();assert.equal(await page.locator('#activityNote').inputValue(),'Synthetic release note');await page.locator('[data-smart="activity-tab"][data-value="vlog"]').click();assert.equal(await page.locator('[data-smart-check="shot"]').first().isChecked(),true);assert.deepEqual(await snapshot(page),withProgress);assert.deepEqual(await receipt(page),queued);assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('chinaCompanionPrivateV2')).smartState.packing),packingState,'Packing inventories, fresh checks and outbox survive rollback/forward recovery');assert.deepEqual(errors,[]);
++ // Real same-origin worker lifecycle: a stage must preserve root caches and survive a legacy root update.
++ const staged=await context.newPage(),stageOrigin=origin+'acceptance/',stageCache='cc27:'+stageOrigin+':v1-7-1';
++ await staged.goto(stageOrigin);await waitWorker(staged,stageCache);await staged.reload();
++ assert.equal(await staged.evaluate(()=>caches.has('china-companion-v1-6-1')),true,'Staging activation removed the production cache');
++ assert.equal(await staged.evaluate(name=>caches.has(name),'cc27:'+origin+':v1-7-1'),true,'Staging activation removed a sibling scope cache');
++ serving=before;await page.reload();await waitWorker(page,'china-companion-v1-6-1');
++ assert.equal(await staged.evaluate(name=>caches.has(name),stageCache),true,'Legacy root activation removed the staging cache');
++ await context.setOffline(true);await staged.reload();await staged.locator('#openMenu').waitFor();
++ assert.deepEqual(await snapshot(staged),withProgress,'Staged offline reload changed saved data');
++ assert.deepEqual(await receipt(staged),queued,'Staged offline reload lost pending media');
++ await context.setOffline(false);await staged.close();
++ serving=root;await page.reload();await waitWorker(page,'cc27:'+origin+':v1-7-1');
++ assert.equal(fs.readFileSync(path.join(root,'receipt-store.js'),'utf8'),fs.readFileSync(path.join(before,'receipt-store.js'),'utf8'),'Outbox schema changed');
++ console.log(JSON.stringify({passed:true,baseline:BASELINE,candidate:cp.execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),checks:['Prepared rollback patch applies and baseline syntax/regression suite passes','Actual Chromium baseline → candidate service-worker update','Legacy records, OAuth configuration and uploaded-receipt reference preserved','Pending PDF bytes, reserved Drive ID and filename preserved','No duplicate paid-tracker spending','Candidate offline reload preserves notes, vlog, bag inventory, independent stage checks and pending packing outbox','Pinned v1.6.1 rollback and offline reload preserve data','Forward recovery restores working v1.7 progress','Same-origin staging and root workers preserve each other’s caches; stage reload works offline after legacy-root activation','No external API calls or signed-in profile used'],physicalDevice:false,liveGoogleAccount:false},null,2));
++ }finally{await context?.close();await browser?.close();server.close();fs.rmSync(temporary,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exitCode=1;});
+diff --git a/daily-carry.js b/daily-carry.js
+deleted file mode 100644
+--- a/daily-carry.js
++++ /dev/null
+@@ -1,98 +0,0 @@
+-/* Daily Carry: offline activity-aware suggestions, never a packing inventory or Sheet mutation. */
+-(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.ChinaDailyCarry=api;})(typeof globalThis!=='undefined'?globalThis:this,()=>{'use strict';
+-const start='2027-01-11',end='2027-01-21';
+-const DATES=Array.from({length:11},(_,i)=>'2027-01-'+String(11+i).padStart(2,'0'));
+-const trim=v=>String(v??'').trim();
+-const norm=v=>trim(v).normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ');
+-const items=[
+- ['phone','Phone + offline Chinese addresses','Essentials','Keep ticket screenshots, hotel address and navigation accessible.',true,['phone','iphone','手机']],
+- ['payment','Primary GCash/Alipay+ + physical backup card','Essentials','Check login and QR payment readiness before leaving the hotel.',true,['gcash','visa']],
+- ['powerbank','Power bank + USB-C cable','Power & tech','Plan for GPS, filming and winter battery drain. Carry power banks in cabin baggage on flights.',true,['power bank','powerbank','usb c']],
+- ['water','Water bottle','Essentials','Hydrate; refill as permitted.',true,['water bottle','thermos']],
+- ['tissues','Tissues / wet wipes','Essentials','Useful on long walks, stations and food stops.',true,['tissue','wet wipe']],
+- ['meds','Personal essential medication (review)','Essentials','Only your own prescribed/needed items, in their suitable packaging; do not auto-assume medication.',true,['medication','medicine']],
+- ['wintercoat','Warm winter coat / jacket','Cold weather','Winter layers according to the actual forecast and your comfort.',true,['winter jacket','coat','puffer','down jacket']],
+- ['walking','Comfortable walking shoes','Clothing','Wear rather than carry. Expect substantial walking and possible stairs.',true,['walking shoes','sneakers']],
+- ['pocket','DJI Osmo Pocket 3 or Pocket 4','Camera','Compact default walking/vlog camera, not both unless planned.',false,['osmo pocket','pocket 3','pocket 4']],
+- ['sdcard','Spare SD card + safe case','Camera','Use a small protected case; avoid leaving footage cards unsecured.',false,['sd card','micro sd']],
+- ['mic','DJI Mic 2 or Mic Mini','Camera','For on-camera Taglish vlog and clean ambient audio.',false,['dji mic','mic mini']],
+- ['sparecamera','Camera spare battery / charging cable','Camera','Cold weather reduces battery runtime. Check battery transport rules.',false,['battery','camera charger']],
+- ['umbrella','Compact umbrella / rain layer','Weather','Only if forecast suggests rain; verify daily.',false,['umbrella','raincoat']],
+- ['sunscreen','Sunscreen + lip balm','Weather','Useful during sunny, dry and windy winter sightseeing.',false,['sunscreen','lip balm']],
+- ['hotpacks','Hand warmers / warm gloves','Cold weather','Consider for extended outdoor winter exposure.',false,['gloves','hand warmer']],
+- ['warmhat','Warm hat / scarf','Cold weather','Extra warmth when standing outside for long periods.',false,['hat','scarf','beanie']],
+- ['warmboots','Grippy water-resistant footwear','Cold weather','Wear appropriate footwear for potentially icy or wet terrain; actual conditions unverified.',false,['boots','snow boots','traction']],
+- ['actioncam','DJI Osmo Action camera','Camera','Optional for mountain or movement-based footage where permitted.',false,['osmo action','action 6']],
+- ['camera360','360 camera + short grip','Camera','Optional for wide scenic footage; verify venue and selfie-stick restrictions.',false,['360','insta360']],
+- ['ticket','Tickets / booking confirmation offline','Travel day','Store offline QR, reservation code and Chinese destination address.',true,['ticket','booking']],
+- ['passport','Passport / required travel ID','Travel day','Check actual ID requirements for each leg before departure.',true,['passport']],
+- ['charger','Phone charger + travel adapter','Travel day','For airport/train/hotel transfers; check airline cabin rules.',true,['travel adapter','charger']],
+- ['earbuds','Earbuds','Travel day','Useful during long transit, when safe and permitted.',false,['earbuds','airpods']],
+- ['snack','Compact snack','Travel day','Useful for long travel or attraction queues; check venue and transport food rules.',false,['snack']],
+- ['disney','Disney booking QR / park app ready','Special day','Check park entry, ticket QR and official current rules.',true,['disney ticket']],
+- ['raincover','Weather protection for camera bag','Special day','Protect electronics in snow/rain. Check current conditions.',false,['rain cover','waterproof']],
+- ['seat','HSR / flight boarding details','Travel day','Check actual terminal/station and departure before leaving.',true,['boarding','train ticket']],
+- ['map','Offline route and Chinese destination address','Travel day','Save the exact destination and entrance; no live ETA offline.',true,['map']],
+-];
+-const catalog=Object.fromEntries(items.map(([id,title,category,reason,base,aliases])=>[id,{id:'rec:'+id,title,category,reason,base,aliases}]));
+-const CORE=['phone','payment','powerbank','water','tissues','meds','walking'];
+-const WINTER=['wintercoat'];const FILM=['pocket','sdcard'];const TRANSIT=['passport','ticket','seat','charger','earbuds','snack','map'];
+-const SPECIAL={
+- disney:['disney','pocket','sdcard','snack','powerbank','sunscreen'],
+- snow:['hotpacks','warmhat','warmboots','raincover','actioncam','sparecamera','sdcard'],
+- wall:['hotpacks','warmhat','warmboots','sunscreen','pocket','sparecamera'],
+- panda:['pocket','sdcard','sunscreen'],
+- night:['pocket','sparecamera','warmhat'],
+-};
+-const uniq=xs=>[...new Set(xs)];
+-const effective=d=>{const src=d?.itinerary||[];const p=d?.smartState?.plans?.['2027-01-16'];if(!p?.schedule||!Array.isArray(p.schedule)||p.sourceSignature!==JSON.stringify(src.filter(a=>a.date==='2027-01-16')))return src;return [...src.filter(a=>a.date!=='2027-01-16'),...p.schedule];};
+-const activities=(d,date,activityId='')=>effective(d).filter(a=>a?.date===date&&(!activityId||a.id===activityId));
+-const detect=a=>{const s=norm([a.activity,a.area,a.notes,a.transport].join(' '));
+- return {disney:/disney|迪士尼/.test(s),snow:/wulong|fairy mountain|snow|仙女山|武隆/.test(s),wall:/mutianyu|great wall|长城|慕田峪/.test(s),panda:/panda|熊猫/.test(s),night:/night|evening|cruise|skyline|hongya|洪崖|夜/.test(s),transit:/airport|flight|fly |railway|high speed|hsr|station|train|transfer|depart|arrival|check.out|check.in|飞机|火车|机场/.test(s)};
+-};
+-const dayState=(d,date)=>d?.smartState?.dailyCarry?.days?.[date]||{};
+-const eligible=d=>{const v=d?.smartState?.dailyCarry?.days||{};return v&&typeof v==='object'?v:{};};
+-function plan(d,date,{activityId=''}={}){
+- if(!DATES.includes(date))throw Error('Choose a China trip date from January 11–21, 2027.');
+- const all=activities(d,date),selected=activities(d,date,activityId),events=selected.length?selected:all,flags=events.map(detect);
+- const transit=flags.some(f=>f.transit),disney=flags.some(f=>f.disney),snow=flags.some(f=>f.snow),wall=flags.some(f=>f.wall),panda=flags.some(f=>f.panda),night=flags.some(f=>f.night),tour=events.length&&events.some(a=>!detect(a).transit);
+- let ids=[...CORE,...WINTER];
+- if(tour)ids.push(...FILM);if(transit)ids.push(...TRANSIT);
+- if(disney)ids.push(...SPECIAL.disney);if(snow)ids.push(...SPECIAL.snow);if(wall)ids.push(...SPECIAL.wall);if(panda)ids.push(...SPECIAL.panda);if(night)ids.push(...SPECIAL.night);
+- if(tour&&!disney&&!snow&&!wall)ids.push('umbrella','sunscreen');if(events.length===0)ids.push('ticket','charger');
+- ids=uniq(ids);
+- const s=dayState(d,date),excluded=new Set(s.excluded||[]),checks=s.checks||{};
+- const base=ids.map(id=>catalog[id]).filter(Boolean).map(item=>({...item,required:item.base||transit&&TRANSIT.includes(item.id.slice(4)),checked:!!checks[item.id],source:'suggested',matched:matchItem(d,item)}));
+- const extra=(s.custom||[]).filter(x=>x&&trim(x.title)).map(x=>({id:x.id,title:trim(x.title).slice(0,140),category:'My extras',reason:trim(x.note).slice(0,300),checked:!!checks[x.id],source:'custom',required:false,matched:matchItem(d,x)}));
+- const rows=[...base,...extra].filter(x=>!excluded.has(x.id));
+- return {date,activities:all,filteredActivities:events,items:rows,excluded:[...excluded],stats:{checked:rows.filter(x=>x.checked).length,total:rows.length},bag:trim(s.bag)||'Ulanzi PB038 10L sling',notes:trim(s.notes||''),flags:{transit,disney,snow,wall,panda,night},cautions:[
+-   'Suggestions are not proof that an item is owned, packed, or safe to carry. Your main Packing & Bags checklist stays independent.',
+-   'Check the actual weather, airline lithium battery requirements, venue photography/selfie-stick rules, and entry ID before leaving.',
+-   ...(snow||wall?['Mountain / winter conditions are unverified. Use suitable cold and potentially icy terrain protection.']:[]),
+-   ...(disney?['Check Shanghai Disneyland’s current prohibited-item and photography rules before packing a camera or tripod.']:[]),
+- ]};
+-}
+-function matchItem(d,item){const pack=d?.smartState?.packing,raw=d?.packingRecords||[],stored=Object.values(pack?.items||{}),names=[...raw.filter(r=>r['Record Type']==='ITEM').map(x=>x['Item / Task']),...stored.filter(x=>x?.archived!==true).map(x=>x.name)].map(norm).filter(Boolean);
+- const aliases=(item.aliases||[]).map(norm).filter(x=>x.length>=4);
+- return names.find(n=>aliases.some(a=>n===a||n.includes(a)&&a.length>=6))||'';
+-}
+-function changed(d,date,operation){
+- if(!DATES.includes(date))throw Error('Date outside China trip.');
+- const old=d?.smartState?.dailyCarry||{},days={...old.days},s={...days[date],checks:{...days[date]?.checks},excluded:[...(days[date]?.excluded||[])],custom:[...(days[date]?.custom||[])]};
+- const validate=id=>{if(!String(id).startsWith('rec:')&&!s.custom.some(x=>x.id===id))throw Error('Unknown day-carry item.');};
+- switch(operation.type){
+-  case'check':validate(operation.id);s.checks[operation.id]=!!operation.value;break;
+-  case'exclude':validate(operation.id);if(!s.excluded.includes(operation.id))s.excluded.push(operation.id);break;
+-  case'restore':s.excluded=[];break;
+-  case'add':{const title=trim(operation.title).slice(0,140);if(!title)throw Error('Enter the item to carry.');if(s.custom.length>=40)throw Error('Daily carry limit is 40 personal items.');if(s.custom.some(x=>norm(x.title)===norm(title)))throw Error('This day already has that item.');const id='custom:'+Date.now().toString(36)+':'+Math.random().toString(36).slice(2,10);s.custom.push({id,title,note:''});break;}
+-  case'bag':s.bag=trim(operation.value).slice(0,90)||'Ulanzi PB038 10L sling';break;
+-  case'notes':s.notes=trim(operation.value).slice(0,1500);break;
+-  case'reset-checks':s.checks={};break;
+-  default:throw Error('Unknown daily-carry operation.');
+- }
+- s.updatedAt=new Date().toISOString();days[date]=s;return {...old,days};
+-}
+-function progress(d,date){const p=plan(d,date);return p.stats;}
+-function merge(incoming={},current={}){const days={...incoming.days};for(const [date,cur]of Object.entries(current.days||{})){const inc=days[date]||{};days[date]={...inc,...cur,checks:{...inc.checks,...cur.checks},custom:[...new Map([...(inc.custom||[]),...(cur.custom||[])].map(x=>[x.id,x])).values()],excluded:[...new Set([...(inc.excluded||[]),...(cur.excluded||[])])]};}return {...incoming,...current,days};}
+-return {DATES,catalog,activities,detect,plan,changed,progress,merge,dayState};
+-});
+diff --git a/daily-carry-ui.js b/daily-carry-ui.js
+deleted file mode 100644
+--- a/daily-carry-ui.js
++++ /dev/null
+@@ -1,29 +0,0 @@
+-/* iPhone Daily Carry checklist: private daily state only, never a Packing & Bags sync write. */
+-(function(root){'use strict';const D=root.ChinaDailyCarry;if(!D)return;
+-const $=q=>document.querySelector(q),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+-let C,day='',focusActivity='',filter='all';
+-const source=()=>C.getData();
+-const button=(label,action,attrs='')=>`<button type="button" class="secondary-btn" data-daily="${action}" ${attrs}>${label}</button>`;
+-function open(date='',activityId=''){day=D.DATES.includes(date)?date:(D.DATES.includes(C.getDay())?C.getDay():D.DATES[0]);focusActivity=activityId||'';filter='all';}
+-function save(op,message){try{const current=source(),dailyCarry=D.changed(current,day,op);C.saveSmart({...current.smartState,dailyCarry});render();if(message)C.notify(message);return true;}catch(e){C.notify('Daily Carry not saved: '+e.message+'. Existing checklist kept.');render();return false;}}
+-function render(){const host=$('#dailyCarryContent');if(!host||!C)return;if(!D.DATES.includes(day))open();let d=source(),p=D.plan(d,day,{activityId:focusActivity});
+- const choices=[['all','All'],['not-ready','Not ready'],['camera','Camera'],['essentials','Essentials']];
+- host.innerHTML=`<section class="panel"><div class="section-title"><h3>Daily Carry</h3><span class="mini-status">LOCAL ONLY · PER-DAY</span></div><p>Review what to bring for today's actual destinations. Each day starts unchecked, even if the item is already in My Bags.</p><label class="field"><span>Select trip date</span><select id="dailyCarryDate">${D.DATES.map(dt=>`<option value="${dt}" ${dt===day?'selected':''}>${dt} · ${esc(new Date(dt+'T12:00:00+08:00').toLocaleDateString('en-US',{month:'short',day:'numeric',weekday:'short',timeZone:'Asia/Shanghai'}))}</option>`).join('')}</select></label><label class="field"><span>Recommendations for</span><select id="dailyCarryActivity"><option value="">All scheduled stops this day</option>${p.activities.map(a=>`<option value="${esc(a.id)}" ${focusActivity===a.id?'selected':''}>${esc(a.activity)}</option>`).join('')}</select></label><div class="daily-activities">${p.activities.map(a=>`<span>${esc(a.time||'Flexible')} · ${esc(a.activity)}</span>`).join('')||'<p class="caption">No activities loaded for this date. Core travel suggestions only; connect your tracker to personalize.</p>'}</div></section>
+- <section class="panel"><span class="eyebrow dark">YOUR DAY BAG</span><h3>${esc(p.bag)}</h3><p class="caption">Default: Ulanzi PB038 10L sling. Leave bulky kit or your iPad in the hotel on long walking days when practical and secure.</p><label class="field"><span>Carry setup</span><select id="dailyCarryBag">${['Ulanzi PB038 10L sling','Pockets only / ultra-light','Small daypack','Transfer-day carry-on','Other / manual'].map(n=>`<option value="${esc(n)}" ${p.bag===n?'selected':''}>${esc(n)}</option>`).join('')}</select></label><p class="daily-carry-stat"><strong>${p.stats.checked}/${p.stats.total}</strong> ready for this ${focusActivity?'stop':'day'}</p><div class="daily-progress" role="progressbar" aria-label="Daily Carry readiness" aria-valuenow="${p.stats.checked}" aria-valuemin="0" aria-valuemax="${p.stats.total}"><span style="width:${p.stats.total?Math.round(p.stats.checked/p.stats.total*100):0}%"></span></div><p class="caption">Daily checks are independent of the main Packing & Bags inventory, hotel checkouts, and Google Sheet synchronization.</p><div class="daily-filter">${choices.map(([v,l])=>`<button class="secondary-btn" data-daily="filter" data-value="${v}" aria-pressed="${filter===v}">${l}</button>`).join('')}</div></section>
+- <section class="panel"><h3>Bring on this outing</h3><div class="daily-carry-items">${p.items.filter(item=>filter==='all'||filter==='not-ready'&&!item.checked||filter==='camera'&&item.category==='Camera'||filter==='essentials'&&['Essentials','Travel day','Cold weather','Weather','Clothing'].includes(item.category)).map(item=>`<div class="daily-carry-item"><label class="online-opt"><input type="checkbox" data-daily-check="${esc(item.id)}" ${item.checked?'checked':''}><span><b>${esc(item.title)}</b><small>${esc(item.category)} ${item.required?'· Core / relevant':'· Optional'}</small></span></label><p>${esc(item.reason)}</p>${item.matched?`<p class="caption">Similar item in My Bags: ${esc(item.matched)}. Not necessarily in today's sling.</p>`:'<p class="caption">Not matched to My Bags. Confirm you actually own or have it.</p>'}${button('Skip for this outing','exclude',`data-id="${esc(item.id)}"`)}</div>`).join('')||'<p class="caption">No matching suggestions in this filter. Switch to All or add your own item.</p>'}</div><div class="button-row">${button('Restore skipped suggestions','restore')}${button('Reset today’s checks','reset-checks')}</div></section>
+- <section class="panel"><h3>My extras & reminders</h3><label class="field"><span>Add something for this day only</span><input id="dailyCarryAdd" maxlength="140" placeholder="e.g. spare camera battery / hand warmer"></label>${button('Add to today','add')}<label class="field"><span>Day-specific note (saved only when you tap Save)</span><textarea id="dailyCarryNotes" rows="3" maxlength="1500" placeholder="e.g. leave iPad at hotel; charge Pocket camera tonight">${esc(p.notes)}</textarea></label>${button('Save day note','notes')}</section>
+- <details class="panel"><summary>Practical checks before leaving</summary>${p.cautions.map(x=>`<p>${esc(x)}</p>`).join('')}<p>Weather conditions, park rules, transport batteries and venue entry restrictions are not checked live. Avoid bringing restricted equipment or anything you cannot safely secure.</p></details>`;
+-}
+-function preview(date){if(!C)return'';try{const p=D.plan(source(),date);return p.stats.checked+'/'+p.stats.total+' ready';}catch{return'Choose a day';}}
+-function init(context){C=context;document.addEventListener('change',e=>{if(!$('#page-packing')?.classList.contains('active'))return;const t=e.target;if(t.id==='dailyCarryDate'){open(t.value);render();return;}if(t.id==='dailyCarryActivity'){focusActivity=t.value;render();return;}if(t.id==='dailyCarryBag'){save({type:'bag',value:t.value},'Today’s carry setup saved locally.');return;}if(t.dataset.dailyCheck){const prev=t.checked;if(!save({type:'check',id:t.dataset.dailyCheck,value:prev},'Daily readiness updated locally.'))t.checked=!prev;}});
+- document.addEventListener('click',e=>{const b=e.target.closest('[data-daily]');if(!b||!$('#page-packing')?.classList.contains('active'))return;const kind=b.dataset.daily;try{switch(kind){
+- case'filter':filter=b.dataset.value;render();break;
+- case'exclude':save({type:'exclude',id:b.dataset.id},'Skipped for this day only.');break;
+- case'restore':save({type:'restore'},'Suggestions restored for this day.');break;
+- case'add':save({type:'add',title:$('#dailyCarryAdd').value},'Your extra item was added for this date.');break;
+- case'notes':save({type:'notes',value:$('#dailyCarryNotes').value},'Today’s note saved privately.');break;
+- case'reset-checks':if(confirm('Reset readiness checks for this date? This will not change My Bags or any other day.'))save({type:'reset-checks'},'Only this date’s checks were reset.');break;
+- }}catch(err){C.notify(err.message);}});
+-}
+-root.ChinaDailyCarryUI={init,open,render,preview};
+-})(globalThis);
+diff --git a/tests/daily-carry.test.cjs b/tests/daily-carry.test.cjs
+deleted file mode 100644
+--- a/tests/daily-carry.test.cjs
++++ /dev/null
+@@ -1,70 +0,0 @@
+-const {test}=require('node:test'),assert=require('node:assert/strict');
+-const D=require('../daily-carry.js'),P=require('../packing.js'),S=require('../smart-travel.js');
+-const fixture=()=>structuredClone(require('../scripts/preview-fixture.cjs').chinaCompanionPrivateV2);
+-test('daily carry suggests cold-weather and attraction-specific gear for actual travel day',()=>{
+- const d=fixture();d.itinerary.push(
+-  {id:'c-disney',date:'2027-01-14',city:'Shanghai',activity:'Shanghai Disneyland full day',time:'08:30'},
+-  {id:'c-snow',date:'2027-01-16',city:'Chongqing',activity:'Fairy Mountain Wulong snow day trip',time:'07:00'},
+-  {id:'c-wall',date:'2027-01-20',city:'Beijing',activity:'Mutianyu Great Wall',time:'07:00'},
+-  {id:'c-transit',date:'2027-01-18',city:'Chengdu',activity:'Fly Chengdu to Beijing',time:'Afternoon'});
+- const names=date=>D.plan(d,date).items.map(x=>x.title).join('|');
+- assert.match(names('2027-01-14'),/Disney booking|DJI Osmo Pocket/);
+- assert.match(names('2027-01-16'),/Hand warmers|Grippy water/);
+- assert.match(names('2027-01-20'),/Warm hat|Camera spare battery/);
+- assert.match(names('2027-01-18'),/Passport|HSR \/ flight boarding details/);
+- assert.doesNotMatch(names('2027-01-12'),/Snow day gear|Disney booking/);
+-});
+-test('one attraction filter stays within the selected itinerary day and never imports another date',()=>{
+- const d=fixture();d.itinerary=[{id:'test-walk',date:'2027-01-12',city:'Shanghai',activity:'The Bund walk'},
+- {id:'test-rail',date:'2027-01-12',city:'Shanghai',activity:'Flight to Chongqing'},
+- {id:'other',date:'2027-01-14',city:'Shanghai',activity:'Shanghai Disneyland'}];
+- const walk=D.plan(d,'2027-01-12',{activityId:'test-walk'});
+- assert.equal(walk.activities.length,2);
+- assert.equal(walk.filteredActivities.length,1);
+- assert.ok(!walk.flags.transit);
+- assert.ok(D.plan(d,'2027-01-12',{activityId:'test-rail'}).flags.transit);
+- assert.throws(()=>D.plan(d,'2027-01-22'),/trip date/);
+-});
+-test('opening a day or computing suggestions cannot modify packing inventory or queue sync changes',()=>{
+- const d=fixture(),before=JSON.stringify(d),p=D.plan(d,'2027-01-12');
+- assert.ok(p.items.length>0);
+- assert.equal(JSON.stringify(d),before);
+- assert.ok(!d.smartState?.dailyCarry);
+- const original=JSON.stringify(P.inventory(d));
+- const next=D.changed(d,'2027-01-12',{type:'check',id:p.items[0].id,value:true});
+- const cloned={...d,smartState:{...d.smartState,dailyCarry:next}};
+- assert.equal(JSON.stringify(P.inventory(cloned)),original);
+- assert.equal(JSON.stringify(cloned.smartState.packing),JSON.stringify(d.smartState.packing));
+- assert.deepEqual(cloned.smartState.packing.sync.pending,d.smartState.packing.sync.pending);
+-});
+-test('daily checks stay independent per date, and reset does not erase personal packing or another day',()=>{
+- const d=fixture(),id=D.plan(d,'2027-01-12').items[0].id;
+- let daily=D.changed(d,'2027-01-12',{type:'check',id,value:true});
+- d.smartState.dailyCarry=daily;
+- daily=D.changed(d,'2027-01-13',{type:'check',id,value:false});
+- d.smartState.dailyCarry=daily;
+- assert.equal(D.plan(d,'2027-01-12').items.find(x=>x.id===id).checked,true);
+- assert.equal(D.plan(d,'2027-01-13').items.find(x=>x.id===id).checked,false);
+- daily=D.changed(d,'2027-01-12',{type:'reset-checks'});
+- d.smartState.dailyCarry=daily;
+- assert.equal(D.plan(d,'2027-01-12').stats.checked,0);
+- assert.ok(daily.days['2027-01-13']);
+-});
+-test('custom item, skip, notes and backup merge never erase matching data',()=>{
+- let d=fixture(),date='2027-01-12';
+- d.smartState.dailyCarry=D.changed(d,date,{type:'add',title:'Cable pouch'});
+- let x=d.smartState.dailyCarry.days[date].custom[0];
+- assert.ok(D.plan(d,date).items.some(r=>r.id===x.id));
+- d.smartState.dailyCarry=D.changed(d,date,{type:'check',id:x.id,value:true});
+- d.smartState.dailyCarry=D.changed(d,date,{type:'notes',value:'Leave iPad in hotel.'});
+- d.smartState.dailyCarry=D.changed(d,date,{type:'exclude',id:'rec:water'});
+- assert.ok(!D.plan(d,date).items.some(r=>r.id==='rec:water'));
+- assert.match(D.plan(d,date).notes,/iPad/);
+- const merged=S.mergeState({dailyCarry:{days:{[date]:{custom:[{id:'custom:older',title:'Older'}],checks:{'rec:phone':true}}}}},d.smartState);
+- assert.equal(merged.dailyCarry.days[date].custom.length,2);
+- assert.equal(merged.dailyCarry.days[date].checks[x.id],true);
+- assert.equal(merged.dailyCarry.days[date].checks['rec:phone'],true);
+- d.smartState.dailyCarry=merged.dailyCarry;
+- d.smartState.dailyCarry=D.changed(d,date,{type:'restore'});
+- assert.ok(D.plan(d,date).items.some(r=>r.id==='rec:water'));
+-});
