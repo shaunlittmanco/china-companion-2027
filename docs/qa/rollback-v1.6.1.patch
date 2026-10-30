@@ -4658,3 +4658,329 @@ deleted file mode 100644
 - d.smartState.dailyCarry=D.changed(d,date,{type:'restore'});
 - assert.ok(D.plan(d,date).items.some(r=>r.id==='rec:water'));
 -});
+diff --git a/packing-sync.js b/packing-sync.js
+deleted file mode 100644
+--- a/packing-sync.js
++++ /dev/null
+@@ -1,130 +0,0 @@
+-/* Opt-in file-scoped packing sync. Credentials live only in create() closure memory.
+- * Canonical upserts are preceded by append-only recovery proposals in the same private tab.
+- * Competing app revisions remain recoverable and require explicit conflict resolution.
+- * Manual Sheet edits during the final request still have no transactional compare-and-swap. */
+-(function(root,f){const api=f(typeof module==='object'&&module.exports?require('./packing.js'):root.ChinaPacking);if(typeof module==='object'&&module.exports)module.exports=api;else root.ChinaPackingSync=api;})(globalThis,P=>{'use strict';
+-const TAB='Packing & Bags',SCOPE='https://www.googleapis.com/auth/drive.file';
+-const HEADERS=['Record Type','Item / Task','Bag','Category','Quantity','Unit Weight (kg)','Status','Checkpoint / Hotel','Notes','Item ID','Record ID','Checkpoint ID','Updated At','Source'];
+-const text=v=>String(v??'').trim(),copy=x=>JSON.parse(JSON.stringify(x)),values=r=>HEADERS.map(h=>r[h]??''),signature=r=>JSON.stringify(values(r).map((v,i)=>i===12?'':text(v))),meta=r=>{try{return text(r.Source).startsWith('CC27:')?JSON.parse(r.Source.slice(5)):{};}catch{return{};}};
+-function parse(rows){if(!rows[2]||HEADERS.some((h,i)=>text(rows[2][i])!==h))throw Error('Packing & Bags headers must match A3:N3. Saved data kept.');const records=[],ids=new Set(),items=new Set(),checkpointKeys=new Set();for(let n=3;n<rows.length;n++){if(!rows[n].some(v=>text(v)))continue;const r=Object.fromEntries(HEADERS.map((h,i)=>[h,rows[n][i]??'']));if(!['ITEM','CHECK','SWEEP'].includes(text(r['Record Type'])))throw Error('Unknown packing record type. Review the tab before syncing.');if(!text(r['Item / Task']))throw Error('Packing row has no item/task name.');if(r['Record Type']==='ITEM'){r._needsIds=!text(r['Item ID'])||!text(r['Record ID']);if(!text(r.Quantity))r.Quantity=1;const q=Number(r.Quantity);if(!Number.isInteger(q)||q<1||q>999)throw Error('Packing item quantity must be a whole number from 1 to 999.');if(!['','active','archived'].includes(text(r.Status).toLowerCase()))throw Error('Packing ITEM status must be Active or Archived.');if(!['',...P.BAGS.map(b=>b.name),'Unassigned',...P.BAGS.map(b=>b.id)].includes(text(r.Bag)))throw Error('Unknown bag name in Packing & Bags.');if(text(r['Unit Weight (kg)'])!==''&&(!Number.isFinite(+r['Unit Weight (kg)'])||+r['Unit Weight (kg)']<0))throw Error('Invalid packing unit weight.');const i=P.dedicated([r])[0];r['Item ID']=i.id;r['Record ID']=i.recordId;if(items.has(i.id))throw Error('Duplicate packing Item ID. Resolve duplicate rows; nothing was written.');items.add(i.id);}else if(!text(r['Checkpoint ID'])||!text(r['Record ID']))throw Error('A CHECK/SWEEP row needs its checkpoint and record ID.');if(text(r.Source).startsWith('CC27:')){try{JSON.parse(text(r.Source).slice(5));}catch{throw Error('Packing metadata is invalid. Saved records kept.');}}for(const value of [r['Record ID'],r['Item ID'],r['Checkpoint ID']].filter(Boolean))if(['__proto__','constructor','prototype'].includes(text(value))||text(value).length>240)throw Error('Invalid packing identity. Saved records kept.');if(!meta(r).recovery&&((r['Record Type']==='CHECK'&&text(r['Item ID']))||r['Record Type']==='SWEEP')){const key=JSON.stringify([r['Record Type'],text(r['Checkpoint ID']),r['Record Type']==='CHECK'?text(r['Item ID']):text(r['Item / Task'])]);if(checkpointKeys.has(key))throw Error('Duplicate packing checkpoint item/task. Resolve duplicate rows; nothing was written.');checkpointKeys.add(key);}if(ids.has(r['Record ID']))throw Error('Duplicate packing Record ID. Resolve it before retrying.');ids.add(r['Record ID']);records.push({...r,_row:n+1});}return records;}
+-const stable=x=>JSON.stringify(sort(x));function sort(x){return Array.isArray(x)?x.map(sort):x&&typeof x==='object'?Object.fromEntries(Object.keys(x).sort().map(k=>[k,sort(x[k])])):x;}
+-function record(type,name,id,checkpoint='',itemId=''){return Object.fromEntries(HEADERS.map(h=>[h,({'Record Type':type,'Item / Task':name,'Record ID':id,'Checkpoint ID':checkpoint,'Item ID':itemId})[h]||'']));}
+-function source(payload){const value='CC27:'+JSON.stringify({v:1,...payload});if(value.length>45000)throw Error('Packing record is too large to sync safely. Export a backup and shorten notes.');return value;}
+-function encode(d){const out={},checkpointRecordId=(type,checkpoint,key,fallback)=>(d.packingRecords||[]).find(r=>r['Record Type']===type&&r['Checkpoint ID']===checkpoint&&!meta(r).recovery&&(type==='CHECK'?r['Item ID']===key:r['Item / Task']===key))?.['Record ID']||fallback;for(const i of P.inventory(d,{archived:true})){const r=record('ITEM',i.name,i.recordId||'ITEM-'+i.id,'',i.id);Object.assign(r,{Bag:P.BAGS.find(b=>b.id===i.bag)?.name||'Unassigned',Category:i.category,Quantity:i.quantity,'Unit Weight (kg)':i.weightG==null?'':i.weightG/1000,Status:i.archived?'Archived':'Active',Notes:i.notes||'',Source:source({source:i.sourceRef||i.sourceKey||i.source,item:{packed:!!i.packed,critical:!!i.critical,consumable:!!i.consumable,needed:i.needed!==false,measured:!!i.measured,retired:!!i.retired,retiredReason:i.retiredReason||null,position:i.position||null}})});out[r['Record ID']]=r;}
+-for(const[id,s]of Object.entries(P.state(d).sessions||{})){const m=P.session(d,id),stage=record('CHECK','Stage details','STAGE-'+id,id);const {items,checks,tasks,...snapshotMeta}=s.snapshot||{};const {startedItems,checks:omitChecks,tasks:omitTasks,snapshot,...sessionMeta}=s;stage.Status=s.completed?(s.overridden?'Completed unresolved':'Completed'):'In progress';stage['Checkpoint / Hotel']=m.definition.title;stage.Source=source({stage:{...sessionMeta,definition:m.definition},snapshotMeta:s.completed?snapshotMeta:null});out[stage['Record ID']]=stage;
+-for(const i of m.items){const c=m.checks[i.id],r=record('CHECK',i.name,checkpointRecordId('CHECK',id,i.id,'CHECK-'+id+'-'+i.id),id,i.id);Object.assign(r,{Bag:P.BAGS.find(b=>b.id===i.bag)?.name||'Unassigned',Category:i.category,Quantity:c?.quantity??0,Status:c?.state||'Not Checked','Checkpoint / Hotel':m.definition.title,Notes:c?.note||'',Source:source({expected:i,check:c||null})});out[r['Record ID']]=r;}
+-for(const name of P.tasks(m.definition.type)){const r=record('SWEEP',name,checkpointRecordId('SWEEP',id,name,'SWEEP-'+id+'-'+P.tasks(m.definition.type).indexOf(name)),id);r.Status=m.tasks[name]==='checked'?'Checked':m.tasks[name]==='na'?'N/A':'Not Checked';r['Checkpoint / Hotel']=m.definition.title;r.Source=source({dumpLocation:m.dumpLocation||''});out[r['Record ID']]=r;}}
+-return out;}
+-const revision=()=>globalThis.crypto?.randomUUID?.()||'revision-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+-function stamp(r,id){r.Source=source({...meta(r),...(text(r.Source).startsWith('CC27:')?{}:{source:r.Source}),revision:id});return r;}
+-function queued(d,nextSmart,at=new Date().toISOString()){if(!nextSmart.packing||nextSmart.packing===d.smartState?.packing)return nextSmart;const before=encode(d),nextData={...d,smartState:nextSmart},after=encode(nextData),old=P.state(d).sync||{},next={...nextSmart.packing,sync:{...old,...nextSmart.packing.sync,pending:{...old.pending,...nextSmart.packing.sync?.pending}}};for(const[id,r]of Object.entries(after))if(!before[id]||signature(before[id])!==signature(r)){r['Updated At']=at;const rev=revision();stamp(r,rev);const pending=next.sync.pending[id];next.sync.pending[id]={draft:r,revision:rev,base:pending?.base??old.base?.[id]??null,queuedAt:at};}return{...nextSmart,packing:next};}
+-function ingest(d,records,{confirmed=false,now=new Date().toISOString()}={}){for(const ack of Object.values(P.state(d).sync?.confirmed||{})){const rev=meta(ack.draft).revision;if(rev&&!records.some(r=>meta(r).recovery?.revision===rev))throw new SyncError('stale','Packing response predates a confirmed edit or its recovery history was removed. Refresh again. Previous snapshot kept.');}const s=P.materialize(d),sync={...s.sync,base:{...s.sync?.base},pending:{...s.sync?.pending},conflicts:{...s.sync?.conflicts},confirmed:{...s.sync?.confirmed}};const remote=Object.fromEntries(records.map(r=>[r['Record ID'],r]));for(const[id,ack]of Object.entries(sync.confirmed)){if(!remote[id]&&!sync.pending[id]){const rev=revision(),draft=stamp(copy(ack.draft),rev);sync.pending[id]={draft,revision:rev,base:null,queuedAt:now};sync.conflicts[id]={local:ack.draft,remote:null,detectedAt:now};}}for(const[id,p]of Object.entries(sync.pending)){const r=remote[id];if(r&&signature(r)===signature(p.draft)&&confirmed){sync.confirmed[id]={draft:p.draft,at:now};delete sync.pending[id];delete sync.conflicts[id];}else if((r?signature(r):null)!==p.base&&!(r&&signature(r)===signature(p.draft)))sync.conflicts[id]={local:p.draft,remote:r||null,detectedAt:now};}
+-const aliases={},migrationTouched=new Set();const items={...s.items},catalog=Object.fromEntries(Object.entries(s.catalog||{}).filter(([id,i])=>i.source!=='from tracker'||s.items?.[id]));if(Object.values(s.items||{}).some(i=>i.source==='from tracker')){const fresh=P.dedicated(records);for(const [oldId,override]of Object.entries(s.items||{})){const old=s.catalog?.[oldId];if(old?.source!=='from tracker')continue;const matches=fresh.filter(i=>text(i.name).toLowerCase()===text(old.name).toLowerCase());if(matches.length===1){const target=matches[0],patch={};for(const k of ['name','category','bag','quantity','weightG','measured','notes','packed','critical','consumable','needed','archived','retired','retiredReason','position'])if(stable(override[k])!==stable(old[k]))patch[k]=override[k];items[target.id]={...target,...patch,id:target.id,recordId:target.recordId,source:target.source,sourceRef:target.sourceRef};delete items[oldId];delete catalog[oldId];aliases[oldId]=target.id;migrationTouched.add(target.id);delete sync.pending['ITEM-'+oldId];}else{items[oldId]={...override,source:'added on device',sourceRef:override.sourceKey||'Legacy requirement reviewed on device'};migrationTouched.add(oldId);}}}
+-for(const i of P.dedicated(records)){const id=i.recordId;if(!sync.pending[id]&&!migrationTouched.has(i.id)){delete items[i.id];catalog[i.id]=i;}}
+-const grouped={};for(const r of records)if(r['Record Type']!=='ITEM'&&!meta(r).recovery){const id=r['Checkpoint ID'];(grouped[id]??=[]).push(r);}
+-const sessions=copy(s.sessions||{});for(const session of Object.values(sessions)){if(session.completed)continue;session.startedItems=(session.startedItems||[]).map(i=>aliases[i.id]?{...i,id:aliases[i.id],recordId:items[aliases[i.id]]?.recordId}:i);session.checks=Object.fromEntries(Object.entries(session.checks||{}).map(([id,c])=>[aliases[id]||id,c]));}for(const [id,p]of Object.entries(sync.pending))if(p.draft?.['Record Type']==='CHECK'&&aliases[p.draft?.['Item ID']])delete sync.pending[id];for(const[id,rows]of Object.entries(grouped)){const stage=rows.find(r=>r['Record ID']==='STAGE-'+id);let extra=stage&&meta(stage);if(!extra?.stage){const definition=P.definitions({...d,packingLoaded:true,packingRecords:records}).find(x=>x.id===id);if(!definition){sync.conflicts['STAGE-'+id]={history:true,detectedAt:now};continue;}extra={stage:{definition,startedAt:now}};}if(rows.some(r=>sync.pending[r['Record ID']]))continue;const startedItems=[],checks={},tasks={};let dumpLocation='';for(const r of rows){const m=meta(r);if(r['Record Type']==='CHECK'&&r['Record ID']!=='STAGE-'+id){const expected=m.expected||P.dedicated(records).find(i=>i.id===r['Item ID']);if(!expected)throw Error('CHECK item identity is missing. Previous records kept.');startedItems.push(expected);if(text(r.Status)!=='Not Checked'){const rawState=text(r.Status).toLowerCase(),aliases={'still packed':'still-packed','unpacked in the room':'room','unpacked / in room':'room','in use':'wearing','carrying/wearing':'wearing','home/accounted for':'home','accounted for at home':'home','gifted intentionally':'gifted','missing/unresolved':'missing'};const check={...m.check,state:aliases[rawState]||rawState,quantity:Number(r.Quantity)||0,note:text(r.Notes)};if(!P.states(extra.stage.definition.type).some(([v])=>v===check.state)||!Number.isInteger(check.quantity)||check.quantity<0||check.quantity>expected.quantity||check.state==='consumed'&&!expected.consumable||['left','gifted'].includes(check.state)&&(!check.acknowledged||check.state==='left'&&!check.note))throw Error('Packing verification status/quantity requires explicit review. Previous records kept.');checks[expected.id]=check;}}if(r['Record Type']==='SWEEP'){const taskValue=text(r.Status).toLowerCase();if(!['','not checked','checked','na','n/a'].includes(taskValue))throw Error('Invalid room task status. Use checked or na.');tasks[r['Item / Task']]=taskValue==='checked'?'checked':['na','n/a'].includes(taskValue)?'na':'';dumpLocation=m.dumpLocation||dumpLocation;}}const candidate={...extra.stage,startedItems,checks,tasks,dumpLocation};if(candidate.completed)candidate.snapshot={...extra.snapshotMeta,id,definition:candidate.definition,items:copy(startedItems),checks:copy(checks),tasks:copy(tasks),dumpLocation};const existing=sessions[id];if(existing?.completed&&stable(existing.snapshot)!==stable(candidate.snapshot)){sessions[id]={...existing,recoveredSnapshots:[...(existing.recoveredSnapshots||[]),...((existing.recoveredSnapshots||[]).some(x=>stable(x)===stable(candidate))?[]:[candidate])]};sync.conflicts['STAGE-'+id]={local:stage||null,remote:stage||null,history:true,detectedAt:now};}else sessions[id]=candidate;}
+-for(const[id,r]of Object.entries(remote)){sync.base[id]=signature(r);if(r._needsIds&&!sync.pending[id]){const draft=Object.fromEntries(HEADERS.map(h=>[h,r[h]??'']));draft['Updated At']=now;const rev=revision();stamp(draft,rev);sync.pending[id]={draft,revision:rev,base:signature(r),queuedAt:now};}}if(migrationTouched.size){const migrated={...d,packingLoaded:true,packingRecords:records,smartState:{...d.smartState,packing:{...s,items,catalog,sessions}}};for(const[id,r]of Object.entries(encode(migrated))){if(!(r['Record Type']==='ITEM'&&migrationTouched.has(r['Item ID']))&&!(r['Record Type']!=='ITEM'&&Object.keys(aliases).length))continue;const rev=revision();r['Updated At']=now;stamp(r,rev);sync.pending[id]={draft:r,revision:rev,base:remote[id]?signature(remote[id]):null,queuedAt:now};}}
+-const journals=records.map(r=>meta(r).recovery).filter(Boolean),resolved=new Set([...journals.flatMap(j=>j.resolves||[]),...Object.values(sync.pending).flatMap(p=>p.resolves||[])]),branches={};for(const j of journals){if(resolved.has(j.revision))continue;const key=j.target+'|'+j.base;(branches[key]??=[]).push(j);}for(const list of Object.values(branches)){const unique=[...new Map(list.map(j=>[signature(j.draft),j])).values()];if(unique.length>1){const id=unique[0].target;sync.conflicts[id]={local:sync.pending[id]?.draft||unique[0].draft,remote:unique[1].draft,recoveryRevisions:unique.map(j=>j.revision),detectedAt:now};}}
+-if(confirmed)sync.lastSuccess=now;sync.status=Object.keys(sync.conflicts).length?'Conflict':Object.keys(sync.pending).length?'Pending Sync':'Synced';return{...d,packingLoaded:true,packingRecords:records,smartState:{...d.smartState,packing:{...s,catalog,items,sessions,sync}}};}
+-function resolve(d,id,choice){const s=copy(P.state(d)),c=s.sync?.conflicts?.[id];if(!c||c.history)throw Error('This completed history conflict requires an explicit correction; both versions remain in backup.');s.sync.resolved={...s.sync.resolved,[id]:{...c,resolvedAt:new Date().toISOString(),choice}};if(choice==='remote'||choice==='local'){const draft=copy(choice==='remote'?c.remote:c.local);if(!draft){delete s.sync.pending[id];delete s.sync.confirmed[id];delete s.sync.base[id];const itemId=c.local?.['Item ID'];if(itemId&&s.catalog?.[itemId])s.items={...s.items,[itemId]:{...s.catalog[itemId],...s.items?.[itemId],archived:true}};}else{const rev=revision();stamp(draft,rev);draft['Updated At']=new Date().toISOString();s.sync.pending[id]={draft,revision:rev,base:c.remote?(s.sync.base?.[id]??signature(c.remote)):null,resolves:c.recoveryRevisions||[],queuedAt:new Date().toISOString()};}}else throw Error('Choose which version to retain.');delete s.sync.conflicts[id];return s;}
+-class SyncError extends Error{constructor(code,message){super(message);this.code=code;}}
+-function create({sheetId,getData,saveData,fetcher=fetch,onState=()=>{},now=()=>Date.now()}){const getSheetId=typeof sheetId==='function'?sheetId:()=>sheetId;let token=null,expires=0,grant=false,pending=null,generation=0,last=0;const notify=(status,message)=>onState({status,message});function clear(){token=null;expires=0;grant=false;generation++;notify('Needs Sign-in','Packing writes disconnected. Offline data and pending changes are retained.');}function authorize(r,selectedId){clear();if(selectedId!==getSheetId()||!r.access_token||!text(r.scope).split(/\s+/).includes(SCOPE))throw new SyncError('auth','Select the configured workbook and approve file-scoped access.');token=r.access_token;expires=now()+Number(r.expires_in||0)*1000;grant=true;notify('Pending Sync','Packing access connected for this session.');}const hasToken=()=>grant&&!!token&&now()<expires-30000;
+-async function request(path,{method='GET',body}={},session){if(session!==generation||!hasToken())throw new SyncError('auth','Packing authorization expired. Reconnect; pending edits are retained.');const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);let res;try{res=await fetcher('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(getSheetId())+path,{method,headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',credentials:'omit',referrerPolicy:'no-referrer',signal:controller.signal});}catch{throw new SyncError('network','Packing sync could not be confirmed. Pending edits retained; retry reads before writing again.');}finally{clearTimeout(timer);}if(session!==generation)throw new SyncError('cancelled','Packing sync cancelled.');if(res.status===401){clear();throw new SyncError('auth','Packing authorization expired. Reconnect to retry.');}if(!res.ok)throw new SyncError('response',res.status===403?'Google denied file access. Select the existing workbook again.':'Packing sync failed. Pending changes retained; no automatic blind write retry.');const json=await res.json();if(session!==generation)throw new SyncError('cancelled','Packing sync cancelled.');return json;}
+-async function read(session){const m=await request('?fields=spreadsheetId,properties(title),sheets(properties(sheetId,title,gridProperties))',{},session);if(m.spreadsheetId!==getSheetId()||m.properties?.title!=='China Trip Command Center 2027')throw Error('Unexpected workbook identity. Writes blocked.');const tab=m.sheets?.find(s=>s.properties?.title===TAB)?.properties;if(!tab||tab.gridProperties?.columnCount!==14||tab.gridProperties.rowCount>10000)throw Error('Packing & Bags tab/schema changed. Writes blocked.');const range="'Packing & Bags'!A1:N"+tab.gridProperties.rowCount;const r=await request('/values/'+encodeURIComponent(range)+'?valueRenderOption=UNFORMATTED_VALUE',{},session);return{records:parse(r.values||[]),rows:tab.gridProperties.rowCount};}
+-function sync(force=false,readOnly=false){if(pending)return pending;if(!hasToken()){notify('Needs Sign-in','Local changes are safe. Connect Packing Sync to write them.');return Promise.resolve(false);}if(!force&&last&&now()-last<60000)return Promise.resolve(false);last=now();const session=generation;pending=(async()=>{try{notify('Pending Sync','Reading packing records before any write…');let current=await read(session);await saveData(ingest(getData(),current.records));let s=P.state(getData()).sync||{};if(Object.keys(s.conflicts||{}).length){notify('Conflict','Review local and Sheet versions before retrying.');return false;}const batch=copy(s.pending||{});if(readOnly){notify('Review Required',Object.keys(batch).length+' pending Packing & Bags changes. No write performed.');return{pending:Object.keys(batch).length,conflicts:Object.keys(s.conflicts||{}).length};}if(!Object.keys(batch).length){await saveData(ingest(getData(),current.records,{confirmed:true,now:new Date(now()).toISOString()}));notify('Synced','Packing records refreshed.');return true;}
+-// Re-read immediately before writing. Row sorting, new records and changed versions invalidate the preflight.
+-const again=await read(session);if(JSON.stringify(again.records.map(r=>[r._row,signature(r)]))!==JSON.stringify(current.records.map(r=>[r._row,signature(r)]))){await saveData(ingest(getData(),again.records));throw new SyncError('changed','Packing Sheet changed during preflight. No writes sent; review and retry.');}current=again;if(current.records.some((r,i)=>r._row!==i+4))throw new SyncError('gaps','Packing rows contain blank gaps. Keep records contiguous from row 4, preserving IDs, before writing. Read-only import and pending edits are safe.');const journal=[];for(const[id,p]of Object.entries(batch)){if(!p.revision)throw Error('Pending record predates safe sync. Re-edit or explicitly resolve it before writing.');const rid='REV-'+p.revision;if(current.records.some(r=>r['Record ID']===rid))continue;const r=record('CHECK','Sync recovery · '+p.draft['Item / Task'],rid,'packing-sync-recovery',p.draft['Item ID']);r.Status='Proposal';r['Updated At']=p.queuedAt;r.Source=source({recovery:{target:id,revision:p.revision,base:p.base,draft:p.draft,resolves:p.resolves||[]}});journal.push(r);}
+-const used=Math.max(3,...current.records.map(r=>r._row));if(used+journal.length+Object.keys(batch).filter(id=>!current.records.some(r=>r['Record ID']===id)).length>current.rows)throw Error('Packing tab is full. Extend its existing rows before retrying.');
+-if(journal.length)await request('/values/'+encodeURIComponent("'Packing & Bags'!A3:N"+current.rows)+':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',body:{values:journal.map(values)}},session);
+-current=await read(session);await saveData(ingest(getData(),current.records));if(Object.keys(P.state(getData()).sync?.conflicts||{}).length){notify('Conflict','Competing packing revisions are retained in the private Sheet. Review before writing.');return false;}for(const p of Object.values(batch))if(!current.records.some(r=>r['Record ID']==='REV-'+p.revision))throw Error('Recovery proposal could not be confirmed. Upserts were not sent.');
+-let row=Math.max(3,...current.records.map(r=>r._row))+1;const updates=[],appends=[];for(const[id,p]of Object.entries(batch)){const existing=current.records.find(r=>r['Record ID']===id);if(existing&&signature(existing)===signature(p.draft))continue;if((existing?signature(existing):null)!==p.base)throw new SyncError('conflict','Packing changed while the recovery proposal was being saved. Refresh to review.');if(!existing){appends.push(values(p.draft));continue;}const n=existing._row;if(n>current.rows)throw Error('Packing tab is full. Nothing further sent.');updates.push({range:"'Packing & Bags'!A"+n+':N'+n,values:[values(p.draft)]});}
+-if(updates.length)await request('/values:batchUpdate',{method:'POST',body:{valueInputOption:'RAW',data:updates}},session);if(appends.length)await request('/values/'+encodeURIComponent("'Packing & Bags'!A3:N"+current.rows)+':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',body:{values:appends}},session);
+-const after=await read(session);const remote=Object.fromEntries(after.records.map(r=>[r['Record ID'],r]));let latest=getData();for(const[id,p]of Object.entries(batch)){const q=P.state(latest).sync?.pending?.[id];if(q&&signature(q.draft)!==signature(p.draft)&&remote[id]&&signature(remote[id])===signature(p.draft)){latest=copy(latest);latest.smartState.packing.sync.pending[id].base=signature(remote[id]);}}let next=ingest(latest,after.records,{confirmed:true,now:new Date(now()).toISOString()});for(const[id,p]of Object.entries(batch))if(!remote[id]||signature(remote[id])!==signature(p.draft)){next.smartState.packing.sync.conflicts[id]={local:p.draft,remote:remote[id]||null,detectedAt:new Date(now()).toISOString()};}await saveData(next);const conflicts=Object.keys(P.state(next).sync.conflicts||{}).length;notify(conflicts?'Conflict':Object.keys(P.state(next).sync.pending||{}).length?'Pending Sync':'Synced',conflicts?'Write readback differs. Both versions retained for review.':'Packing sync confirmed by readback.');return!conflicts;
+-}catch(e){if(session!==generation)return false;notify(e.code==='auth'?'Needs Sign-in':e.code==='conflict'?'Conflict':'Sync Failed',e instanceof SyncError?e.message:'Packing sync stopped safely. Review tab schema or retry; pending edits retained.');return false;}})().finally(()=>{pending=null;});return pending;}
+-return{authorize,disconnect:clear,hasToken,sync};}
+-let liveStatus={status:'Needs Sign-in',message:'Read-only imports work separately. Writes require opt-in file selection.'},dailyStatus={status:'Needs Sign-in',message:'Daily Carry saves locally until authorized.'},browserClient,dailyClient,context,autoWrites=false,reviewed=false;
+-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+-function panel(d){
+- const p=P.state(d).sync||{},pending=Object.keys(p.pending||{}).length,conflicts=Object.entries(p.conflicts||{});
+- const daily=d.smartState?.dailyCarry?.sync||{},dailyConflict=Object.entries(daily.conflicts||{}),status=conflicts.length||dailyConflict.length?'Conflict':!autoWrites&&browserClient?.hasToken()?'Review Required':browserClient?.hasToken()?liveStatus.status:'Needs Sign-in';
+- const preview=Object.values(p.pending||{}).slice(0,20).map(x=>'<li>'+esc(x.draft?.['Item / Task']||x.draft?.['Record ID']||'Record')+' · '+esc(x.draft?.Status||'Pending')+'</li>').join('');
+- return '<details class="panel packing-sync"><summary>Unified Packing Auto Sync · '+esc(status)+'</summary>'+
+- '<p><b>My Bags + Packing Journey</b> → existing Packing & Bags tab: '+esc(liveStatus.status)+' · '+pending+' pending · '+conflicts.length+' conflicts</p>'+
+- '<p><b>Daily Carry</b> → new Daily Carry tab: '+esc(dailyStatus.status)+' · '+dailyConflict.length+' conflicts</p>'+
+- '<p class="caption">Last Packing & Bags sync: '+esc(p.lastSuccess||'Not yet verified')+' · Daily Carry: '+esc(daily.lastSuccess||'Not yet verified')+'</p>'+
+- '<p>'+esc(liveStatus.message)+'</p><p>'+esc(dailyStatus.message)+'</p>'+
+- '<p>One Google <code>drive.file</code> session for both tabs. It authorizes access to the entire selected workbook, but this app writes only Packing & Bags and Daily Carry. Other tabs stay read-only. Sign-in may be required again after app restart; tokens are never saved to localStorage.</p>'+
+- '<label class="online-opt"><input id="packingConsent" type="checkbox"> I authorize access to the existing master workbook for these two packing tabs.</label>'+
+- '<div class="button-row"><button class="secondary-btn" data-packing-sync="connect">Connect unified sync</button><button class="secondary-btn" data-packing-sync="refresh">Refresh / Retry</button><button class="secondary-btn" data-packing-sync="disconnect">Disconnect writes</button></div>'+
+- (!autoWrites&&browserClient?.hasToken()?'<div class="notice"><b>Writes paused for review.</b><p>'+pending+' Packing records currently pending. Check them before enabling automatic uploads. Existing pending QA proposals must not be approved accidentally.</p>'+ (pending?'<details><summary>Review pending records ('+pending+')</summary><ul>'+preview+'</ul></details>':'<p>No pending Packing & Bags records detected.</p>')+'<button class="secondary-btn" data-packing-sync="enable">I reviewed changes · Enable auto-sync</button></div>':'')+
+- '<p class="caption">Online and signed-in: sync after local changes, foreground return and approximately every five minutes. Offline: queue locally. On conflict, pause writes and preserve both versions. Never runs in the background while the iPhone PWA is closed.</p>'+
+- [...conflicts,...dailyConflict].slice(0,16).map(([id,c])=>'<details class="notice"><summary>Conflict: '+esc(c.local?.['Item / Task']||id)+'</summary><pre>'+esc(JSON.stringify({device:c.local,sheet:c.remote},null,2))+'</pre>'+(!c.history&& !daily.conflicts?.[id]?'<button class="secondary-btn" data-packing-sync="local" data-id="'+esc(id)+'">Keep device version</button><button class="secondary-btn" data-packing-sync="remote" data-id="'+esc(id)+'">Use Sheet version</button>':'<button class="secondary-btn" data-packing-sync="daily-local" data-id="'+esc(id)+'">Keep device day · explicit write</button><button class="secondary-btn" data-packing-sync="daily-remote" data-id="'+esc(id)+'">Use Sheet day</button>')+'</details>').join('')+
+- '</details>';
+-}
+-function loadPicker(){return new Promise((resolve,reject)=>{if(globalThis.google?.picker)return resolve();const go=()=>globalThis.gapi.load('picker',{callback:resolve,onerror:()=>reject(Error('Google Picker could not load.')),timeout:15000,ontimeout:()=>reject(Error('Google Picker timed out.'))});if(globalThis.gapi)return go();const script=document.createElement('script');script.src='https://apis.google.com/js/api.js';script.onload=go;script.onerror=()=>reject(Error('Google Picker is unavailable.'));document.head.append(script);});}
+-function initBrowser(c){
+- context=c;
+- const refresh=()=>{if(globalThis.ChinaPackingUI?.render)globalThis.ChinaPackingUI.render();};
+- browserClient=create({sheetId:c.sheetId,getData:c.getData,saveData:c.saveData,onState:s=>{liveStatus=s;refresh();}});
+- dailyClient=globalThis.ChinaDailyCarrySync?.create({sheetId:c.sheetId,getData:c.getData,saveData:c.saveData,onState:s=>{dailyStatus=s;refresh();}});
+- const syncBoth=async(force=false)=>{
+-  if(!autoWrites||!browserClient.hasToken()||!navigator.onLine)return false;
+-  await browserClient.sync(force);
+-  if(Object.keys(P.state(c.getData()).sync?.conflicts||{}).length){liveStatus={status:'Conflict',message:'Packing conflict blocked automatic writes in both tabs.'};refresh();return false;}
+-  return dailyClient?.run({force});
+- };
+- const preflight=async()=>{
+-  const p=await browserClient.sync(true,true);
+-  if(!p||p.conflicts)return;
+-  const d=await dailyClient?.run({readOnly:true,force:true});
+-  if(d===false)return;
+-  if(p.pending>0){autoWrites=false;reviewed=false;liveStatus={status:'Review Required',message:p.pending+' pending Packing & Bags records require review before any writing.'};refresh();return;}
+-  autoWrites=true;reviewed=true;await syncBoth(true);
+- };
+- const connect=()=>{
+-  if(!document.querySelector('#packingConsent')?.checked)throw Error('Review and check the existing-workbook authorization first.');
+-  if(!navigator.onLine)throw Error('Offline. Local edits remain pending.');
+-  if(!text(c.sheetId()))throw Error('Save the existing private workbook URL/ID in Settings first.');
+-  const id=document.querySelector('#googleClientId')?.value.trim()||localStorage.getItem('chinaCompanionGoogleClientIdV1'),key=localStorage.getItem('chinaCompanionPickerApiKeyV1'),project=localStorage.getItem('chinaCompanionProjectNumberV1');
+-  if(!/^\d+-[\w-]+\.apps\.googleusercontent\.com$/.test(id||'')||!key||!/^\d+$/.test(project||''))throw Error('Enter the existing OAuth client ID, restricted Picker API key and Cloud project number in Settings. Do not create new credentials.');
+-  if(!globalThis.google?.accounts?.oauth2)throw Error('Google sign-in unavailable. Retry while online.');
+-  // Request a Google popup on this direct user gesture. Token remains in memory only.
+-  globalThis.google.accounts.oauth2.initTokenClient({client_id:id,scope:SCOPE,include_granted_scopes:false,error_callback:()=>{liveStatus={status:'Needs Sign-in',message:'Consent closed or blocked. Offline edits retained.'};refresh();},callback:async r=>{
+-   try{
+-    if(r.error||!r.access_token)throw Error('Google authorization not completed.');
+-    await loadPicker();
+-    const p=globalThis.google.picker,view=new p.DocsView(p.ViewId.SPREADSHEETS).setMode(p.DocsViewMode.LIST);
+-    new p.PickerBuilder().addView(view).setOAuthToken(r.access_token).setDeveloperKey(key).setAppId(project).setOrigin(location.origin).setCallback(async result=>{
+-     if(result[p.Response.ACTION]!==p.Action.PICKED)return;
+-     const selected=result[p.Response.DOCUMENTS]?.[0]?.[p.Document.ID];
+-     try{autoWrites=false;reviewed=false;browserClient.authorize(r,selected);dailyClient?.authorize(r,selected);await preflight();}
+-     catch(e){autoWrites=false;c.notify(e.message);}
+-    }).build().setVisible(true);
+-   }catch(e){liveStatus={status:'Needs Sign-in',message:e.message};refresh();}
+-  }}).requestAccessToken({prompt:''});
+- };
+- document.addEventListener('click',e=>{const el=e.target.closest('[data-packing-sync]');if(!el)return;try{
+-  const action=el.dataset.packingSync;
+-  if(action==='connect')connect();
+-  if(action==='refresh'){c.refreshReadOnly?.();if(autoWrites)syncBoth(true);else if(browserClient.hasToken())preflight();}
+-  if(action==='disconnect'){autoWrites=false;reviewed=false;browserClient.disconnect();dailyClient?.disconnect();}
+-  if(action==='enable'){
+-   if(!browserClient.hasToken())throw Error('Reconnect Google first.');
+-   if(!confirm('Enable automatic Google Sheet writes for the reviewed pending Packing & Bags records AND Daily Carry? This may include old QA proposals. Cancel if any entry is unfamiliar.'))return;
+-   autoWrites=true;reviewed=true;syncBoth(true);refresh();
+-  }
+-  if(action==='daily-local'||action==='daily-remote'){
+-   if(!confirm('Resolve the saved Daily Carry conflict for '+el.dataset.id+' using the '+(action==='daily-local'?'device':'Sheet')+' version? Review both records before confirming.'))return;
+-   dailyClient?.resolve(el.dataset.id,action==='daily-local'?'device':'sheet').then(()=>{if(autoWrites)syncBoth(true);}).catch(e=>c.notify(e.message));
+-  }
+-  if(action==='local'||action==='remote'){
+-   const next=resolve(c.getData(),el.dataset.id,action);c.saveData({...c.getData(),smartState:{...c.getData().smartState,packing:next}});
+-   if(action==='remote')c.refreshReadOnly?.();if(autoWrites)syncBoth(true);
+-  }
+- }catch(err){c.notify(err.message);}});
+- const auto=()=>{if(navigator.onLine&&document.visibilityState==='visible'&&autoWrites&&browserClient.hasToken())syncBoth();};
+- window.addEventListener('online',auto);window.addEventListener('focus',auto);document.addEventListener('visibilitychange',auto);setInterval(auto,300000);
+-}
+-
+-return{TAB,SCOPE,HEADERS,parse,encode,signature,queued,ingest,resolve,create,SyncError,panel,initBrowser,changed(){if(autoWrites&&browserClient?.hasToken()&&navigator.onLine&&document.visibilityState==='visible'){browserClient.sync(true).then(()=>dailyClient?.run({force:true}));}}};
+-});
+diff --git a/daily-carry-sync.js b/daily-carry-sync.js
+deleted file mode 100644
+--- a/daily-carry-sync.js
++++ /dev/null
+@@ -1,115 +0,0 @@
+-/* File-scoped, opt-in Daily Carry Google Sheets two-way sync. No auth tokens in storage. */
+-(function(root,f){const api=f(typeof module==='object'&&module.exports?require('./daily-carry.js'):root.ChinaDailyCarry);if(typeof module==='object'&&module.exports)module.exports=api;else root.ChinaDailyCarrySync=api;})(globalThis,D=>{'use strict';
+-const TAB='Daily Carry',HEADERS=['Record ID','Date','Record Type','Item ID','Item / Day','Status','Bag','Notes','Updated At','Revision','Source'];
+-const text=v=>String(v??'').trim(),copy=v=>JSON.parse(JSON.stringify(v)),dates=D.DATES;
+-const sig=rows=>JSON.stringify(rows.map(r=>[r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[10]]).sort((a,b)=>a[0].localeCompare(b[0])));
+-const recordId=(date,id)=>'ITEM-'+date+'-'+id;
+-function encodeDate(d,date){
+- const p=D.plan(d,date),state=D.dayState(d,date),at=state.updatedAt||'';
+- const rows=[['DAY-'+date,date,'DAY','','Daily carry','Planned',p.bag,p.notes,at,'','China Companion']];
+- const excluded=new Set(state.excluded||[]),items=[...p.items,...[...excluded].map(id=>{const suggestion=Object.values(D.catalog).find(r=>r.id===id),custom=(state.custom||[]).find(x=>x.id===id);return suggestion?{...suggestion,id}:custom?{...custom,category:'My extras'}:{id,title:id,category:'Unknown'};})];
+- const known=new Set();
+- for(const item of items){if(known.has(item.id))continue;known.add(item.id);
+- const label=text(item.title).slice(0,140),custom=item.id.startsWith('custom:');
+- rows.push([recordId(date,item.id),date,'ITEM',item.id,label,excluded.has(item.id)?'Skipped':state.checks?.[item.id]?'Ready':'Not Ready','',custom?text(item.note||'').slice(0,300):'',at,'',custom?'My extra':'Suggested']);
+- }
+- return rows;
+-}
+-function encode(d){return Object.fromEntries(dates.map(date=>[date,encodeDate(d,date)]));}
+-function parse(rows){
+- if(JSON.stringify((rows[0]||[]).slice(0,11).map(text))!==JSON.stringify(HEADERS))throw Error('Daily Carry headers must match A1:K1; no writes made.');
+- const out={},seen=new Set();for(let i=1;i<rows.length;i++){const v=rows[i];if(!v||!v.some(x=>text(x)))continue;const row=Array.from({length:11},(_,j)=>text(v[j]));const [id,date,type,itemId,,status]=row;
+- if(!dates.includes(date)||!id||!['DAY','ITEM'].includes(type)||seen.has(id)||type==='DAY'&&id!=='DAY-'+date||type==='ITEM'&&(!itemId||id!==recordId(date,itemId)))throw Error('Daily Carry record identity/date requires review; no writes made.');
+- if(type==='DAY'&&status!=='Planned'||type==='ITEM'&&!['Ready','Not Ready','Skipped'].includes(status))throw Error('Daily Carry status value invalid; no writes made.');
+- seen.add(id);(out[date]??=[]).push({...{id,values:row,row:i+1}});
+- }
+- return out;
+-}
+-function importDate(day,rows){const next={...day,checks:{},excluded:[],custom:[]},dayRow=rows.find(r=>r.values[2]==='DAY');if(dayRow){next.bag=dayRow.values[6];next.notes=dayRow.values[7];next.updatedAt=dayRow.values[8]||new Date().toISOString();}
+- for(const row of rows.filter(r=>r.values[2]==='ITEM')){const [,date,,id,title,status,,note]=row.values;if(status==='Ready')next.checks[id]=true;if(status==='Skipped')next.excluded.push(id);if(id.startsWith('custom:'))next.custom.push({id,title,note});}
+- return next;
+-}
+-function ingest(d,remote,datesToPull=[],baselines={}){
+- const old=d.smartState?.dailyCarry||{},days={...old.days},sync={...old.sync,base:{...old.sync?.base,...baselines},conflicts:{...old.sync?.conflicts}};
+- for(const date of datesToPull)days[date]=importDate(days[date]||{},remote[date]||[]);
+- for(const date of datesToPull)delete sync.conflicts[date];
+- return {...d,smartState:{...d.smartState,dailyCarry:{...old,days,sync}}};
+-}
+-function create({sheetId,getData,saveData,fetcher=fetch,onState=()=>{},now=()=>Date.now()}){
+- const sheet=typeof sheetId==='function'?sheetId:()=>sheetId;let token='',expiry=0,generation=0,running=null,last=0;const emit=(status,message)=>onState({status,message});
+- const hasToken=()=>!!token&&now()+30000<expiry;
+- function disconnect(){token='';expiry=0;generation++;emit('Needs Sign-in','Packing session expired or disconnected. Offline changes are retained.');}
+- function authorize(r,selected){disconnect();if(!r.access_token||selected!==sheet()||!text(r.scope).split(/\s+/).includes('https://www.googleapis.com/auth/drive.file'))throw Error('Select the configured master workbook with file-scoped permission.');token=r.access_token;expiry=now()+Number(r.expires_in||0)*1000;emit('Connected','Daily Carry connected to the selected workbook.');}
+- async function api(path,opts={},version){if(version!==generation||!hasToken())throw Error('Google permission expired; local changes retained.');
+- const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);
+- let response;try{response=await fetcher('https://sheets.googleapis.com/v4/spreadsheets/'+encodeURIComponent(sheet())+path,{method:opts.method||'GET',headers:{Authorization:'Bearer '+token,...(opts.body?{'Content-Type':'application/json'}:{})},...(opts.body?{body:JSON.stringify(opts.body)}:{}),signal:ctrl.signal,credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer'});}finally{clearTimeout(timer);}
+- if(version!==generation)throw Error('Sync session changed; local data retained.');
+- if(response.status===401){disconnect();throw Error('Google access expired. Reconnect to resume.');}
+- if(!response.ok)throw Error('Daily Carry Google Sheets request failed ('+response.status+'). Pending edits retained.');
+- return response.json();
+- }
+- async function read(version){
+- const metadata=await api('?fields=spreadsheetId,properties(title),sheets(properties(sheetId,title,gridProperties))',{},version);
+- if(metadata.spreadsheetId!==sheet()||metadata.properties?.title!=='China Trip Command Center 2027')throw Error('Unexpected workbook. Writes blocked.');
+- const tab=metadata.sheets?.find(s=>s.properties?.title===TAB)?.properties;
+- if(!tab||tab.gridProperties?.columnCount!==11||tab.gridProperties.rowCount>10000)throw Error('Daily Carry tab missing or incompatible. Writes blocked.');
+- const r=await api('/values/'+encodeURIComponent("'Daily Carry'!A1:K"+tab.gridProperties.rowCount)+'?valueRenderOption=UNFORMATTED_VALUE',{},version);
+- return {groups:parse(r.values||[]),rowCount:tab.gridProperties.rowCount};
+- }
+- async function run({readOnly=false,force=false}={}){
+- if(running)return running;if(!hasToken()){emit('Needs Sign-in','Connect the existing master workbook; local data remains safe.');return false;}
+- if(!force&&now()-last<30000)return false;last=now();const version=generation;
+- running=(async()=>{try{
+- emit('Syncing',readOnly?'Reviewing both tabs without writing…':'Checking Daily Carry for changes…');
+- const first=await read(version),existing=first.groups,planned=encode(getData()),saved=getData().smartState?.dailyCarry||{},baseline=saved.sync?.base||{},localDays=saved.days||{};
+- const pull=[],write=[],conflicts=[],bases={};
+- for(const date of dates){
+-  const remote=existing[date]||[],local=planned[date],rSig=sig(remote.map(r=>r.values)),lSig=sig(local),b=baseline[date];
+-  if(rSig===lSig){bases[date]=rSig;continue;}
+-  if(!remote.length){write.push(date);continue;}
+-  if(b===rSig){write.push(date);continue;}
+-  if((b===lSig||!localDays[date]&&b===undefined)&&remote.length){pull.push(date);bases[date]=rSig;continue;}
+-  conflicts.push(date);
+- }
+- if(conflicts.length){const current=getData(),s=current.smartState?.dailyCarry||{};
+-  const merge={...s,sync:{...s.sync,base:{...baseline,...bases},conflicts:{...s.sync?.conflicts,...Object.fromEntries(conflicts.map(date=>[date,{local:planned[date],remote:(existing[date]||[]).map(r=>r.values),at:new Date().toISOString()}]))}}};
+-  await saveData({...current,smartState:{...current.smartState,dailyCarry:merge}});
+-  emit('Conflict','Daily Carry changed in both locations: '+conflicts.join(', ')+'. Review before choosing a version.');return false;
+- }
+- if(readOnly){
+-  emit('Review Required',write.length+' dates would be written; '+pull.length+' dates would be imported. No changes sent.');
+-  return {write:write.length,pull:pull.length,conflicts:0};
+- }
+- if(pull.length){let updated=ingest(getData(),existing,pull,bases);await saveData(updated);}
+- if(write.length){
+-  const second=await read(version);
+-  if(JSON.stringify(second.groups)!==JSON.stringify(first.groups))throw Error('Daily Carry changed during preflight; no writes sent. Refresh and review.');
+-  const afterPlan=encode(getData());
+-  const updates=[],appends=[];
+-  for(const date of write){
+-   const next=afterPlan[date],old=new Map((second.groups[date]||[]).map(r=>[r.id,r]));
+-   for(const values of next){const record=old.get(values[0]);if(record){if(sig([record.values])===sig([values]))continue;updates.push({range:"'Daily Carry'!A"+record.row+":K"+record.row,values:[values]});}
+-    else appends.push(values);
+-   }
+-  }
+-  if(updates.length)await api('/values:batchUpdate',{method:'POST',body:{valueInputOption:'RAW',data:updates}},version);
+-  if(appends.length)await api('/values/'+encodeURIComponent("'Daily Carry'!A1:K"+second.rowCount)+':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',body:{values:appends}},version);
+- }
+- const after=await read(version),finalPlan=encode(getData()),newBase={...baseline,...bases};for(const date of dates){const desired=sig(finalPlan[date]),actual=sig((after.groups[date]||[]).map(x=>x.values));if(desired!==actual)throw Error('Daily Carry readback differs on '+date+'. No success claimed; review before retry.');newBase[date]=actual;}
+- const current=getData(),state=current.smartState?.dailyCarry||{};await saveData({...current,smartState:{...current.smartState,dailyCarry:{...state,sync:{...state.sync,base:newBase,conflicts:{},lastSuccess:new Date().toISOString()}}}});
+- emit('Synced','Daily Carry '+dates.length+' days verified with readback.');return true;
+- }catch(e){emit(hasToken()?'Sync Failed':'Needs Sign-in',e.message||'Daily Carry sync stopped. Local data retained.');return false;}})().finally(()=>{running=null;});return running;
+- }
+- async function resolve(date,choice){
+-  const current=getData(),state=current.smartState?.dailyCarry||{},conflict=state.sync?.conflicts?.[date];
+-  if(!dates.includes(date)||!conflict)throw Error('No saved Daily Carry conflict for that day.');
+-  if(!['device','sheet'].includes(choice))throw Error('Choose device or Sheet version.');
+-  const remoteRows=(conflict.remote||[]).map((values,i)=>({id:values[0],row:i+2,values}));let next=current;
+-  if(choice==='sheet'){next=ingest(current,{[date]:remoteRows},[date],{[date]:sig(conflict.remote||[])});}
+-  else{const sync={...state.sync,base:{...state.sync?.base,[date]:sig(conflict.remote||[])},conflicts:{...state.sync?.conflicts}};delete sync.conflicts[date];next={...current,smartState:{...current.smartState,dailyCarry:{...state,sync}}};}
+-  await saveData(next);return true;
+- }
+- return {authorize,disconnect,hasToken,run,resolve};
+-}
+-return {TAB,HEADERS,encodeDate,encode,parse,sig,ingest,create};
+-});
+diff --git a/tests/daily-carry-sync.test.cjs b/tests/daily-carry-sync.test.cjs
+deleted file mode 100644
+--- a/tests/daily-carry-sync.test.cjs
++++ /dev/null
+@@ -1,66 +0,0 @@
+-const {test}=require('node:test'),assert=require('node:assert/strict');
+-const M=require('../daily-carry-sync.js'),D=require('../daily-carry.js');
+-const workbook='1Pvy6BIZJL_hLxP8td-HKdoEg2NuZ2b1LaWnz98GpFhs';
+-function make(d={itinerary:[],smartState:{}}){
+- let data=structuredClone(d),writeRequests=[],rows=[M.HEADERS.slice()],calls=[],status=[];
+- const fetcher=async(raw,opts={})=>{
+-  const url=decodeURIComponent(raw),body=opts.body?JSON.parse(opts.body):null;calls.push({url,method:opts.method||'GET'});
+-  if(url.endsWith('?fields=spreadsheetId,properties(title),sheets(properties(sheetId,title,gridProperties))'))
+-   return {ok:true,status:200,json:async()=>({spreadsheetId:workbook,properties:{title:'China Trip Command Center 2027'},sheets:[{properties:{title:'Daily Carry',gridProperties:{columnCount:11,rowCount:500}}}]})};
+-  if(url.includes('/values:batchUpdate')){writeRequests.push(body);for(const entry of body.data){const line=Number(entry.range.match(/!A(\d+):K/)[1])-1;rows[line]=entry.values[0];}return{ok:true,status:200,json:async()=>({})};}
+-  if(url.includes(':append?')){writeRequests.push(body);rows.push(...body.values);return{ok:true,status:200,json:async()=>({})};}
+-  if(url.includes('/values/'))return{ok:true,status:200,json:async()=>({values:structuredClone(rows)})};
+-  throw Error('Unexpected URL '+url);
+- };
+- const client=M.create({sheetId:()=>workbook,getData:()=>data,saveData:async v=>{data=v},fetcher,onState:s=>status.push(s),now:()=>10000});
+- return {client,get data(){return data},get rows(){return rows},writeRequests,calls,status};
+-}
+-function authorize(m){m.client.authorize({access_token:'synthetic-only',expires_in:3600,scope:'https://www.googleapis.com/auth/drive.file'},workbook);}
+-test('Daily Carry tab has stable row fields and separate rows for every trip day',()=>{
+- const values=M.encode({itinerary:[],smartState:{}});
+- assert.equal(Object.keys(values).length,11);
+- assert.deepEqual(M.HEADERS,['Record ID','Date','Record Type','Item ID','Item / Day','Status','Bag','Notes','Updated At','Revision','Source']);
+- for(const [date,rows] of Object.entries(values)){assert.equal(rows[0][0],'DAY-'+date);assert.ok(rows.some(x=>x[2]==='ITEM'));assert.equal(rows[0][6],'Ulanzi PB038 10L sling');}
+-});
+-test('read-only preflight makes no Google Sheet writes, and no token means no sync',async()=>{
+- const m=make();assert.equal(await m.client.run(),false);assert.equal(m.writeRequests.length,0);
+- authorize(m);const v=await m.client.run({readOnly:true,force:true});assert.deepEqual(v,{write:11,pull:0,conflicts:0});assert.equal(m.writeRequests.length,0);
+- assert.equal(m.rows.length,1);assert.ok(m.calls.every(x=>!x.url.includes('Packing & Bags')),'Daily client never writes permanent Packing tab');
+-});
+-test('first authorized sync writes daily rows, reads back and keeps itinerary/packing unchanged',async()=>{
+- const source={itinerary:[{id:'park',date:'2027-01-14',city:'Shanghai',activity:'Shanghai Disneyland'}],smartState:{packing:{items:{safe:{id:'safe',name:'Phone'}}}}},m=make(source);
+- authorize(m);assert.equal(await m.client.run({force:true}),true);assert.ok(m.rows.length>100);assert.equal(m.data.smartState.dailyCarry.sync.lastSuccess!==undefined,true);
+- assert.deepEqual(m.data.itinerary,source.itinerary);assert.deepEqual(m.data.smartState.packing,source.smartState.packing);
+- assert.equal(m.rows.filter(r=>r[2]==='DAY').length,11);
+- assert.ok(m.rows.some(r=>r[4].includes('Disney')&&r[1]==='2027-01-14'));
+-});
+-test('a day check syncs to the Sheet, and a direct Sheet status edit comes back into app',async()=>{
+- const m=make();authorize(m);assert.equal(await m.client.run({force:true}),true);
+- const date='2027-01-12',id='rec:phone';
+- const changed=D.changed(m.data,date,{type:'check',id,value:true});m.data.smartState.dailyCarry=changed;
+- assert.equal(await m.client.run({force:true}),true);
+- let row=m.rows.find(r=>r[0]==='ITEM-'+date+'-'+id);assert.equal(row[5],'Ready');
+- row=m.rows.find(r=>r[0]==='ITEM-'+date+'-rec:payment');row[5]='Ready';
+- assert.equal(await m.client.run({force:true}),true);
+- assert.equal(m.data.smartState.dailyCarry.days[date].checks['rec:payment'],true);
+- assert.equal(m.data.smartState.dailyCarry.days[date].checks[id],true);
+-});
+-test('manual Sheet changes competing with unsynced device changes block writes',async()=>{
+- const m=make();authorize(m);await m.client.run({force:true});
+- const date='2027-01-12';const changed=D.changed(m.data,date,{type:'check',id:'rec:water',value:true});m.data.smartState.dailyCarry=changed;
+- m.rows.find(r=>r[0]==='ITEM-'+date+'-rec:phone')[5]='Ready';
+- const before=m.writeRequests.length;
+- assert.equal(await m.client.run({force:true}),false);assert.equal(m.writeRequests.length,before);
+- assert.ok(m.data.smartState.dailyCarry.sync.conflicts[date]);assert.match(m.status.at(-1).status,/Conflict/);
+-});
+-test('parse rejects wrong headers, duplicate ids and unrecognized statuses before any write',()=>{
+- assert.throws(()=>M.parse([['Name']]),/headers/);
+- const basic=[M.HEADERS.slice(),['DAY-2027-01-11','2027-01-11','DAY','','Day','Planned','','','','','']];
+- assert.equal(M.parse(basic)['2027-01-11'].length,1);
+- assert.throws(()=>M.parse([...basic,basic[1]]),/identity/);
+- assert.throws(()=>M.parse([basic[0],['ITEM-2027-01-11-rec:phone','2027-01-11','ITEM','rec:phone','Phone','PACKED','','','','','']]),/status/);
+-});
+-test('disconnect invalidates token without deleting saved day records',async()=>{
+- const m=make();authorize(m);await m.client.run({force:true});const copy=JSON.stringify(m.data);
+- m.client.disconnect();assert.equal(m.client.hasToken(),false);assert.equal(await m.client.run({force:true}),false);assert.equal(JSON.stringify(m.data),copy);
+-});
