@@ -1,22 +1,18 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),P=require('../packing'),S=require('../packing-sync');
-test('offline edit after confirmed sync renders Pending Sync rather than stale Synced', {timeout:2000}, async()=>{
+test('offline edit after a successful packing sync is labeled pending even after sign-out',()=>{
  const row={'Record Type':'ITEM','Item / Task':'Fictional QA scarf',Bag:'Unassigned',Category:'QA',Quantity:1,Status:'Active','Item ID':'qa-scarf','Record ID':'qa-record'};
  const records=S.parse([[],[],S.HEADERS,S.HEADERS.map(h=>row[h]??'')]);
- let data=S.ingest({trip:{},hotels:[],smartState:{packing:{}}},records),click,api,finish;
- const synced=new Promise(resolve=>finish=resolve),stored={chinaCompanionPickerApiKeyV1:'FICTIONAL_KEY',chinaCompanionProjectNumberV1:'123'};
- const controls={'#packingConsent':{checked:true},'#googleClientId':{value:'123-fictional.apps.googleusercontent.com'}};
- const picker={ViewId:{SPREADSHEETS:'spreadsheets'},DocsViewMode:{LIST:'list'},Response:{ACTION:'action',DOCUMENTS:'docs'},Action:{PICKED:'picked'},Document:{ID:'id'}};
- picker.DocsView=class{setMode(){return this;}};
- picker.PickerBuilder=class{addView(){return this;}setOAuthToken(){return this;}setDeveloperKey(){return this;}setAppId(){return this;}setOrigin(){return this;}setCallback(fn){this.callback=fn;return this;}build(){return this;}setVisible(){this.callback({action:'picked',docs:[{id:'fictional-workbook'}]});}};
- const sandbox={module:{exports:{}},require:()=>P,URL,Date,console,AbortController,setTimeout,clearTimeout,crypto:require('node:crypto').webcrypto,navigator:{onLine:true},location:{origin:'https://example.test'},setInterval:()=>{},localStorage:{getItem:k=>stored[k]},document:{visibilityState:'visible',querySelector:k=>controls[k],addEventListener:(n,fn)=>{if(n==='click')click=fn;}},window:{addEventListener:()=>{}},google:{picker,accounts:{oauth2:{initTokenClient:options=>({requestAccessToken:()=>options.callback({access_token:'FICTIONAL_TOKEN',scope:S.SCOPE,expires_in:3600})})}}},fetch:async url=>({ok:true,status:200,json:async()=>url.includes('/values/')?{values:[[],[],S.HEADERS,S.HEADERS.map(h=>row[h]??'')]}:{spreadsheetId:'fictional-workbook',properties:{title:'China Trip Command Center 2027'},sheets:[{properties:{title:S.TAB,gridProperties:{columnCount:14,rowCount:100}}}]}}),ChinaPackingUI:{render:()=>{if(api?.panel(data).includes('Packing Sync · Synced'))finish();}}};
- vm.runInNewContext(fs.readFileSync('packing-sync.js','utf8'),sandbox);api=sandbox.module.exports;
- api.initBrowser({sheetId:()=> 'fictional-workbook',getData:()=>data,saveData:next=>{data=next;},notify:message=>assert.fail(message)});
- click({target:{closest:()=>({dataset:{packingSync:'connect'}})}});await synced;
- assert.match(api.panel(data),/<summary>Packing Sync · Synced<\/summary>/);
- sandbox.navigator.onLine=false;
- data={...data,smartState:api.queued(data,{...data.smartState,packing:P.updateItem(data,'qa-scarf',{notes:'Retain offline proposal'})})};api.changed();
+ let data=S.ingest({trip:{},hotels:[],smartState:{packing:{}}},records);
+ data={...data,smartState:{...data.smartState,packing:{...data.smartState.packing,sync:{...data.smartState.packing.sync,lastSuccess:'2026-10-30T00:00:00.000Z'}}}};
+ const before=JSON.stringify(data.smartState.packing.sessions||{});
+ data={...data,smartState:S.queued(data,{...data.smartState,packing:P.updateItem(data,'qa-scarf',{notes:'Retain offline proposal'})})};
  assert.equal(Object.keys(P.state(data).sync.pending).length,1);
- assert.match(api.panel(data),/<summary>Packing Sync · Pending Sync<\/summary>/);
- assert.doesNotMatch(api.panel(data),/Packing records refreshed\./,'A prior successful refresh must not describe a newer pending edit');
+ assert.equal(JSON.stringify(data.smartState.packing.sessions||{}),before);
+ const sandbox={module:{exports:{}},require:()=>P,globalThis:null};sandbox.globalThis=sandbox;
+ vm.runInNewContext(fs.readFileSync('packing-sync.js','utf8'),sandbox);
+ const panel=sandbox.module.exports.panel(data);
+ assert.match(panel,/Unified Packing Auto Sync · Needs Sign-in · Pending Sync/);
+ assert.match(panel,/1 pending/);
+ assert.doesNotMatch(panel,/Packing records refreshed\./,'Old successful sync must not describe newer offline edit.');
  assert.equal(P.state(data).sync.pending['qa-record'].draft.Notes,'Retain offline proposal');
 });
