@@ -1453,3 +1453,24 @@ dialog::backdrop{background:#10111485}
 }
 
 /* Sticky header dimensions remain fixed while scrolling to keep touch targets stable. */
+
+/* Independent day-by-day bag checklist, suitable for iPhone widths. */
+.daily-activities{display:grid;gap:5px;margin:10px 0 0}
+.daily-activities span{font-size:12px;line-height:1.5;padding:7px 10px;background:var(--paper);border-radius:8px}
+.daily-carry-stat{margin:16px 0 8px;font-size:14px}.daily-carry-stat strong{font-size:24px;color:var(--brand-ink)}
+.daily-progress{width:100%;height:8px;background:var(--line);border-radius:10px;overflow:hidden}
+.daily-progress span{display:block;height:100%;background:var(--jade);border-radius:10px}
+.daily-filter{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:18px 0 5px}
+.daily-filter button{padding:8px 3px;font-size:12px;min-height:44px}
+.daily-filter [aria-pressed="true"]{background:var(--jade);color:#fff;border-color:var(--jade)}
+.daily-carry-item{padding:12px 0;border-top:1px solid var(--line)}
+.daily-carry-item:first-child{border-top:0}
+.daily-carry-item .online-opt{align-items:flex-start}
+.daily-carry-item .online-opt input{width:24px;height:24px;margin-top:2px}
+.daily-carry-item .online-opt span{display:flex;flex-direction:column;gap:4px;min-width:0;line-height:1.35;overflow-wrap:anywhere}
+.daily-carry-item small{font-size:12px;color:var(--muted)}
+.daily-carry-item p{font-size:13px;line-height:1.6;margin:8px 0}
+.daily-carry-item .secondary-btn{font-size:12px;min-height:40px}
+#dailyCarryContent textarea{width:100%;max-width:100%;min-height:86px}
+#dailyCarryContent .field{min-width:0}
+@media(max-width:370px){.daily-filter{grid-template-columns:repeat(2,minmax(0,1fr))}}
