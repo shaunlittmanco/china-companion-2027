@@ -46,7 +46,7 @@ let liveStatus={status:'Needs Sign-in',message:'Read-only imports work separatel
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function panel(d){
  const p=P.state(d).sync||{},pending=Object.keys(p.pending||{}).length,conflicts=Object.entries(p.conflicts||{});
- const daily=d.smartState?.dailyCarry?.sync||{},dailyConflict=Object.entries(daily.conflicts||{}),status=conflicts.length||dailyConflict.length?'Conflict':!autoWrites&&browserClient?.hasToken()?'Review Required':browserClient?.hasToken()?liveStatus.status:'Needs Sign-in';
+ const daily=d.smartState?.dailyCarry?.sync||{},dailyConflict=Object.entries(daily.conflicts||{}),status=conflicts.length||dailyConflict.length?'Conflict':!autoWrites&&browserClient?.hasToken()?'Review Required':browserClient?.hasToken()?liveStatus.status:pending?'Needs Sign-in · Pending Sync':'Needs Sign-in';
  const preview=Object.values(p.pending||{}).slice(0,20).map(x=>'<li>'+esc(x.draft?.['Item / Task']||x.draft?.['Record ID']||'Record')+' · '+esc(x.draft?.Status||'Pending')+'</li>').join('');
  return '<details class="panel packing-sync"><summary>Unified Packing Auto Sync · '+esc(status)+'</summary>'+
  '<p><b>My Bags + Packing Journey</b> → existing Packing & Bags tab: '+esc(liveStatus.status)+' · '+pending+' pending · '+conflicts.length+' conflicts</p>'+
