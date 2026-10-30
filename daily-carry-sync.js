@@ -100,7 +100,16 @@ function create({sheetId,getData,saveData,fetcher=fetch,onState=()=>{},now=()=>D
  emit('Synced','Daily Carry '+dates.length+' days verified with readback.');return true;
  }catch(e){emit(hasToken()?'Sync Failed':'Needs Sign-in',e.message||'Daily Carry sync stopped. Local data retained.');return false;}})().finally(()=>{running=null;});return running;
  }
- return {authorize,disconnect,hasToken,run};
+ async function resolve(date,choice){
+  const current=getData(),state=current.smartState?.dailyCarry||{},conflict=state.sync?.conflicts?.[date];
+  if(!dates.includes(date)||!conflict)throw Error('No saved Daily Carry conflict for that day.');
+  if(!['device','sheet'].includes(choice))throw Error('Choose device or Sheet version.');
+  const remoteRows=(conflict.remote||[]).map((values,i)=>({id:values[0],row:i+2,values}));let next=current;
+  if(choice==='sheet'){next=ingest(current,{[date]:remoteRows},[date],{[date]:sig(conflict.remote||[])});}
+  else{const sync={...state.sync,base:{...state.sync?.base,[date]:sig(conflict.remote||[])},conflicts:{...state.sync?.conflicts}};delete sync.conflicts[date];next={...current,smartState:{...current.smartState,dailyCarry:{...state,sync}}};}
+  await saveData(next);return true;
+ }
+ return {authorize,disconnect,hasToken,run,resolve};
 }
 return {TAB,HEADERS,encodeDate,encode,parse,sig,ingest,create};
 });
