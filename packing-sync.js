@@ -86,7 +86,7 @@ function initBrowser(c){
   if(!navigator.onLine)throw Error('Offline. Local edits remain pending.');
   if(!text(c.sheetId()))throw Error('Save the existing private workbook URL/ID in Settings first.');
   const id=document.querySelector('#googleClientId')?.value.trim()||localStorage.getItem('chinaCompanionGoogleClientIdV1'),key=localStorage.getItem('chinaCompanionPickerApiKeyV1'),project=localStorage.getItem('chinaCompanionProjectNumberV1');
-  if(!/^\d+-[\w-]+\.apps\.googleusercontent\.com$/.test(id||'')||!key||!/^\d+$/.test(project||''))throw Error('Enter the existing OAuth client ID, restricted Picker API key and Cloud project number in Settings. Do not create new credentials.');
+  if(!/^\d+-[\w-]+\.apps\.googleusercontent\.com$/.test(id||'')||!key||!/^\d+$/.test(project||''))throw Error('Complete Settings → Google OAuth setup, then tap Save Google connection settings. Reuse the existing client ID, restricted Picker key and project number.');
   if(!globalThis.google?.accounts?.oauth2)throw Error('Google sign-in unavailable. Retry while online.');
   // Request a Google popup on this direct user gesture. Token remains in memory only.
   globalThis.google.accounts.oauth2.initTokenClient({client_id:id,scope:SCOPE,include_granted_scopes:false,error_callback:()=>{liveStatus={status:'Needs Sign-in',message:'Consent closed or blocked. Offline edits retained.'};refresh();},callback:async r=>{

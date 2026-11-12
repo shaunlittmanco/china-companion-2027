@@ -357,6 +357,26 @@ function initSheetSync(){
  const configuredSheetId=()=>{try{return localStorage.getItem(sheetConfigKey)||'';}catch{return'';}};
  const saveTracker=()=>{let value=$('#googleSheetId').value.trim();const url=value.match(/^https:\/\/docs\.google\.com\/spreadsheets\/d\/([\w-]+)(?:\/.*)?$/);if(url)value=url[1];if(!/^[\w-]{20,}$/.test(value))throw Error('Enter the existing private workbook URL or ID in Google OAuth setup.');const old=configuredSheetId();if(old&&old!==value)throw Error('This device is bound to its existing workbook. Switching trackers is blocked to protect pending records.');localStorage.setItem(sheetConfigKey,value);$('#googleSheetId').value=value;$('#trackerSourceLink').href='https://docs.google.com/spreadsheets/d/'+value+'/edit';$('#trackerSourceLink').hidden=false;return value;};
  $('#googleSheetId').value=configuredSheetId();if(configuredSheetId())saveTracker();bind('#saveTrackerConfig','click',()=>{try{saveTracker();notify('Existing tracker saved privately on this device.');}catch(e){notify(e.message);}});
+ const saveGoogleSetup=()=>{
+  const clientId=$('#googleClientId').value.trim(),project=$('#receiptProjectNumber').value.trim(),key=$('#receiptApiKey').value.trim();
+  if(!/^\d+-[\w-]+\.apps\.googleusercontent\.com$/.test(clientId))throw Error('Google OAuth Client ID is missing or invalid. Use your existing web client.');
+  if(!globalThis.ChinaReceipts?.settings)throw Error('Google Picker setup is unavailable. Reopen the app while online.');
+  globalThis.ChinaReceipts.settings(key,project,clientId); // Validate format AND matching Cloud project before persisting.
+  saveTracker();
+  try{
+   localStorage.setItem(OAUTH_CONFIG,clientId);
+   localStorage.setItem('chinaCompanionPickerApiKeyV1',key);
+   localStorage.setItem('chinaCompanionProjectNumberV1',project);
+  }catch{throw Error('Could not save Google configuration on this device. Check browser storage.');}
+  $('#pickerConfigState').textContent='Google settings saved on this device. Return to Packing & Bags → Unified Packing Auto Sync and tap Connect unified sync.';
+  notify('Existing Google configuration saved. No new credentials or permissions created.');
+ };
+ bind('#saveGoogleSetup','click',()=>{try{saveGoogleSetup();}catch(e){$('#pickerConfigState').textContent=e.message;notify(e.message);}});
+ try{
+  const present=[localStorage.getItem(OAUTH_CONFIG),localStorage.getItem('chinaCompanionPickerApiKeyV1'),localStorage.getItem('chinaCompanionProjectNumberV1')];
+  if(present.every(Boolean))$('#pickerConfigState').textContent='Google configuration saved on this device. Connect unified sync when ready.';
+ }catch{}
+
  sheetSync=ChinaSheetSync.create({sheetId:configuredSheetId,
   getCurrent:()=>data,
   onState:s=>{syncState=s;renderSyncState();},

@@ -1,7 +1,7 @@
 // Keep each worker scope independent, including legacy production at the same origin.
 const CACHE_PREFIX='cc27:'+self.registration.scope+':';
-const CACHE=CACHE_PREFIX+'v1-7-3';
-const CORE=['./packing.js?v=1.7.3','./packing-sync.js?v=1.7.3','./packing-ui.js?v=1.7.3','./trip-guide.js?v=1.7.3','./fx-rates.js?v=1.7.3','./daily-carry.js?v=1.7.3','./daily-carry-ui.js?v=1.7.3','./daily-carry-sync.js?v=1.7.3','./smart-travel.js?v=1.7.3','./companion-ui.js?v=1.7.3','./','./index.html','./styles.css?v=1.7.3','./jade-ui.js?v=1.7.3','./app.js?v=1.7.3','./sheet-sync.js?v=1.7.3','./receipts.js?v=1.7.3','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.7.3','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
+const CACHE=CACHE_PREFIX+'v1-7-4';
+const CORE=['./packing.js?v=1.7.4','./packing-sync.js?v=1.7.4','./packing-ui.js?v=1.7.4','./trip-guide.js?v=1.7.4','./fx-rates.js?v=1.7.4','./daily-carry.js?v=1.7.4','./daily-carry-ui.js?v=1.7.4','./daily-carry-sync.js?v=1.7.4','./smart-travel.js?v=1.7.4','./companion-ui.js?v=1.7.4','./','./index.html','./styles.css?v=1.7.4','./jade-ui.js?v=1.7.4','./app.js?v=1.7.4','./sheet-sync.js?v=1.7.4','./receipts.js?v=1.7.4','./receipt-store.js?v=1.6.1','./travel-data.js?v=1.7.4','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./icons/favicon.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{

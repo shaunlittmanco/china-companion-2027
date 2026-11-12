@@ -164,3 +164,35 @@ test('Daily Carry read-only open does not queue Packing Sync writes, per-day che
   assert.equal(app.w.document.querySelector('#dailyCarryContent [data-daily-check]').checked,false,'Fresh independent day checks');
  }finally{app.close();}
 });
+
+test('one Google Settings save stores existing Picker configuration for Packing Sync without receipt OAuth',()=>{
+ const app=start({offline:false}),tracker='fictional_private_tracker_00000001',client='123456789-fictional.apps.googleusercontent.com',key='AIza'+'x'.repeat(32);
+ try{
+  app.set('googleSheetId',tracker);
+  app.set('googleClientId',client);
+  app.set('receiptApiKey',key);
+  app.set('receiptProjectNumber','123456789');
+  app.click('saveGoogleSetup');
+  assert.equal(app.w.localStorage.getItem('chinaCompanionGoogleClientIdV1'),client);
+  assert.equal(app.w.localStorage.getItem('chinaCompanionPickerApiKeyV1'),key);
+  assert.equal(app.w.localStorage.getItem('chinaCompanionProjectNumberV1'),'123456789');
+  assert.equal(app.w.localStorage.getItem('chinaCompanionSheetIdV1'),tracker);
+  assert.match(app.el('pickerConfigState').textContent,/saved on this device/i);
+  assert.equal(app.el('receiptApiKey').length===undefined,true);
+  const stored=app.w.localStorage.getItem('chinaCompanionProjectNumberV1');
+  app.set('receiptProjectNumber','987654321');
+  app.click('saveGoogleSetup');
+  assert.equal(app.w.localStorage.getItem('chinaCompanionProjectNumberV1'),stored,'Mismatch cannot replace saved Google config');
+  assert.match(app.el('pickerConfigState').textContent,/must match/i);
+ }finally{app.close();}
+});
+test('stored public Google Picker setup reloads in consolidated OAuth settings without secrets',()=>{
+ const key='AIza'+'z'.repeat(32),app=start({seed:{chinaCompanionGoogleClientIdV1:'123456789-test.apps.googleusercontent.com',chinaCompanionProjectNumberV1:'123456789',chinaCompanionPickerApiKeyV1:key}});
+ try{
+  assert.equal(app.el('receiptApiKey').value,key);
+  assert.equal(app.el('receiptProjectNumber').value,'123456789');
+  assert.match(app.el('pickerConfigState').textContent,/saved on this device/i);
+  assert.equal(app.w.document.querySelectorAll('#receiptApiKey').length,1);
+  assert.equal(app.w.document.querySelectorAll('#receiptProjectNumber').length,1);
+ }finally{app.close();}
+});
